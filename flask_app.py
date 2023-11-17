@@ -79,7 +79,6 @@ def contests():
         question = request.form.get("symbol")
         _answer = answer(question)
         return render_template("answer.html", _answer=_answer)
-    
     portfolio = db.execute(
         "SELECT * FROM portfolios WHERE user_id = (?)", (session["user_id"],)
     )
@@ -416,4 +415,4 @@ def password_change():
 
 @app.route("/landing", methods=["GET"])
 def layout():
-    return render_template("trial_1.html")
+    return render_template("landing.html")

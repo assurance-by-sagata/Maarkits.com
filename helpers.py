@@ -5,6 +5,7 @@ import requests
 import subprocess
 import urllib
 import uuid
+import openai
 
 from flask import redirect, render_template, session
 from functools import wraps
@@ -88,3 +89,17 @@ def lookup(symbol):
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
+def answer(question):
+    """Get answer to user question"""
+    openai.api_key = "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"
+    prompt = question 
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=1000
+    )
+    response = response.choices[0].text
+    # expiryList = expiry.strip().split("!")
+
+    return response
