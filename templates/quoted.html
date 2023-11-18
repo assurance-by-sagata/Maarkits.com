@@ -5,13 +5,13 @@
 {% endblock %}
 
 {% block main %}
-    <div class="bg-light text-center rounded p-4 shadow">
+    <div class="bg-dark text-center rounded p-4 shadow text-light opacity-75">
         The current share price of {{stock.symbol}}({{stock.name}}) is {{stock.price | usd}}
     </div>
     <br>
     <div class="row g-4">
         <div class="col-sm-12 col-xl-8">
-            <div class="bg-light text-center rounded p-4 shadow">
+            <div class="bg-dark text-center rounded p-4 shadow opacity-75">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">{{stock.name}} news</h6>
                     <div>
@@ -26,9 +26,9 @@
             </div>
         </div>
         <div class="col-sm-12 col-xl-4">
-            <div class="bg-light text-center rounded p-4 shadow h-100">
+            <div class="bg-dark text-center rounded p-4 shadow h-100 opacity-75">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">{{stock.name}} Performance</h6>
+                    <h6 class="mb-0 text-light">{{stock.name}} Performance</h6>
                     <div>
                         <select class="form-select" aria-label="Default select example">
                             <option selected>This Month</option>
@@ -39,12 +39,12 @@
                 <div class="w-100 d-flex justify-content-center">
                     <div id="container" style="height: 370px; width: 450px;">
                         <div>
-                            <table class="table table-hover">
+                            <table class="table table-hover table-dark">
                                 <thead>
-                                    <tr>
+                                    <!-- <tr>
                                         <th class="text-start">Symbol</th>
                                         <th class="text-end">Price</th>
-                                    </tr>
+                                    </tr> -->
                                 </thead>
                                 <tbody>
                                     {% for stock in assets %}

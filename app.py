@@ -71,9 +71,9 @@ def index():
         assets.append(lookup(elem))
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets)
 
-@app.route("/contests", methods=["GET", "POST"])
+@app.route("/learn", methods=["GET", "POST"])
 @login_required
-def contests():
+def learn():
     """Show portfolio of stocks"""
     if request.method == "POST":
         question = request.form.get("symbol")
@@ -110,7 +110,7 @@ def contests():
     assets = []
     for elem in symbols:
         assets.append(lookup(elem))
-    return render_template("contests.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets)
+    return render_template("learn.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets)
 
 
 
