@@ -4,6 +4,5 @@ requests
 werkzeug
 datetime
 pytz
-os
 pytest
 openai
