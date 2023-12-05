@@ -56,7 +56,7 @@ def lookup(symbol):
     """Look up quote for symbol."""
 
     # Prepare API request
-    symbol = symbol.upper()
+    symbol = symbol.uppe()
     end = datetime.datetime.now(pytz.timezone("US/Eastern"))
     start = end - datetime.timedelta(days=7)
 
@@ -79,6 +79,7 @@ def lookup(symbol):
 
         # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
         quotes = list(csv.DictReader(response.content.decode("utf-8").splitlines()))
+        print(quotes)
         quotes.reverse()
         price = round(float(quotes[0]["Adj Close"]), 2)
         return {"name": symbol, "price": price, "symbol": symbol}
