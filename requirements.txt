@@ -1,4 +1,3 @@
-sqlite3
 Flask
 Flask-Session
 requests
@@ -7,3 +6,4 @@ datetime
 pytz
 os
 pytest
+openai
