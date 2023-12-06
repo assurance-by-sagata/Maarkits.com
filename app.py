@@ -216,6 +216,11 @@ def history():
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return render_template("history.html", history=user_history, usernames=usernames, size=len(usernames))
 
+@app.route("/beginner")
+@login_required
+def beginner():
+    return render_template("beginner.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
