@@ -94,7 +94,14 @@ def total_computation(username):
         total += stock["price"] * stock["num_shares"]
     return total, cash
 
-
+def leaderboard():
+    """Test function for leaderboard"""
+    usernames = db.execute("SELECT username FROM users LIMIT 10")
+    usernames = [dict(i) for i in usernames]
+    for username in usernames:
+        username["total"] = total_computation(username["username"])[0]
+    usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
+    return usernames
 
 def lookup(symbol):
     """Look up quote for symbol."""
