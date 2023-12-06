@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 import pytz
-from helpers import apology, login_required, lookup, usd, answer
+from helpers import apology, login_required, lookup, usd, answer, total_computation
 
 # Configure application
 app = Flask(__name__)
@@ -209,10 +209,12 @@ def history():
         (session["user_id"],)
     )
     user_history = [dict(i) for i in user_history]
-    username = db.execute("SELECT username FROM users WHERE id = (?)", (session["user_id"],))
-    username = [dict(i) for i in username]
-    username = username[0]["username"]
-    return render_template("history.html", history=user_history, username=username)
+    usernames = db.execute("SELECT username FROM users LIMIT 10")
+    usernames = [dict(i) for i in usernames]
+    for username in usernames:
+        username["total"] = total_computation(username["username"])[0]
+    usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
+    return render_template("history.html", history=user_history, usernames=usernames, size=len(usernames))
 
 
 @app.route("/login", methods=["GET", "POST"])
