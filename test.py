@@ -14,7 +14,11 @@ def test_lookup():
 
 
 def test_total():
+    portfolio = db.execute(
+        "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (?))", ("arman", )
+    )
+    portfolio = [dict(i) for i in portfolio]
     cash = db.execute("SELECT * FROM users WHERE username = (?)", ("arman",))
     cash = [dict(i) for i in cash]
     cash = cash[0]["cash"]
-    assert(total_computation("arman")[1] == cash)
+    assert(total_computation("arman") == (cash + portfolio[0]["price"] * portfolio[0]["num_shares"], cash))

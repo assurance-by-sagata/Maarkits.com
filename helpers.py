@@ -95,6 +95,7 @@ def total_computation(username):
     return total, cash
 
 
+
 def lookup(symbol):
     """Look up quote for symbol."""
 
