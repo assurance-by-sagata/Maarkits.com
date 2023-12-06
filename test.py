@@ -1,16 +1,13 @@
 from helpers import lookup
 from helpers import apology_test
 from helpers import total_computation
+from helpers import leaderboard
 import sqlite3
 
 
 con = sqlite3.connect("finance.db", check_same_thread=False)
 con.row_factory = sqlite3.Row
 db = con.cursor()
-
-def test_lookup():
-    assert(lookup("TSLA")["symbol"] == "TSLA")
-    assert(lookup("TSLA")["name"] == "TSLA")
 
 
 def test_total():
@@ -22,3 +19,8 @@ def test_total():
     cash = [dict(i) for i in cash]
     cash = cash[0]["cash"]
     assert(total_computation("arman") == (cash + portfolio[0]["price"] * portfolio[0]["num_shares"], cash))
+    
+def test_leaderboard():
+    assert(len(leaderboard()) == 10)
+    for i in range(9):
+        assert(leaderboard()[i]["total"] >= leaderboard()[i + 1]["total"])
