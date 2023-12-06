@@ -1,5 +1,7 @@
 from helpers import lookup
 from helpers import apology_test
+from helpers import total_computation
+from helpers import leaderboard
 import sqlite3
 
 con = sqlite3.connect("finance.db", check_same_thread=False)
