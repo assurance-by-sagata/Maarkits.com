@@ -173,10 +173,12 @@ def buy():
     # Update current portfolio
     else:
         db.execute(
-            "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?)",
+            # Fixed bug- update on pythonanywere
+            "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?) and stock_symbol = (?)",
             (price,
             num_shares,
-            session["user_id"])
+            session["user_id"],
+            stock["symbol"])
         )
         con.commit()
         db.execute(
@@ -417,3 +419,6 @@ def password_change():
 @app.route("/landing", methods=["GET"])
 def layout():
     return render_template("trial_1.html")
+
+if __name__ == "__main__":
+    app.run()

@@ -6,9 +6,14 @@ import subprocess
 import urllib
 import uuid
 import openai
+import sqlite3
 
 from flask import redirect, render_template, session
 from functools import wraps
+
+con = sqlite3.connect("finance.db", check_same_thread=False)
+con.row_factory = sqlite3.Row
+db = con.cursor()
 
 
 def apology(message, code=400):
@@ -74,6 +79,20 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+def total_computation(username):
+    portfolio = db.execute(
+        "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (?))", (username, )
+    )
+    portfolio = [dict(i) for i in portfolio]
+    cash = db.execute("SELECT * FROM users WHERE username = (?)", (username,))
+    cash = [dict(i) for i in cash]
+    cash = cash[0]["cash"]
+    portfolio = [dict(i) for i in portfolio]
+    total = cash
+    for stock in portfolio:
+        total += stock["price"] * stock["num_shares"]
+    return total, cash
 
 
 def lookup(symbol):
