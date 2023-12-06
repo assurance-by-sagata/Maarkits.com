@@ -1,5 +1,6 @@
 from helpers import lookup
 from helpers import apology_test
+import sqlite3
 
 con = sqlite3.connect("finance.db", check_same_thread=False)
 con.row_factory = sqlite3.Row
