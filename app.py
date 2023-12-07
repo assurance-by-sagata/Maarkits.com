@@ -173,7 +173,6 @@ def buy():
     # Update current portfolio
     else:
         db.execute(
-            # Fixed bug- update on pythonanywere
             "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?) and stock_symbol = (?)",
             (price,
             num_shares,

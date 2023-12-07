@@ -34,7 +34,7 @@
             <td class="border-0 text-end">{{cash}}</td>
         </tr>
         <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">TOTAL</td>
+            <td class="border-0 fw-bold text-end" colspan="4">TOTAL Value</td>
             <td class="border-0 w-bold text-end">{{total}}</td>
         </tr>
     </tfoot>
@@ -90,7 +90,13 @@
                     </div>
                 </div>
                 <!-- <canvas id="worldwide-sales"></canvas> -->
-                <img src="static/img/feed.png" alt="Market Feed" class="container-fluid">
+                <img id="news1_img">
+                <h5 id="news1"></h5>
+                <img id="news2_img">
+                <h5 id="news2"></h5>
+                <img id="news3_img">
+                <h5 id="news3"></h5>
+                <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
             </div>
         </div>
         <div class="col-sm-12 col-xl-4">
@@ -134,4 +140,18 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("https://stocknewsapi.com/api/v1?tickers=META,AMZN,NFLX&items=3&page=1&token=qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n")
+        .then(response => response.json())
+        .then(result => {document.querySelector("#news1").innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
+        document.querySelector("#news1_img").src = result.data[0]["image_url"]
+        document.querySelector("#news2").innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
+        document.querySelector("#news2_img").src = result.data[1]["image_url"]
+        document.querySelector("#news3").innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
+        document.querySelector("#news3_img").src = result.data[2]["image_url"]
+    })
+        .catch(err => console.log(err))
+    });
+</script>
 {% endblock %}
