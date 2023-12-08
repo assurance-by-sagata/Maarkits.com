@@ -12,8 +12,8 @@ db = con.cursor()
 
 def test_lookup():
     assert(lookup("TSLA")["symbol"] == "TSLA")
-    assert(lookup("TSLA")["name"] == "TSLA")
-    assert(lookup("GOOG")["name"] == "GOOG")
+    assert(lookup("TSLA")["name"] == "Tesla, Inc.")
+    assert(lookup("GOOG")["name"] == "Alphabet Inc.")
     
 def test_apology():
     assert(apology_test("Sorry") == ("Sorry", 400))
@@ -49,7 +49,7 @@ def test_buy_sell():
     
     # Test sell capabilities
     portfolio = [dict(i) for i in portfolio]
-    assert(portfolio[0]["stock_name"] == "TSLA")
+    assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
     assert(portfolio[0]["num_shares"] == 5)
     assert(sell_test("TSLA", "16", "10") == 400)

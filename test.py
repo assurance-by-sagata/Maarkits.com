@@ -25,7 +25,7 @@ def test_buy_sell():
     
     # Test sell capabilities
     portfolio = [dict(i) for i in portfolio]
-    assert(portfolio[0]["stock_name"] == "TSLA")
+    assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
     assert(portfolio[0]["num_shares"] == 5)
     assert(sell_test("TSLA", "16", "10") == 400)
