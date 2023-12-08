@@ -261,27 +261,25 @@ def lookup(symbol):
     start = end - datetime.timedelta(days=7)
 
     # Yahoo Finance API
-    url = (
-        f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
-        f"?period1={int(start.timestamp())}"
-        f"&period2={int(end.timestamp())}"
-        f"&interval=1d&events=history&includeAdjustedClose=true"
-    )
+    url = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    # url = (
+    #     f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
+    #     f"?period1={int(start.timestamp())}"
+    #     f"&period2={int(end.timestamp())}"
+    #     f"&interval=1d&events=history&includeAdjustedClose=true"
+    # )
 
     # Query API
     try:
-        response = requests.get(
-            url,
-            cookies={"session": str(uuid.uuid4())},
-            headers={"User-Agent": "python-requests", "Accept": "*/*"},
+        response = requests.get(url,
+        cookies={"session": str(uuid.uuid4())},
+        headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
-        response.raise_for_status()
-
-        # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
-        quotes = list(csv.DictReader(response.content.decode("utf-8").splitlines()))
-        quotes.reverse()
-        price = round(float(quotes[0]["Adj Close"]), 2)
-        return {"name": symbol, "price": price, "symbol": symbol}
+    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
+        quotes = response.json()
+        # quotes.reverse()
+        price = round(float(quotes[0]["price"]), 2)
+        return {"name": quotes[0]["name"], "price": price, "symbol": symbol}
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
 
