@@ -8,4 +8,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Unit Tests
       run: 
-          pip3 install --user -r requirements.txt && pytest test.py
+          pip3 install --user -r requirements.txt && pytest api/test.py
