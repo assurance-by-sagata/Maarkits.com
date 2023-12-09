@@ -1,5 +1,5 @@
 Flask
-./api/flask_session
+Flask-Session
 requests
 werkzeug
 datetime
