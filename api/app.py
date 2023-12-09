@@ -1,5 +1,4 @@
 import os
-
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import Flask, flash, redirect, render_template, request, session
@@ -9,29 +8,42 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 import pytz
 from helpers import apology, login_required, lookup, usd, answer, total_computation
+from urllib.parse import quote_plus
+from flask_sqlalchemy import SQLAlchemy
 
 # Configure application
 app = Flask(__name__)
+encoded_password = quote_plus("Saucepan03@!")
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
 
 # Configure session to use filesystem (instead of signed cookies)
+# SQLAlchemy configuration
+app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://postgres:{encoded_password}@db.krvuffjhmqiyerbpgqtv.supabase.co:5432/postgres"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Configure Flask-Session
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_TYPE"] = "sqlalchemy"
+# Initialize SQLAlchemy and Flask-Session
+db_temp = SQLAlchemy(app)
+app.config['SESSION_SQLALCHEMY'] = db_temp
+app.config['SESSION_SQLALCHEMY_TABLE'] = 'flask_sessions'  # Name of the table for sessions
+# Assign the session to the app
 Session(app)
 # Configure database connection
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
 db = con.cursor(cursor_factory=RealDictCursor)
 
 
-@app.after_request
-def after_request(response):
-    """Ensure responses aren't cached"""
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
+# @app.after_request
+# def after_request(response):
+#     """Ensure responses aren't cached"""
+#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#     response.headers["Expires"] = 0
+#     response.headers["Pragma"] = "no-cache"
+#     return response
 
 
 @app.route("/")
@@ -400,5 +412,11 @@ def password_change():
 def layout():
     return render_template("trial_1.html")
 
+# # Function to create tables (including the "flask_sessions" table)
+# def create_tables():
+#     with app.app_context():
+#         db_temp.create_all()
+
 if __name__ == "__main__":
+    # create_tables()
     app.run()
