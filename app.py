@@ -1,6 +1,7 @@
 import os
 
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
@@ -19,11 +20,9 @@ app.jinja_env.filters["usd"] = usd
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-
 # Configure database connection
-con = sqlite3.connect("finance.db", check_same_thread=False)
-con.row_factory = sqlite3.Row
-db = con.cursor()
+con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
+db = con.cursor(cursor_factory=RealDictCursor)
 
 
 @app.after_request
@@ -39,30 +38,34 @@ def after_request(response):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (?)", (session["user_id"],)
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
     )
+    portfolio = db.fetchall()
     portfolio = [dict(i) for i in portfolio]
     for stock in portfolio:
         db.execute(
-            "UPDATE portfolios set price = (?) WHERE user_id = (?) AND stock_symbol = (?)",
+            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
             (lookup(stock["stock_symbol"])["price"],
             session["user_id"],
             stock["stock_symbol"])
         )
         con.commit()
-    cash = db.execute("SELECT * FROM users WHERE id = (?)", (session["user_id"],))
+    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    cash = db.fetchall()
     cash = [dict(i) for i in cash]
-    cash = cash[0]["cash"]
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (?) ORDER BY stock_symbol",
+    cash = float(cash[0]["cash"])
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
         (session["user_id"],)
     )
+    portfolio = db.fetchall()
     portfolio = [dict(i) for i in portfolio]
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
-    username = db.execute("SELECT username FROM users WHERE id = (?)", (session["user_id"],))
+    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+    username = db.fetchall()
     username = [dict(i) for i in username]
     username = username[0]["username"]
     symbols = ["TSLA", "AAPL", "GOOG"]
@@ -74,43 +77,15 @@ def index():
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
 def learn():
-    """Show portfolio of stocks"""
-    if request.method == "POST":
-        question = request.form.get("symbol")
-        _answer = answer(question)
-        return render_template("answer.html", _answer=_answer)
-    
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (?)", (session["user_id"],)
-    )
-    portfolio = [dict(i) for i in portfolio]
-    for stock in portfolio:
-        db.execute(
-            "UPDATE portfolios set price = (?) WHERE user_id = (?) AND stock_symbol = (?)",
-            (lookup(stock["stock_symbol"])["price"],
-            session["user_id"],
-            stock["stock_symbol"])
-        )
-        con.commit()
-    cash = db.execute("SELECT * FROM users WHERE id = (?)", (session["user_id"],))
-    cash = [dict(i) for i in cash]
-    cash = cash[0]["cash"]
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (?) ORDER BY stock_symbol",
-        (session["user_id"],)
-    )
-    portfolio = [dict(i) for i in portfolio]
-    total = cash
-    for stock in portfolio:
-        total += stock["price"] * stock["num_shares"]
-    username = db.execute("SELECT username FROM users WHERE id = (?)", (session["user_id"],))
+    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+    username = db.fetchall()
     username = [dict(i) for i in username]
     username = username[0]["username"]
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
     for elem in symbols:
         assets.append(lookup(elem))
-    return render_template("learn.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets)
+    return render_template("learn.html", username=username, assets=assets)
 
 
 
@@ -132,21 +107,23 @@ def buy():
     if num_shares < 0:
         return apology("Invalid Shares", 400)
     price = stock["price"]
-    user = db.execute("SELECT * FROM users WHERE id = (?)", (session["user_id"],))
+    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    user = db.fetchall()
     user = [dict(i) for i in user]
     if (num_shares * price) > user[0]["cash"]:
         return apology("Cannot Afford", 400)
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (?) AND stock_symbol = (?)",
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
         (session["user_id"],
         symbol)
     )
+    portfolio = db.fetchall()
     portfolio = [dict(i) for i in portfolio]
     # Start a stock for a new user if it doesn't exist
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(?, ?, ?, ?, ?, ?)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
             (session["user_id"],
             stock["name"],
             stock["symbol"],
@@ -156,7 +133,7 @@ def buy():
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (session["user_id"],
             stock["symbol"],
             price,
@@ -165,7 +142,7 @@ def buy():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
@@ -173,7 +150,7 @@ def buy():
     # Update current portfolio
     else:
         db.execute(
-            "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?) and stock_symbol = (?)",
+            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
             (price,
             num_shares,
             session["user_id"],
@@ -181,7 +158,7 @@ def buy():
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (session["user_id"],
             stock["symbol"],
             price,
@@ -190,7 +167,7 @@ def buy():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
@@ -203,12 +180,14 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
-    user_history = db.execute(
-        "SELECT * FROM history WHERE user_id = (?) ORDER BY time_of_transaction",
+    db.execute(
+        "SELECT * FROM history WHERE user_id = (%s) ORDER BY time_of_transaction",
         (session["user_id"],)
     )
+    user_history = db.fetchall()
     user_history = [dict(i) for i in user_history]
-    usernames = db.execute("SELECT username FROM users LIMIT 10")
+    db.execute("SELECT username FROM users LIMIT 10")
+    usernames = db.fetchall()
     usernames = [dict(i) for i in usernames]
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
@@ -239,7 +218,8 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = (?)", (request.form.get("username"),))
+        db.execute("SELECT * FROM users WHERE username = (%s)", (request.form.get("username"),))
+        rows = db.fetchall()
 
         rows = [dict(i) for i in rows]
         # Ensure username exists and password is correct
@@ -290,7 +270,8 @@ def register():
         username = request.form.get("username")
         if not username:
             return ("Please provide a username", 400)
-        database_username = db.execute("SELECT username FROM users WHERE username = (?)", (username,))
+        db.execute("SELECT username FROM users WHERE username = (%s)", (username,))
+        database_username = db.fetchall()
         database_username = [dict(i) for i in database_username]
         if (
             len(database_username)
@@ -302,9 +283,10 @@ def register():
         if password != password_check or not password:
             return apology("passwords do not match / did not enter a password", 400)
         # Register user
-        db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", (username,generate_password_hash(password)))
+        db.execute("INSERT INTO users (username, hash) VALUES(%s, %s)", (username,generate_password_hash(password)))
         con.commit()
-        user = db.execute("SELECT id FROM users WHERE username = (?)", (username,))
+        db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+        user = db.fetchall()
         user = [dict(i) for i in user]
         # Log user in  after registration
         session["user_id"] = user[0]["id"]
@@ -319,19 +301,21 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    valid_symbols = db.execute(
-        "SELECT stock_symbol FROM portfolios WHERE user_id = (?)", (session["user_id"],)
+    db.execute(
+        "SELECT stock_symbol FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
     )
+    valid_symbols = db.fetchall()
     valid_symbols = [dict(i) for i in valid_symbols]
     if request.method == "GET":
         return render_template("sell.html", symbols=valid_symbols)
     symbol = request.form.get("symbol").upper()
     num_shares = request.form.get("shares")
-    stock = db.execute(
-        "SELECT * FROM portfolios WHERE stock_symbol = (?) AND user_id = (?)",
+    db.execute(
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
         (symbol,
         session["user_id"])
     )
+    stock = db.fetchall()
     stock = [dict(i) for i in stock]
     # Error checking (i.e. missing symbol, too many shares sold etc)
     if len(stock) != 1:
@@ -349,13 +333,13 @@ def sell():
     price = lookup(symbol)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
         db.execute(
-            "DELETE FROM portfolios WHERE user_id = (?) AND stock_symbol = (?)",
+            "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
             (session["user_id"],
             symbol)
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (session["user_id"],
             symbol,
             price,
@@ -364,14 +348,14 @@ def sell():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
         con.commit()
     else:
         db.execute(
-            "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?) AND stock_symbol = (?)",
+            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
             (price,
             num_shares,
             session["user_id"],
@@ -379,7 +363,7 @@ def sell():
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (session["user_id"],
             symbol,
             price,
@@ -388,7 +372,7 @@ def sell():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
@@ -402,7 +386,8 @@ def sell():
 def password_change():
     if request.method == "GET":
         return render_template("password_change.html")
-    prev_password = db.execute("SELECT * FROM users WHERE id = (?)", (session["user_id"],))
+    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    prev_password = db.fetchall()
     prev_password = [dict(i) for i in prev_password]
     prev_password = prev_password[0]["hash"]
     if not check_password_hash(prev_password, request.form.get("curr_password")):
@@ -414,7 +399,7 @@ def password_change():
             400,
         )
     db.execute(
-        "UPDATE users SET hash = (?) WHERE id = (?)",
+        "UPDATE users SET hash = (%s) WHERE id = (%s)",
         (generate_password_hash(new_password),
         session["user_id"])
     )

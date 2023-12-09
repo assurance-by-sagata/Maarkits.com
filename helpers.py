@@ -6,14 +6,14 @@ import subprocess
 import urllib
 import uuid
 import openai
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 from flask import redirect, render_template, session
 from functools import wraps
 
-con = sqlite3.connect("finance.db", check_same_thread=False)
-con.row_factory = sqlite3.Row
-db = con.cursor()
+con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
+db = con.cursor(cursor_factory=RealDictCursor)
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -28,7 +28,7 @@ def apology(message, code=400):
             ("-", "--"),
             (" ", "-"),
             ("_", "__"),
-            ("?", "~q"),
+            ("%s", "~q"),
             ("%", "~p"),
             ("#", "~h"),
             ("/", "~s"),
@@ -52,7 +52,7 @@ def apology_test(message, code=400):
             ("-", "--"),
             (" ", "-"),
             ("_", "__"),
-            ("?", "~q"),
+            ("%s", "~q"),
             ("%", "~p"),
             ("#", "~h"),
             ("/", "~s"),
@@ -80,13 +80,15 @@ def login_required(f):
     return decorated_function
 
 def total_computation(username):
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (?))", (username, )
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", (username, )
     )
+    portfolio = db.fetchall()
     portfolio = [dict(i) for i in portfolio]
-    cash = db.execute("SELECT * FROM users WHERE username = (?)", (username,))
+    db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
+    cash = db.fetchall()
     cash = [dict(i) for i in cash]
-    cash = cash[0]["cash"]
+    cash = float(cash[0]["cash"])
     portfolio = [dict(i) for i in portfolio]
     total = cash
     for stock in portfolio:
@@ -95,7 +97,8 @@ def total_computation(username):
 
 def leaderboard():
     """Test function for leaderboard"""
-    usernames = db.execute("SELECT username FROM users LIMIT 10")
+    db.execute("SELECT username FROM users LIMIT 10")
+    usernames = db.fetchall()
     usernames = [dict(i) for i in usernames]
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
@@ -114,21 +117,23 @@ def buy_test(symbol, user_id, num_shares):
     if num_shares < 0:
         return 400
     price = stock["price"]
-    user = db.execute("SELECT * FROM users WHERE id = (?)", (user_id,))
+    db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
+    user = db.fetchall()
     user = [dict(i) for i in user]
     if (num_shares * price) > user[0]["cash"]:
         return 400
-    portfolio = db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (?) AND stock_symbol = (?)",
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
         (user_id,
         symbol)
     )
+    portfolio = db.fetchall()
     portfolio = [dict(i) for i in portfolio]
     # Start a stock for a new user if it doesn't exist
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(?, ?, ?, ?, ?, ?)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
             (user_id,
             stock["name"],
             stock["symbol"],
@@ -138,7 +143,7 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (user_id,
             stock["symbol"],
             price,
@@ -147,16 +152,17 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
         con.commit()
+        return 200
     # Update current portfolio
     else:
         db.execute(
             # Fixed bug- update on pythonanywere
-            "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?) and stock_symbol = (?)",
+            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
             (price,
             num_shares,
             user_id,
@@ -164,7 +170,7 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (user_id,
             symbol,
             price,
@@ -173,23 +179,26 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
         con.commit()
+        return 200
         
 def sell_test(symbol, user_id, num_shares):
     """Sell shares of stock"""
-    valid_symbols = db.execute(
-        "SELECT stock_symbol FROM portfolios WHERE user_id = (?)", (user_id,)
+    db.execute(
+        "SELECT stock_symbol FROM portfolios WHERE user_id = (%s)", (user_id,)
     )
+    valid_symbols = db.fetchall()
     valid_symbols = [dict(i) for i in valid_symbols]
-    stock = db.execute(
-        "SELECT * FROM portfolios WHERE stock_symbol = (?) AND user_id = (?)",
+    db.execute(
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
         (symbol,
         user_id)
     )
+    stock = db.fetchall()
     stock = [dict(i) for i in stock]
     # Error checking (i.e. missing symbol, too many shares sold etc)
     if len(stock) != 1:
@@ -207,13 +216,13 @@ def sell_test(symbol, user_id, num_shares):
     price = lookup(symbol)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
         db.execute(
-            "DELETE FROM portfolios WHERE user_id = (?) AND stock_symbol = (?)",
+            "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
             (user_id,
             symbol)
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (user_id,
             symbol,
             price,
@@ -222,14 +231,15 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
         con.commit()
+        return 200
     else:
         db.execute(
-            "UPDATE portfolios SET price = (?), num_shares = num_shares + (?) WHERE user_id = (?) AND stock_symbol = (?)",
+            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
             (price,
             num_shares,
             user_id,
@@ -237,7 +247,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(?, ?, ?, ?, ?)",
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
             (user_id,
             symbol,
             price,
@@ -246,11 +256,12 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (?) WHERE id = (?)",
+            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
         con.commit()
+        return 200
 
 def lookup(symbol):
     """Look up quote for symbol."""
@@ -264,7 +275,7 @@ def lookup(symbol):
     url = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66"
     # url = (
     #     f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
-    #     f"?period1={int(start.timestamp())}"
+    #     f"%speriod1={int(start.timestamp())}"
     #     f"&period2={int(end.timestamp())}"
     #     f"&interval=1d&events=history&includeAdjustedClose=true"
     # )
