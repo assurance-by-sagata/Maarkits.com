@@ -1,13 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='Maarkits.com',
-    version='1.0',    
+    name='YourProjectName',  # Replace with your project name
+    version='1.0',          # Replace with your project version
     packages=find_packages(),
     install_requires=[
+        # List your project dependencies here. For example:
         'Flask',
-        # ... other dependencies for later
+        # ... other dependencies if any
     ],
-    # Including local flask_session as a package
+    # Including your local flask_session as a package
     dependency_links=['./flask_session#egg=flask_session'],
 )
