@@ -84,12 +84,9 @@ def total_computation(username):
         "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", (username, )
     )
     portfolio = db.fetchall()
-    portfolio = [dict(i) for i in portfolio]
     db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
     cash = db.fetchall()
-    cash = [dict(i) for i in cash]
     cash = float(cash[0]["cash"])
-    portfolio = [dict(i) for i in portfolio]
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
@@ -99,7 +96,6 @@ def leaderboard():
     """Test function for leaderboard"""
     db.execute("SELECT username FROM users LIMIT 10")
     usernames = db.fetchall()
-    usernames = [dict(i) for i in usernames]
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
@@ -119,7 +115,6 @@ def buy_test(symbol, user_id, num_shares):
     price = stock["price"]
     db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     user = db.fetchall()
-    user = [dict(i) for i in user]
     if (num_shares * price) > user[0]["cash"]:
         return 400
     db.execute(
@@ -128,7 +123,6 @@ def buy_test(symbol, user_id, num_shares):
         symbol)
     )
     portfolio = db.fetchall()
-    portfolio = [dict(i) for i in portfolio]
     # Start a stock for a new user if it doesn't exist
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
@@ -192,14 +186,12 @@ def sell_test(symbol, user_id, num_shares):
         "SELECT stock_symbol FROM portfolios WHERE user_id = (%s)", (user_id,)
     )
     valid_symbols = db.fetchall()
-    valid_symbols = [dict(i) for i in valid_symbols]
     db.execute(
         "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
         (symbol,
         user_id)
     )
     stock = db.fetchall()
-    stock = [dict(i) for i in stock]
     # Error checking (i.e. missing symbol, too many shares sold etc)
     if len(stock) != 1:
         return 400

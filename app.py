@@ -42,7 +42,6 @@ def index():
         "SELECT * FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
     )
     portfolio = db.fetchall()
-    portfolio = [dict(i) for i in portfolio]
     for stock in portfolio:
         db.execute(
             "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
@@ -53,20 +52,17 @@ def index():
         con.commit()
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     cash = db.fetchall()
-    cash = [dict(i) for i in cash]
     cash = float(cash[0]["cash"])
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
         (session["user_id"],)
     )
     portfolio = db.fetchall()
-    portfolio = [dict(i) for i in portfolio]
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
-    username = [dict(i) for i in username]
     username = username[0]["username"]
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
@@ -79,7 +75,6 @@ def index():
 def learn():
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
-    username = [dict(i) for i in username]
     username = username[0]["username"]
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
@@ -109,7 +104,6 @@ def buy():
     price = stock["price"]
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     user = db.fetchall()
-    user = [dict(i) for i in user]
     if (num_shares * price) > user[0]["cash"]:
         return apology("Cannot Afford", 400)
     db.execute(
@@ -118,7 +112,6 @@ def buy():
         symbol)
     )
     portfolio = db.fetchall()
-    portfolio = [dict(i) for i in portfolio]
     # Start a stock for a new user if it doesn't exist
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
@@ -185,10 +178,8 @@ def history():
         (session["user_id"],)
     )
     user_history = db.fetchall()
-    user_history = [dict(i) for i in user_history]
     db.execute("SELECT username FROM users LIMIT 10")
     usernames = db.fetchall()
-    usernames = [dict(i) for i in usernames]
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
@@ -221,7 +212,6 @@ def login():
         db.execute("SELECT * FROM users WHERE username = (%s)", (request.form.get("username"),))
         rows = db.fetchall()
 
-        rows = [dict(i) for i in rows]
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(
             rows[0]["hash"], request.form.get("password")
@@ -272,7 +262,6 @@ def register():
             return ("Please provide a username", 400)
         db.execute("SELECT username FROM users WHERE username = (%s)", (username,))
         database_username = db.fetchall()
-        database_username = [dict(i) for i in database_username]
         if (
             len(database_username)
             > 0
@@ -287,7 +276,6 @@ def register():
         con.commit()
         db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
         user = db.fetchall()
-        user = [dict(i) for i in user]
         # Log user in  after registration
         session["user_id"] = user[0]["id"]
         flash("Registered!")
@@ -305,7 +293,6 @@ def sell():
         "SELECT stock_symbol FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
     )
     valid_symbols = db.fetchall()
-    valid_symbols = [dict(i) for i in valid_symbols]
     if request.method == "GET":
         return render_template("sell.html", symbols=valid_symbols)
     symbol = request.form.get("symbol").upper()
@@ -316,7 +303,6 @@ def sell():
         session["user_id"])
     )
     stock = db.fetchall()
-    stock = [dict(i) for i in stock]
     # Error checking (i.e. missing symbol, too many shares sold etc)
     if len(stock) != 1:
         return apology("Invalid Symbol", 400)
@@ -388,7 +374,6 @@ def password_change():
         return render_template("password_change.html")
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     prev_password = db.fetchall()
-    prev_password = [dict(i) for i in prev_password]
     prev_password = prev_password[0]["hash"]
     if not check_password_hash(prev_password, request.form.get("curr_password")):
         return apology("Invalid Current Password", 400)
