@@ -6,3 +6,4 @@ datetime
 pytz
 pytest
 openai
+pyscopg2
