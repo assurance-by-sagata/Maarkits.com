@@ -73,6 +73,10 @@ def index():
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
 def learn():
+    if request.method == "POST":
+        question = request.form.get("symbol")
+        _answer = answer(question)
+        return render_template("answer.html", _answer=_answer)
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
