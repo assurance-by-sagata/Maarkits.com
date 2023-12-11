@@ -60,7 +60,7 @@
             </div>
             <br>
             <div>
-                <button class="btn btn-primary" type="submit">Get more info about this stock</button>
+                <button class="btn btn-primary" type="submit">Quote</button>
             </div>
         </form>
         <br>
@@ -106,7 +106,7 @@
         <div class="col-sm-12 col-xl-4">
             <div class="bg-light text-center rounded p-4 shadow h-100">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Historical Performance of assets in my portfolio</h6>
+                    <h6 class="mb-0">My Top Performing Assets</h6>
                     <div>
                         <select class="form-select" aria-label="Default select example">
                             <option selected>This Month</option>
@@ -144,53 +144,4 @@
         </div>
     </div>
 </div>
-<script>
-    function restartAnimation(element) {
-        // Remove the class
-        element.classList.remove('slide-in');
-    
-        // Force a reflow/repaint
-        void element.offsetWidth;
-    
-        // Re-add the class
-        element.classList.add('slide-in');
-    }
-    function updateNews() {
-        fetch(`https://stocknewsapi.com/api/v1/category?section=general&items=3&page=1&token=qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n`)
-        .then(response => response.json())
-        .then(result => {
-        const news1 = document.querySelector("#news1")
-        const news1Image = document.querySelector("#news1_img")
-        const news2 = document.querySelector("#news2")
-        const news2Image = document.querySelector("#news2_img")
-        const news3 = document.querySelector("#news3")
-        const news3Image = document.querySelector("#news3_img")
-        news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
-        news1Image.src = result.data[0]["image_url"]
-        news1.classList.add('slide-in');
-        news1.classList.add('news');
-        news1Image.classList.add('slide-in');
-        news1Image.classList.add('news');
-        news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
-        news2Image.src = result.data[1]["image_url"]
-        news2.classList.add('slide-in');
-        news2.classList.add('news');
-        news2Image.classList.add('slide-in');
-        news2Image.classList.add('news');
-        news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
-        news3Image.src = result.data[2]["image_url"]
-        news3.classList.add('slide-in');
-        news3.classList.add('news');
-        news3Image.classList.add('slide-in');
-        news3Image.classList.add('news');
-    })
-        .catch(err => console.log(err))
-    };
-    document.addEventListener("DOMContentLoaded", () => {
-        
-        updateNews();
-        setInterval(updateNews, 300000); // Update every 5 minutes
-    });
-
-</script>
 {% endblock %}
