@@ -70,16 +70,16 @@ def index():
         (session["user_id"],)
     )
     portfolio = db.fetchall()
+    assets = []
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
+        assets.append(stock["stock_symbol"])
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
-    symbols = ["TSLA", "AAPL", "GOOG"]
-    assets = []
-    for elem in symbols:
-        assets.append(lookup(elem))
+    
+    
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets)
 
 @app.route("/learn", methods=["GET", "POST"])

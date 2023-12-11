@@ -15,6 +15,22 @@
         <link href="/static/favicon.ico" rel="icon">
 
         <link href="/static/styles.css" rel="stylesheet">
+        <style>
+            @keyframes slideIn {
+                from {
+                    transform: translateX(-100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            .slide-in {
+                animation: slideIn 0.5s ease-out forwards;
+            }            
+        </style>
 
         <script src = "/static/show_password.js"></script>
         <meta name="robots" content="max-image-preview:large" />
@@ -150,7 +166,7 @@
         </main>
 
         <footer class="mb-5 small text-center text-muted">
-            Data provided by <a href="https://finance.yahoo.com/">Yahoo Finance</a>
+            Data provided by <a href="https://finance.yahoo.com/">Financial Modeling Prep</a>
         </footer>
     </body>
 </div>
