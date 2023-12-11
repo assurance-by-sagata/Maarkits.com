@@ -60,7 +60,7 @@
             </div>
             <br>
             <div>
-                <button class="btn btn-primary" type="submit">Quote</button>
+                <button class="btn btn-primary" type="submit">Get more info about this stock</button>
             </div>
         </form>
         <br>
@@ -88,8 +88,7 @@
                     <h6 class="mb-0">Market Feed</h6>
                     <div>
                         <select class="form-select" aria-label="Default select example">
-                            <option selected>This Month</option>
-                            <option value="1">Last Month</option>
+                            <option selected>Latest</option>
                         </select>
                     </div>
                 </div>
@@ -106,56 +105,169 @@
         <div class="col-sm-12 col-xl-4">
             <div class="bg-light text-center rounded p-4 shadow h-100">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">My Top Performing Assets</h6>
+                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
                     <div>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>This Month</option>
-                            <option value="1">Last Month</option>
+                        <select id="time" class="form-select" aria-label="Default select example">
+                            <option value="month" selected>Past Month</option>
+                            <option value="year">Past Year</option>
                         </select>
                     </div>
                 </div>
                 <div class="w-100 d-flex justify-content-center">
                     <div id="container" style="height: 370px; width: 450px;">
-                        <div>
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th class="text-start">Symbol</th>
-                                        <th class="text-end">Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for stock in assets %}
-                                        <tr>
-                                            <td class="text-start">{{stock.symbol}}</td>
-                                            <td class="text-end">{{stock.price | usd}}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div>
-                            <img src="static/img/AAPL.png" alt="Average performance of top performing assets" class="container-fluid">
-                        </div>
-                        <br><br><br><br><br><br>
+                        {% for symbol in assets %}
+                            <div id ="{{symbol}}" class="w-100 d-flex justify-content-center container"></div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        fetch("https://stocknewsapi.com/api/v1/category?section=general&items=3&page=1&token=qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n")
+    // Get today's date
+    const today = new Date();
+
+    // Get yesterday's date
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate());
+
+    // Get the date one month ago
+    let startDate = new Date(today);
+    let choice = document.querySelector("#time");
+    let symbols = {{assets | tojson}};
+    console.log(typeof symbols)
+    startDate.setMonth(startDate.getMonth() - 1);
+    const tempStartData = startDate.toISOString().split('T')[0];
+    const tempEndData = endDate.toISOString().split('T')[0];
+    console.log(tempStartData, tempEndData)
+    async function fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate) {
+        const response = await fetch(`https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+        const data = await response.json();
+        return data.historical;
+    }
+
+    async function calculateMovingAverage(symbol, formattedStartDate, formattedEndDate) {
+        const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=sma&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+        const data = await response.json();
+        return data
+    }
+
+    async function renderCandlestickChart(data, symbol, start, end) {
+        const trace = {
+            x: data.map(item => item.date),
+            close: data.map(item => item.close),
+            high: data.map(item => item.high),
+            low: data.map(item => item.low),
+            open: data.map(item => item.open),
+    
+            // Customization of the candlestick chart
+            increasing: { line: { color: 'green' } },
+            decreasing: { line: { color: 'red' } },
+            
+            type: 'candlestick',
+            name: `${symbol}`
+        };
+
+        const vwapDataTrace = {
+            x: data.map(item => item.date),
+            y: data.map(item => item.vwap),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'vwap'
+        }
+
+        // Fetch the SMA data
+        const movingAverageData = await calculateMovingAverage(symbol, start, end);
+        // Create a new trace for the SMA
+        const movingAverageTrace = {
+            x: movingAverageData.map(item => item.date),
+            y: movingAverageData.map(item => item.sma),
+            type: 'scatter',
+            mode: 'lines',
+            name: '10-day SMA'
+        };
+    
+        const layout = {
+            title: `${symbol} Perfomance (Past Month)`,
+            xaxis: {
+                type: 'date',
+                title: 'Date'
+            },
+            yaxis: {
+                autorange: true,
+                title: 'Stock Price'
+            }
+        };
+    
+        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout);
+    }
+
+    symbols.forEach(symbol => fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err)));
+    choice.onchange = async () => {
+        if (choice.value === "month") {
+            startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+            month = true;
+        } else {
+            startDate = new Date(today);
+            startDate.setFullYear(startDate.getFullYear() - 1);
+            month = false;
+        }
+
+        // Format the dates as YYYY-MM-DD
+        const formattedStartDate = startDate.toISOString().split('T')[0];
+        const formattedEndDate = endDate.toISOString().split('T')[0];
+        console.log(formattedStartDate,formattedEndDate)
+        symbols.forEach(symbol => fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate).then(data => {renderCandlestickChart(data, symbol, formattedStartDate, formattedEndDate)}).catch(err => console.log(err)));
+    }
+    function restartAnimation(element) {
+        // Remove the class
+        element.classList.remove('slide-in');
+    
+        // Force a reflow/repaint
+        void element.offsetWidth;
+    
+        // Re-add the class
+        element.classList.add('slide-in');
+    }
+    function updateNews() {
+        fetch(`https://stocknewsapi.com/api/v1/category?section=general&items=3&page=1&token=qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n`)
         .then(response => response.json())
-        .then(result => {document.querySelector("#news1").innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
-        document.querySelector("#news1_img").src = result.data[0]["image_url"]
-        document.querySelector("#news2").innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
-        document.querySelector("#news2_img").src = result.data[1]["image_url"]
-        document.querySelector("#news3").innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
-        document.querySelector("#news3_img").src = result.data[2]["image_url"]
+        .then(result => {
+        const news1 = document.querySelector("#news1")
+        const news1Image = document.querySelector("#news1_img")
+        const news2 = document.querySelector("#news2")
+        const news2Image = document.querySelector("#news2_img")
+        const news3 = document.querySelector("#news3")
+        const news3Image = document.querySelector("#news3_img")
+        news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
+        news1Image.src = result.data[0]["image_url"]
+        news1.classList.add('slide-in');
+        news1.classList.add('news');
+        news1Image.classList.add('slide-in');
+        news1Image.classList.add('news');
+        news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
+        news2Image.src = result.data[1]["image_url"]
+        news2.classList.add('slide-in');
+        news2.classList.add('news');
+        news2Image.classList.add('slide-in');
+        news2Image.classList.add('news');
+        news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
+        news3Image.src = result.data[2]["image_url"]
+        news3.classList.add('slide-in');
+        news3.classList.add('news');
+        news3Image.classList.add('slide-in');
+        news3Image.classList.add('news');
     })
         .catch(err => console.log(err))
+    };
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        updateNews();
+        setInterval(updateNews, 300000); // Update every 5 minutes
     });
+
 </script>
 {% endblock %}
