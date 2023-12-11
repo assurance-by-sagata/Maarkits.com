@@ -107,7 +107,7 @@
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
                     <div>
-                        <select class="form-select" aria-label="Default select example">
+                        <select id="time" class="form-select" aria-label="Default select example">
                             <option value="month" selected>Past Month</option>
                             <option value="year">Past Year</option>
                         </select>
@@ -205,7 +205,23 @@
     }
 
     symbols.forEach(symbol => fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err)));
+    choice.onchange = async () => {
+        if (choice.value === "month") {
+            startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+            month = true;
+        } else {
+            startDate = new Date(today);
+            startDate.setFullYear(startDate.getFullYear() - 1);
+            month = false;
+        }
 
+        // Format the dates as YYYY-MM-DD
+        const formattedStartDate = startDate.toISOString().split('T')[0];
+        const formattedEndDate = endDate.toISOString().split('T')[0];
+        console.log(formattedStartDate,formattedEndDate)
+        symbols.forEach(symbol => fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate).then(data => {renderCandlestickChart(data, symbol, formattedStartDate, formattedEndDate)}).catch(err => console.log(err)));
+    }
     function restartAnimation(element) {
         // Remove the class
         element.classList.remove('slide-in');
