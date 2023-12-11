@@ -88,8 +88,7 @@
                     <h6 class="mb-0">Market Feed</h6>
                     <div>
                         <select class="form-select" aria-label="Default select example">
-                            <option selected>This Month</option>
-                            <option value="1">Last Month</option>
+                            <option selected>Latest</option>
                         </select>
                     </div>
                 </div>
@@ -106,45 +105,107 @@
         <div class="col-sm-12 col-xl-4">
             <div class="bg-light text-center rounded p-4 shadow h-100">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Historical Performance of assets in my portfolio</h6>
+                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
                     <div>
                         <select class="form-select" aria-label="Default select example">
-                            <option selected>This Month</option>
-                            <option value="1">Last Month</option>
+                            <option value="month" selected>Past Month</option>
+                            <option value="year">Past Year</option>
                         </select>
                     </div>
                 </div>
                 <div class="w-100 d-flex justify-content-center">
                     <div id="container" style="height: 370px; width: 450px;">
-                        <div>
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th class="text-start">Symbol</th>
-                                        <th class="text-end">Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for stock in assets %}
-                                        <tr>
-                                            <td class="text-start">{{stock.symbol}}</td>
-                                            <td class="text-end">{{stock.price | usd}}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div>
-                            <img src="static/img/AAPL.png" alt="Average performance of top performing assets" class="container-fluid">
-                        </div>
-                        <br><br><br><br><br><br>
+                        {% for symbol in assets %}
+                            <div id ="{{symbol}}" class="w-100 d-flex justify-content-center container"></div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
 <script>
+    // Get today's date
+    const today = new Date();
+
+    // Get yesterday's date
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate());
+
+    // Get the date one month ago
+    let startDate = new Date(today);
+    let choice = document.querySelector("#time");
+    let symbols = {{assets | tojson}};
+    console.log(typeof symbols)
+    startDate.setMonth(startDate.getMonth() - 1);
+    const tempStartData = startDate.toISOString().split('T')[0];
+    const tempEndData = endDate.toISOString().split('T')[0];
+    console.log(tempStartData, tempEndData)
+    async function fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate) {
+        const response = await fetch(`https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+        const data = await response.json();
+        return data.historical;
+    }
+
+    async function calculateMovingAverage(symbol, formattedStartDate, formattedEndDate) {
+        const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=sma&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+        const data = await response.json();
+        return data
+    }
+
+    async function renderCandlestickChart(data, symbol, start, end) {
+        const trace = {
+            x: data.map(item => item.date),
+            close: data.map(item => item.close),
+            high: data.map(item => item.high),
+            low: data.map(item => item.low),
+            open: data.map(item => item.open),
+    
+            // Customization of the candlestick chart
+            increasing: { line: { color: 'green' } },
+            decreasing: { line: { color: 'red' } },
+            
+            type: 'candlestick',
+            name: `${symbol}`
+        };
+
+        const vwapDataTrace = {
+            x: data.map(item => item.date),
+            y: data.map(item => item.vwap),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'vwap'
+        }
+
+        // Fetch the SMA data
+        const movingAverageData = await calculateMovingAverage(symbol, start, end);
+        // Create a new trace for the SMA
+        const movingAverageTrace = {
+            x: movingAverageData.map(item => item.date),
+            y: movingAverageData.map(item => item.sma),
+            type: 'scatter',
+            mode: 'lines',
+            name: '10-day SMA'
+        };
+    
+        const layout = {
+            title: `${symbol} Perfomance (Past Month)`,
+            xaxis: {
+                type: 'date',
+                title: 'Date'
+            },
+            yaxis: {
+                autorange: true,
+                title: 'Stock Price'
+            }
+        };
+    
+        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout);
+    }
+
+    symbols.forEach(symbol => fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err)));
+
     function restartAnimation(element) {
         // Remove the class
         element.classList.remove('slide-in');

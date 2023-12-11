@@ -16,7 +16,7 @@
                     <h6 class="mb-0">{{stock.name}} Market Feed</h6>
                     <div>
                         <select class="form-select" aria-label="Default select example">
-                            <option selected>Today</option>
+                            <option selected>Latest</option>
                         </select>
                     </div>
                 </div>
@@ -43,7 +43,8 @@
                         </select>
                     </div>
                 </div>
-                <div id ="stockChart" class="w-100 d-flex justify-content-center container">
+                <div id="container" class="w-100 d-flex justify-content-center">
+                    <div id ="stockChart" class="w-100 d-flex justify-content-center"></div>
                 </div>
                 <canvas class="chart" id="stdChart"></canvas>
                 <canvas class="chart" id="adxChart"></canvas>
@@ -234,14 +235,6 @@
                 type: 'scatter',
                 mode: 'lines',
                 name: 'vwap'
-            }
-
-            const percentChangeTrace = {
-                x: data.map(item => item.date),
-                y: data.map(item => item.changePercent),
-                type: 'scatter',
-                mode: 'lines',
-                name: 'percentChange'
             }
 
             // Fetch the SMA data
