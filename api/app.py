@@ -211,10 +211,23 @@ def history():
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return render_template("history.html", history=user_history, usernames=usernames, size=len(usernames))
 
-@app.route("/beginner")
+@app.route("/beginner", methods=["GET", "POST"])
 @login_required
 def beginner():
+    if request.method == "POST":
+        question = request.form.get("symbol")
+        _answer = answer(question)
+        return render_template("answer_b.html", _answer=_answer)
     return render_template("beginner.html")
+
+@app.route("/advanced", methods=["GET", "POST"])
+@login_required
+def advanced():
+    if request.method == "POST":
+        question = request.form.get("symbol")
+        _answer = answer(question)
+        return render_template("answer_c.html", _answer=_answer)
+    return render_template("advanced.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
