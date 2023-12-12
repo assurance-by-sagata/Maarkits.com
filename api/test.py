@@ -15,6 +15,18 @@ def test_buy_sell():
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
     portfolio = db.fetchall()
+    db.execute (
+        "SELECT bought FROM users WHERE id = (%s)", (2, )
+    )
+    bought = db.fetchall()
+    bought = bought[0]["bought"]
+    db.execute (
+        "SELECT sold FROM users WHERE id = (%s)", (2, )
+    )
+    sold = db.fetchall()
+    sold = sold[0]["sold"]
+    assert(bought > 0)
+    assert(sold > 0)
     assert(len(portfolio) == 0)
     # Test buy capabilities
     assert(buy_test("TSLA", "2", "5") == 200)
@@ -23,13 +35,24 @@ def test_buy_sell():
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
     portfolio = db.fetchall()
-    print(portfolio)
+    db.execute (
+        "SELECT bought FROM users WHERE id = (%s)", (2, )
+    )
+    bought_1 = db.fetchall()
+    bought_1 = bought_1[0]["bought"]
+    assert(bought_1 > bought)
     # Test sell capabilities
     assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
     assert(portfolio[0]["num_shares"] == 5)
     assert(sell_test("TSLA", "2", "10000000") == 400)
     assert(sell_test("TSLA", "2", "5") == 200)
+    db.execute (
+        "SELECT sold FROM users WHERE id = (%s)", (2, )
+    )
+    sold_1 = db.fetchall()
+    sold_1 = sold_1[0]["sold"]
+    assert(sold_1 > sold)
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
