@@ -78,9 +78,11 @@ def index():
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
+    pl = round(cash - total, 2)
+    percent_pl = round((pl / cash) * 100, 2)
     
     
-    return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets)
+    return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl)
 
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
@@ -151,7 +153,7 @@ def buy():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1  WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
@@ -176,12 +178,20 @@ def buy():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
         con.commit()
-    flash("Bought!")
+    db.execute (
+        "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    bought = db.fetchall()
+    bought = bought[0]["bought"]
+    if (bought == 1):
+        flash("Achievement Unlocked! First Virtual Buy")
+    else:
+        flash("Bought!")
     return redirect("/")
 
 
@@ -350,7 +360,7 @@ def sell():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
@@ -374,12 +384,20 @@ def sell():
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             session["user_id"])
         )
         con.commit()
-    flash("Sold!")
+    db.execute (
+        "SELECT sold FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    sold = db.fetchall()
+    sold = sold[0]["sold"]
+    if sold == 1:
+        flash("Achievement Unlocked! First Virtual Sell")
+    else:
+        flash("Sold!")
     return redirect("/")
 
 
@@ -411,6 +429,21 @@ def password_change():
 @app.route("/landing", methods=["GET"])
 def layout():
     return render_template("trial_1.html")
+
+@app.route("/achievements", methods=["GET"])
+@login_required
+def achievements():
+    db.execute (
+        "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    bought = db.fetchall()
+    bought = bought[0]["bought"]
+    db.execute (
+        "SELECT sold FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    sold = db.fetchall()
+    sold = sold[0]["sold"]
+    return render_template("achievements.html", bought=bought, sold=sold)
 
 # # Function to create tables (including the "flask_sessions" table)
 # def create_tables():

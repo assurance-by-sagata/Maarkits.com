@@ -6,142 +6,28 @@
 
 {% block main %}
 <div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
-<table class="table table-dark table-hover">
-    <thead>
-        <tr>
-            <th class="text-start">Symbol</th>
-            <th class="text-start">Name</th>
-            <th class="text-end">Shares Owned</th>
-            <th class="text-end">Current Price (per share)</th>
-            <th class="text-end">TOTAL</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for stock in portfolio %}
-            <tr>
-                <td class="text-start">{{stock.stock_symbol}}</td>
-                <td class="text-start">{{stock.stock_name}}</td>
-                <td class="text-end">{{stock.num_shares}}</td>
-                <td class="text-end">{{stock.price | usd}}</td>
-                <td class="text-end">{{(stock.price * stock.num_shares) | usd}}</td>
-            </tr>
-        {% endfor %}
+    <h1 style="color:green">Achievements</h1>
+    <h1 style="color:white" id="none"></h1>
+    <div class="row">
+        <div id="bought" class="col-sm"></div>
+        <div id="sold" class="col-sm"></div>
+    </div>
+</div>
+<script>
+    const boughtAchievementImage = "/static/img/FirstBuy.png";
+    const soldAchievementImage = "/static/img/FirstSell.png";
+    const bought = {{bought}}
+    const sold = {{sold}}
+    if (bought > 0) {
+        document.getElementById('bought').innerHTML = `<img src="${boughtAchievementImage}" alt="Bought Achievement" />`;
+    }
+    if (sold > 0) {
+        document.getElementById('sold').innerHTML = `<img src="${soldAchievementImage}" alt="Sold Achievement" />`;
+    }
 
-</tbody>
-    <tfoot>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Available Funds</td>
-            <td class="border-0 text-end">{{cash}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">TOTAL Value</td>
-            <td class="border-0 w-bold text-end">{{total}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Starting Amount</td>
-            <td class="border-0 text-end">$10,000.00</td>
-        </tr>
-    </tfoot>
-</table>
-    <div class="d-flex justify-content-xl-between container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
-        <form action="/buy" method="post">
-            <div class="mb-3">
-                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
-            </div>
-            <div class="mb-3">
-                <input class="form-control mx-auto w-auto" name="shares" min = "1" placeholder="Number Of Shares" type="number">
-            </div>
-            <button class="btn btn-primary" type="submit">Buy</button>
-        </form>
-        <br>
-        <form action="/quote" method="post">
-            <div class="mb-3">
-                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
-            </div>
-            <br>
-            <div>
-                <button class="btn btn-primary" type="submit">Quote</button>
-            </div>
-        </form>
-        <br>
-        <form action="/sell" method="post">
-            <div class="mb-3">
-                <select name = symbol placeholder = "Symbol">
-                    {% for stock in portfolio %}
-                        <option value = "{{stock.stock_symbol}}">{{stock.stock_symbol}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <input class="form-control mx-auto w-auto" name="shares" min = "1" placeholder="Number Of Shares" type="number">
-            </div>
-            <button class="btn btn-primary" type="submit">Sell</button>
-        </form>
-    </div>
-</div>
-<br>
-<div class="container-fluid rounded p-4 shad opacity-75">
-    <div class="row g-4">
-        <div class="col-sm-12 col-xl-8">
-            <div class="bg-light text-center text-light rounded p-4 shadow">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Market Feed</h6>
-                    <div>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>This Month</option>
-                            <option value="1">Last Month</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- <canvas id="worldwide-sales"></canvas> -->
-                <img id="news1_img">
-                <h5 id="news1"></h5>
-                <img id="news2_img">
-                <h5 id="news2"></h5>
-                <img id="news3_img">
-                <h5 id="news3"></h5>
-                <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
-            </div>
-        </div>
-        <div class="col-sm-12 col-xl-4">
-            <div class="bg-light text-center rounded p-4 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">My Top Performing Assets</h6>
-                    <div>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>This Month</option>
-                            <option value="1">Last Month</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="w-100 d-flex justify-content-center">
-                    <div id="container" style="height: 370px; width: 450px;">
-                        <div>
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th class="text-start">Symbol</th>
-                                        <th class="text-end">Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for stock in assets %}
-                                        <tr>
-                                            <td class="text-start">{{stock.symbol}}</td>
-                                            <td class="text-end">{{stock.price | usd}}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div>
-                            <img src="static/img/AAPL.png" alt="Average performance of top performing assets" class="container-fluid">
-                        </div>
-                        <br><br><br><br><br><br>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    else if (bought == 0 && sold == 0 )
+    {
+        document.getElementById('none').innerHTML = "Sorry! You have no achievements at the moment. Try playing around with the website a bit to gain some!"
+    }
+</script>
 {% endblock %}
