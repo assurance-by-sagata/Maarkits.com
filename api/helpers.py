@@ -146,7 +146,7 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -173,7 +173,7 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -223,7 +223,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -248,7 +248,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
