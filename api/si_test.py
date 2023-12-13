@@ -32,7 +32,6 @@ def test_buy_sell():
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
     portfolio = db.fetchall()
-    print(portfolio)
     # Test sell capabilities
     assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
