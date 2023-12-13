@@ -209,7 +209,17 @@ def history():
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
-    return render_template("history.html", history=user_history, usernames=usernames, size=len(usernames))
+    db.execute (
+        "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    bought = db.fetchall()
+    bought = bought[0]["bought"]
+    db.execute (
+        "SELECT sold FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    sold = db.fetchall()
+    sold = sold[0]["sold"]
+    return render_template("history.html", history=user_history, usernames=usernames, size=len(usernames), bought=bought, sold=sold)
 
 @app.route("/beginner", methods=["GET", "POST"])
 @login_required
