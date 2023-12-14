@@ -80,9 +80,10 @@ def index():
     username = username[0]["username"]
     pl = round(total - 10000, 2)
     percent_pl = round((pl / 10000) * 100, 2)
+    types = ["Stock (Equity)", "Forex"]
     
     
-    return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl)
+    return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
@@ -114,10 +115,12 @@ def buy():
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
         return apology("Invalid Symbol", 400)
+    if stock["exchange"] and (stock["exchange"] == "FOREX" and request.form.get("type") != "Forex" or stock["exchange"] != "FOREX" and request.form.get("type") == "Forex"):
+        return apology("Asset Type does not match symbol", 400)
     if not num_shares.isdigit():
         return apology("Invalid Shares", 400)
     num_shares = int(num_shares)
-    if num_shares < 0:
+    if num_shares < 1:
         return apology("Invalid Shares", 400)
     price = stock["price"]
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
