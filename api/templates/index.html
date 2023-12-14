@@ -11,8 +11,9 @@
         <tr>
             <th class="text-start">Symbol</th>
             <th class="text-start">Name</th>
-            <th class="text-end">Shares Owned</th>
-            <th class="text-end">Current Price (per share)</th>
+            <th class="text-start">Asset Type</th>
+            <th class="text-end">Number Owned</th>
+            <th class="text-end">Current Price (per unit)</th>
             <th class="text-end">TOTAL</th>
         </tr>
     </thead>
@@ -21,6 +22,7 @@
             <tr>
                 <td class="text-start">{{stock.stock_symbol}}</td>
                 <td class="text-start">{{stock.stock_name}}</td>
+                <td class="text-start">{{stock.type}}</td>
                 <td class="text-end">{{stock.num_shares}}</td>
                 <td class="text-end">{{stock.price | usd}}</td>
                 <td class="text-end">{{(stock.price * stock.num_shares) | usd}}</td>
@@ -30,23 +32,23 @@
 </tbody>
     <tfoot>
         <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Starting amount</td>
+            <td class="border-0 fw-bold text-end" colspan="5">Starting amount</td>
             <td class="border-0 text-end">$10,000.00</td>
         </tr>
         <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Total Portfolio Value</td>
+            <td class="border-0 fw-bold text-end" colspan="5">Total Portfolio Value</td>
             <td class="border-0 w-bold text-end">{{total}}</td>
         </tr>
         <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Available Funds</td>
+            <td class="border-0 fw-bold text-end" colspan="5">Available Funds</td>
             <td class="border-0 text-end">{{cash}}</td>
         </tr>
         <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Total P&L</td>
+            <td class="border-0 fw-bold text-end" colspan="5">Total P&L</td>
             <td class="border-0 text-end">{{pl}}</td>
         </tr>
         <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Percentage P&L</td>
+            <td class="border-0 fw-bold text-end" colspan="5">Percentage P&L</td>
             <td class="border-0 text-end">{{percent_pl}}%</td>
         </tr>
     </tfoot>
@@ -57,9 +59,17 @@
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
             </div>
             <div class="mb-3">
-                <input class="form-control mx-auto w-auto" name="shares" min = "1" placeholder="Number Of Shares" type="number">
+                <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
             </div>
-            <button class="btn btn-primary" type="submit">Buy</button>
+            <div class="mb-3">
+                <select name="type" id="assetTypeSelect" onchange="validateSelection_1()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit" id="submitButton_1" disabled>Buy</button>
         </form>
         <br>
         <form action="/quote" method="post">
@@ -74,16 +84,17 @@
         <br>
         <form action="/sell" method="post">
             <div class="mb-3">
-                <select name = symbol placeholder = "Symbol">
+                <select name="symbol" id="symbolSelect" onchange="validateSelection()">
+                    <option selected="true" disabled="disabled">Choose Symbol</option> 
                     {% for stock in portfolio %}
-                        <option value = "{{stock.stock_symbol}}">{{stock.stock_symbol}}</option>
+                        <option value="{{stock.stock_symbol}}">{{stock.stock_symbol}}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="mb-3">
-                <input class="form-control mx-auto w-auto" name="shares" min = "1" placeholder="Number Of Shares" type="number">
+                <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number To Sell" type="number">
             </div>
-            <button class="btn btn-primary" type="submit">Sell</button>
+            <button class="btn btn-primary" type="submit" id="submitButton" disabled>Sell</button>
         </form>
     </div>
 </div>
@@ -133,6 +144,26 @@
 </div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
 <script>
+    function validateSelection() {
+        var symbolSelect = document.getElementById('symbolSelect');
+        var submitButton = document.getElementById('submitButton');
+        if (symbolSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
+    function validateSelection_1() {
+        var assetTypeSelect = document.getElementById('assetTypeSelect');
+        var submitButton = document.getElementById('submitButton_1');
+        if (assetTypeSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
     url = `https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66`
 
     // Get today's date
