@@ -11,6 +11,27 @@
     <br>
     <div class="row g-4">
         <div class="col-sm-12 col-xl-8">
+            <div class="bg-light text-center rounded p-4 shadow h-100 opacity-75">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">{{stock.name}} Historical Performance</h6>
+                    <div>
+                        <select id="time" class="form-select" aria-label="Default select example">
+                            <option value="month" selected>Past Month</option>
+                            <option value="year">Past Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="container" class="w-100 d-flex justify-content-center container-fluid">
+                    <div id ="stockChart" class="w-100 d-flex"></div>
+                </div>
+                <canvas class="chart" id="stdChart"></canvas>
+                <canvas class="chart" id="adxChart"></canvas>
+                <canvas class="chart" id="rsiChart"></canvas>
+                <canvas class="chart" id="williamsChart"></canvas>
+                <canvas class="chart" id="percentChart"></canvas>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-4">
             <div class="bg-light text-center text-light rounded p-4 shadow opacity-75">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">{{stock.name}} Market Feed</h6>
@@ -30,27 +51,6 @@
                 <img id="news4_img">
                 <h5 id="news4"></h5>
                 <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
-            </div>
-        </div>
-        <div class="col-sm-12 col-xl-4">
-            <div class="bg-light text-center rounded p-4 shadow h-100 opacity-75">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">{{stock.name}} Historical Performance</h6>
-                    <div>
-                        <select id="time" class="form-select" aria-label="Default select example">
-                            <option value="month" selected>Past Month</option>
-                            <option value="year">Past Year</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="container" class="w-100 d-flex justify-content-center">
-                    <div id ="stockChart" class="w-100 d-flex justify-content-center"></div>
-                </div>
-                <canvas class="chart" id="stdChart"></canvas>
-                <canvas class="chart" id="adxChart"></canvas>
-                <canvas class="chart" id="rsiChart"></canvas>
-                <canvas class="chart" id="williamsChart"></canvas>
-                <canvas class="chart" id="percentChart"></canvas>
             </div>
         </div>
     </div>
@@ -260,7 +260,7 @@
                 }
             };
         
-            Plotly.newPlot('stockChart', [trace, movingAverageTrace, vwapDataTrace], layout);
+            Plotly.newPlot('stockChart', [trace, movingAverageTrace, vwapDataTrace], layout, {responsive: true});
         }
         
 
@@ -379,25 +379,25 @@
             const news3Image = document.querySelector("#news3_img")
             const news4 = document.querySelector("#news4")
             const news4Image = document.querySelector("#news4_img")
-            news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<a style='color:blue' class='text-center' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
+            news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div class='text-center'>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a></div>"
             news1Image.src = result.data[0]["image_url"]
             news1.classList.add('slide-in');
             news1.classList.add('news');
             news1Image.classList.add('slide-in');
             news1Image.classList.add('news');
-            news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<a style='color:blue' class='text-center' href=" + result.data[1]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
+            news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<br><a style='color:blue; font-size: 12px' class='text-center' href=" + result.data[1]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
             news2Image.src = result.data[1]["image_url"]
             news2.classList.add('slide-in');
             news2.classList.add('news');
             news2Image.classList.add('slide-in');
             news2Image.classList.add('news');
-            news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<a style='color:blue'class='text-center' href=" + result.data[2]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
+            news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<br><a style='color:blue; font-size: 12px' class='text-center' href=" + result.data[2]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
             news3Image.src = result.data[2]["image_url"]
             news3.classList.add('slide-in');
             news3.classList.add('news');
             news3Image.classList.add('slide-in');
             news3Image.classList.add('news');
-            news4.innerHTML = result.data[3]["title"] + "<div>Date: " + result.data[3]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[3]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<a style='color:blue' class='text-center'  href=" + result.data[3]["news_url"] + ">" + result.data[3]["news_url"] + "</a>"
+            news4.innerHTML = result.data[3]["title"] + "<div>Date: " + result.data[3]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[3]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<br><a style='color:blue; font-size: 12px' class='text-center'  href=" + result.data[3]["news_url"] + ">" + result.data[3]["news_url"] + "</a>"
             news4Image.src = result.data[3]["image_url"]
             news4.classList.add('slide-in');
             news4.classList.add('news');
