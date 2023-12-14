@@ -88,9 +88,27 @@
     </div>
 </div>
 <br>
-<div class="container-fluid rounded p-4 shad opacity-75">
+<div class="rounded p-4 shad opacity-75">
     <div class="row g-4">
-        <div class="col-sm-12 col-xl-8">
+        <div class="col-sm-12 col-xl-8 container-fluid">
+            <div class="bg-light text-center rounded p-4 shadow h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
+                    <div>
+                        <select id="time" class="form-select" aria-label="Default select example">
+                            <option value="month" selected>Past Month</option>
+                            <option value="year">Past Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                        {% for symbol in assets %}
+                            <div id ="{{symbol}}" class="w-100 d-flex"></div>
+                        {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-4 container-fluid">
             <div class="bg-light text-center text-light rounded p-4 shadow">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">Market Feed</h6>
@@ -110,26 +128,7 @@
                 <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
             </div>
         </div>
-        <div class="col-sm-12 col-xl-4">
-            <div class="bg-light text-center rounded p-4 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
-                    <div>
-                        <select id="time" class="form-select" aria-label="Default select example">
-                            <option value="month" selected>Past Month</option>
-                            <option value="year">Past Year</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="w-100 d-flex justify-content-center">
-                    <div id="container" style="height: 370px; width: 450px;">
-                        {% for symbol in assets %}
-                            <div id ="{{symbol}}" class="w-100 d-flex justify-content-center container"></div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
@@ -211,7 +210,7 @@
             }
         };
     
-        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout);
+        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout, {responsive: true});
     }
 
     symbols.forEach(symbol => fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err)));
@@ -252,19 +251,19 @@
         const news2Image = document.querySelector("#news2_img")
         const news3 = document.querySelector("#news3")
         const news3Image = document.querySelector("#news3_img")
-        news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
+        news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "<div>\nLink to article:</div> " + "<div><a style='color:blue; font-size:12px' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a></div>"
         news1Image.src = result.data[0]["image_url"]
         news1.classList.add('slide-in');
         news1.classList.add('news');
         news1Image.classList.add('slide-in');
         news1Image.classList.add('news');
-        news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
+        news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<br><a style='color:blue; font-size:12px' href=" + result.data[1]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
         news2Image.src = result.data[1]["image_url"]
         news2.classList.add('slide-in');
         news2.classList.add('news');
         news2Image.classList.add('slide-in');
         news2Image.classList.add('news');
-        news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
+        news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<br><a style='color:blue; font-size:12px' href=" + result.data[2]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
         news3Image.src = result.data[2]["image_url"]
         news3.classList.add('slide-in');
         news3.classList.add('news');

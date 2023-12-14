@@ -78,8 +78,8 @@ def index():
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
-    pl = round(cash - total, 2)
-    percent_pl = round((pl / cash) * 100, 2)
+    pl = round(total - 10000, 2)
+    percent_pl = round((pl / 10000) * 100, 2)
     
     
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl)
