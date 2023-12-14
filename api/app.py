@@ -204,11 +204,12 @@ def history():
         (session["user_id"],)
     )
     user_history = db.fetchall()
-    db.execute("SELECT username FROM users LIMIT 10")
+    db.execute("SELECT username FROM users")
     usernames = db.fetchall()
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
+    usernames = usernames[:10]
     db.execute (
         "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
     )
