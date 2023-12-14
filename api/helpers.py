@@ -101,11 +101,13 @@ def leaderboard():
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return usernames
 
-def buy_test(symbol, user_id, num_shares):
+def buy_test(symbol, user_id, num_shares, type):
     """Buy shares of stock"""
     stock = lookup(symbol)
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
+        return 400
+    if stock["exchange"] and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
         return 400
     if not num_shares.isdigit():
         return 400
@@ -282,7 +284,7 @@ def lookup(symbol):
         quotes = response.json()
         # quotes.reverse()
         price = round(float(quotes[0]["price"]), 2)
-        return {"name": quotes[0]["name"], "price": price, "symbol": symbol}
+        return {"name": quotes[0]["name"], "price": price, "symbol": symbol, "exchange": quotes[0]["exchange"]}
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
 
