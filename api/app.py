@@ -112,10 +112,11 @@ def buy():
     symbol = request.form.get("symbol").upper()
     num_shares = request.form.get("shares")
     stock = lookup(symbol)
+    type = request.form.get("type")
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
         return apology("Invalid Symbol", 400)
-    if stock["exchange"] and request.form.get("type") and (stock["exchange"] == "FOREX" and request.form.get("type") != "Forex" or stock["exchange"] != "FOREX" and request.form.get("type") == "Forex"):
+    if stock["exchange"] and request.form.get("type") and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
         return apology("Asset Type does not match symbol", 400)
     if not num_shares.isdigit():
         return apology("Invalid Shares", 400)
@@ -137,13 +138,14 @@ def buy():
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
             (session["user_id"],
             stock["name"],
             stock["symbol"],
             price,
             num_shares,
-            time)
+            time,
+            type)
         )
         con.commit()
         db.execute(
