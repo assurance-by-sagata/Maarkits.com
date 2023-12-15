@@ -101,11 +101,13 @@ def leaderboard():
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return usernames
 
-def buy_test(symbol, user_id, num_shares):
+def buy_test(symbol, user_id, num_shares, type):
     """Buy shares of stock"""
     stock = lookup(symbol)
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
+        return 400
+    if stock["exchange"] and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
         return 400
     if not num_shares.isdigit():
         return 400
@@ -127,13 +129,14 @@ def buy_test(symbol, user_id, num_shares):
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
             (user_id,
             stock["name"],
             stock["symbol"],
             price,
             num_shares,
-            time)
+            time,
+            type)
         )
         con.commit()
         db.execute(
@@ -146,7 +149,7 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -173,7 +176,7 @@ def buy_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -223,7 +226,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -248,7 +251,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -282,7 +285,7 @@ def lookup(symbol):
         quotes = response.json()
         # quotes.reverse()
         price = round(float(quotes[0]["price"]), 2)
-        return {"name": quotes[0]["name"], "price": price, "symbol": symbol}
+        return {"name": quotes[0]["name"], "price": price, "symbol": symbol, "exchange": quotes[0]["exchange"]}
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
 

@@ -29,8 +29,10 @@ def test_buy_sell():
     assert(sold > 0)
     assert(len(portfolio) == 0)
     # Test buy capabilities
-    assert(buy_test("TSLA", "2", "5") == 200)
-    assert(buy_test("GOOG", "2", "1000000") == 400)
+    assert(buy_test("TSLA", "2", "5", "temp") == 200)
+    assert(buy_test("GOOG", "2", "1000000", "temp") == 400)
+    assert(buy_test("TSLA", "2", "5", "Forex") == 400)
+    assert(buy_test("MYR/EUR", "2", "5", "temp") == 400)
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
