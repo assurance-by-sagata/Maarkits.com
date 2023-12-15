@@ -115,7 +115,7 @@ def buy():
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
         return apology("Invalid Symbol", 400)
-    if stock["exchange"] and (stock["exchange"] == "FOREX" and request.form.get("type") != "Forex" or stock["exchange"] != "FOREX" and request.form.get("type") == "Forex"):
+    if stock["exchange"] and request.form.get("type") and (stock["exchange"] == "FOREX" and request.form.get("type") != "Forex" or stock["exchange"] != "FOREX" and request.form.get("type") == "Forex"):
         return apology("Asset Type does not match symbol", 400)
     if not num_shares.isdigit():
         return apology("Invalid Shares", 400)
