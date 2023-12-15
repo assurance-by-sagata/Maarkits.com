@@ -129,13 +129,14 @@ def buy_test(symbol, user_id, num_shares, type):
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
             (user_id,
             stock["name"],
             stock["symbol"],
             price,
             num_shares,
-            time)
+            time,
+            type)
         )
         con.commit()
         db.execute(
@@ -148,7 +149,7 @@ def buy_test(symbol, user_id, num_shares, type):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -175,7 +176,7 @@ def buy_test(symbol, user_id, num_shares, type):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -225,7 +226,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
@@ -250,7 +251,7 @@ def sell_test(symbol, user_id, num_shares):
         )
         con.commit()
         db.execute(
-            "UPDATE users SET cash = cash - (%s) WHERE id = (%s)",
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
             (num_shares * price,
             user_id)
         )
