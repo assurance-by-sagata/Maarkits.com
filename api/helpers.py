@@ -129,13 +129,14 @@ def buy_test(symbol, user_id, num_shares, type):
     time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
             (user_id,
             stock["name"],
             stock["symbol"],
             price,
             num_shares,
-            time)
+            time,
+            type)
         )
         con.commit()
         db.execute(
