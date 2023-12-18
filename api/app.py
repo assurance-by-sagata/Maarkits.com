@@ -80,7 +80,7 @@ def index():
     username = username[0]["username"]
     pl = round(total - 10000, 2)
     percent_pl = round((pl / 10000) * 100, 2)
-    types = ["Stock (Equity)", "Forex"]
+    types = ["Stock (Equity)", "Forex", "Index", "ETF"]
     
     
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
@@ -113,19 +113,6 @@ def buy():
     num_shares = request.form.get("shares")
     stock = lookup(symbol)
     type = request.form.get("type")
-    open_time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5)).replace(hour=9, minute=30)
-    close_time = (datetime.datetime.now(pytz.timezone("UTC")) - - datetime.timedelta(hours=5)).replace(hour=4, minute=0)
-    time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5))
-    # Error checking (i.e. missing symbol, too many shares bought etc)
-    # Can only buy when market is open
-    # if type and type != "Forex":
-    #     if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
-    #         return apology("Cannot trade on a weekend!", 400)
-    #     if time < open_time or time > close_time:
-    #         return apology("Non-Forex assets can only start trading 1 hour before the market opens and upto 1 hour after the market closes!")
-    # else:
-    #     if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 17) or (open_time.date().weekday == 4 and time.hour > 17):
-    #         return apology("The Forex market is shut from 5:00 pm Friday to 5:00 pm on Sunday!", 400)
     if not stock:
         return apology("Invalid Symbol", 400)
     if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
@@ -136,6 +123,19 @@ def buy():
     if num_shares < 1:
         return apology("Invalid Shares", 400)
     price = stock["price"]
+    open_time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5)).replace(hour=9, minute=30)
+    close_time = (datetime.datetime.now(pytz.timezone("UTC")) - - datetime.timedelta(hours=5)).replace(hour=4, minute=0)
+    time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5))
+    # Error checking (i.e. missing symbol, too many shares bought etc)
+    # Can only buy when market is open
+    if type and type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return apology("Cannot trade on a weekend!", 400)
+        if time < open_time or time > close_time:
+            return apology("Non-Forex assets can only start trading 1 hour before the market opens and upto 1 hour after the market closes!")
+    else:
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 17) or (open_time.date().weekday == 4 and time.hour > 17):
+            return apology("The Forex market is shut from 5:00 pm Friday to 5:00 pm on Sunday!", 400)
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     user = db.fetchall()
     if (num_shares * price) > user[0]["cash"]:
@@ -370,7 +370,12 @@ def sell():
         session["user_id"])
     )
     stock = db.fetchall()
-    # Error checking (i.e. missing symbol, too many shares sold etc)
+    type = request.form.get("type")
+    db.execute("SELECT type FROM portfolios WHERE stock_symbol = (%s)", (symbol,))
+    types = db.fetchall()
+    type_ans = types[0]["type"]
+    if type != type_ans:
+        return apology("Asset Type does not match symbol", 400)
     if len(stock) != 1:
         return apology("Invalid Symbol", 400)
     if not num_shares.isdigit():
@@ -380,8 +385,20 @@ def sell():
         return apology("Invalid Shares", 400)
     if stock[0]["num_shares"] + num_shares < 0:
         return apology("Too many shares", 400)
+    open_time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5)).replace(hour=9, minute=30)
+    close_time = (datetime.datetime.now(pytz.timezone("UTC")) - - datetime.timedelta(hours=5)).replace(hour=4, minute=0)
+    time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5))
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return apology("Cannot trade on a weekend!", 400)
+        if time < open_time or time > close_time:
+            return apology("Non-Forex assets can only start trading 1 hour before the market opens and upto 1 hour after the market closes!")
+    else:
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 17) or (open_time.date().weekday == 4 and time.hour > 17):
+            return apology("The Forex market is shut from 5:00 pm Friday to 5:00 pm on Sunday!", 400)
     # Keep track of sells
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
     price = lookup(symbol)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
