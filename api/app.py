@@ -113,10 +113,22 @@ def buy():
     num_shares = request.form.get("shares")
     stock = lookup(symbol)
     type = request.form.get("type")
+    open_time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5)).replace(hour=9, minute=30)
+    close_time = (datetime.datetime.now(pytz.timezone("UTC")) - - datetime.timedelta(hours=5)).replace(hour=4, minute=0)
+    time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5))
     # Error checking (i.e. missing symbol, too many shares bought etc)
+    # Can only buy when market is open
+    # if type and type != "Forex":
+    #     if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+    #         return apology("Cannot trade on a weekend!", 400)
+    #     if time < open_time or time > close_time:
+    #         return apology("Non-Forex assets can only start trading 1 hour before the market opens and upto 1 hour after the market closes!")
+    # else:
+    #     if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 17) or (open_time.date().weekday == 4 and time.hour > 17):
+    #         return apology("The Forex market is shut from 5:00 pm Friday to 5:00 pm on Sunday!", 400)
     if not stock:
         return apology("Invalid Symbol", 400)
-    if stock["exchange"] and request.form.get("type") and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
+    if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
         return apology("Asset Type does not match symbol", 400)
     if not num_shares.isdigit():
         return apology("Invalid Shares", 400)
@@ -135,7 +147,7 @@ def buy():
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
             "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
