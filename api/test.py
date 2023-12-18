@@ -3,6 +3,7 @@ from helpers import apology_test
 from helpers import total_computation
 from helpers import leaderboard
 from helpers import buy_test, sell_test
+from datetime import datetime, timedelta, timezone
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
@@ -11,6 +12,16 @@ con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@
 db = con.cursor(cursor_factory=RealDictCursor)
 
 def test_buy_sell():
+    utc_minus_5 = timezone(-timedelta(hours=5))
+    valid_time = datetime(2023, 12, 18, 15, 30, tzinfo=utc_minus_5)
+    post_trading_time = datetime(2023, 12, 18, 17, 30, tzinfo=utc_minus_5)
+    pre_trading_time = datetime(2023, 12, 18, 7, 30, tzinfo=utc_minus_5)
+    weekend_1 = datetime(2023, 12, 17, 10, 30, tzinfo=utc_minus_5)
+    weekend_2 = datetime(2023, 12, 16, 10, 30, tzinfo=utc_minus_5)
+    one_min_before_trading = datetime(2023, 12, 18, 8, 29, tzinfo=utc_minus_5)
+    one_min_after_trading = datetime(2023, 12, 18, 17, 1, tzinfo=utc_minus_5)
+    midnight_check = datetime(2023, 12, 18, 0, 0, tzinfo=utc_minus_5)
+    
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
@@ -28,11 +39,27 @@ def test_buy_sell():
     assert(bought > 0)
     assert(sold > 0)
     assert(len(portfolio) == 0)
-    # Test buy capabilities
-    assert(buy_test("TSLA", "2", "5", "temp") == 200)
-    assert(buy_test("GOOG", "2", "1000000", "temp") == 400)
-    assert(buy_test("TSLA", "2", "5", "Forex") == 400)
-    assert(buy_test("MYR/EUR", "2", "5", "temp") == 400)
+    # Test buy capabilities- datetime kept correct, testing other errors
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", valid_time) == 200)
+    assert(buy_test("GOOG", "2", "1000000", "Stock (Equity)", valid_time) == 400)
+    assert(buy_test("TSLA", "2", "5", "Forex", valid_time) == 400)
+    assert(buy_test("MYREUR", "2", "5", "Stock (Equity)", valid_time) == 400)
+    # Now test edge cases of datetime (invalid times)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", post_trading_time) == 2)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", one_min_after_trading) == 2)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", one_min_before_trading) == 2)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", midnight_check) == 2)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", pre_trading_time) == 2)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", weekend_1) == 1)
+    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", weekend_2) == 1)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", post_trading_time) == 2)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", one_min_after_trading) == 2)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", one_min_before_trading) == 2)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", midnight_check) == 2)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", pre_trading_time) == 2)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", weekend_1) == 1)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", weekend_2) == 1)
+    assert(buy_test("MYREUR", "2", "5", "Forex", weekend_1) == 3)
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
@@ -47,8 +74,8 @@ def test_buy_sell():
     assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
     assert(portfolio[0]["num_shares"] == 5)
-    assert(sell_test("TSLA", "2", "10000000") == 400)
-    assert(sell_test("TSLA", "2", "5") == 200)
+    assert(sell_test("TSLA", "2", "10000000", "Stock (Equity)", valid_time) == 400)
+    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", valid_time) == 200)
     db.execute (
         "SELECT sold FROM users WHERE id = (%s)", (2, )
     )
