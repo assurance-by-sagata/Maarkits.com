@@ -123,19 +123,24 @@ def buy():
     if num_shares < 1:
         return apology("Invalid Shares", 400)
     price = stock["price"]
-    open_time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5)).replace(hour=9, minute=30)
-    close_time = (datetime.datetime.now(pytz.timezone("UTC")) - - datetime.timedelta(hours=5)).replace(hour=4, minute=0)
-    time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5))
+    # Create a datetime object in UTC
+    utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
+
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = utc_dt.astimezone(pytz.timezone('Etc/GMT+5'))
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    time = utc_minus_5_dt
     # Error checking (i.e. missing symbol, too many shares bought etc)
     # Can only buy when market is open
     if type and type != "Forex":
         if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
             return apology("Cannot trade on a weekend!", 400)
         if time < open_time or time > close_time:
-            return apology("Non-Forex assets can only start trading 1 hour before the market opens and upto 1 hour after the market closes!")
+            return apology("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes) ", 400)
     else:
-        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 17) or (open_time.date().weekday == 4 and time.hour > 17):
-            return apology("The Forex market is shut from 5:00 pm Friday to 5:00 pm on Sunday!", 400)
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return apology("You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)", 400)
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     user = db.fetchall()
     if (num_shares * price) > user[0]["cash"]:
@@ -385,18 +390,23 @@ def sell():
         return apology("Invalid Shares", 400)
     if stock[0]["num_shares"] + num_shares < 0:
         return apology("Too many shares", 400)
-    open_time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5)).replace(hour=9, minute=30)
-    close_time = (datetime.datetime.now(pytz.timezone("UTC")) - - datetime.timedelta(hours=5)).replace(hour=4, minute=0)
-    time = (datetime.datetime.now(pytz.timezone("UTC")) - datetime.timedelta(hours=5))
+     # Create a datetime object in UTC
+    utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
+
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = utc_dt.astimezone(pytz.timezone('Etc/GMT+5'))
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    time = utc_minus_5_dt
     # Error checking (i.e. missing symbol, too many shares sold etc)
     if type and type != "Forex":
         if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
             return apology("Cannot trade on a weekend!", 400)
         if time < open_time or time > close_time:
-            return apology("Non-Forex assets can only start trading 1 hour before the market opens and upto 1 hour after the market closes!")
+            return apology("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes) ", 400)
     else:
-        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 17) or (open_time.date().weekday == 4 and time.hour > 17):
-            return apology("The Forex market is shut from 5:00 pm Friday to 5:00 pm on Sunday!", 400)
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return apology("You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)", 400)
     # Keep track of sells
     time = time.strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
