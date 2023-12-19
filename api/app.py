@@ -322,7 +322,8 @@ def quote():
     stock = lookup(symbol)
     if not stock:
         return apology("Invalid Symbol", 400)
-    return render_template("quoted.html", stock=stock)
+    types = ["Stock (Equity)", "Forex", "Index", "ETF"]
+    return render_template("quoted.html", stock=stock, types=types)
 
 
 @app.route("/register", methods=["GET", "POST"])
