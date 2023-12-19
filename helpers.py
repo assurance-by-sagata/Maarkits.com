@@ -101,7 +101,7 @@ def leaderboard():
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return usernames
 
-def buy_test(symbol, user_id, num_shares, type):
+def buy_test(symbol, user_id, num_shares, type, time):
     """Buy shares of stock"""
     stock = lookup(symbol)
     # Error checking (i.e. missing symbol, too many shares bought etc)
@@ -114,6 +114,20 @@ def buy_test(symbol, user_id, num_shares, type):
     num_shares = int(num_shares)
     if num_shares < 0:
         return 400
+    
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = time
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if time.date().weekday() == 5 or time.date().weekday() == 6:
+            return 1
+        if time.time() < open_time.time() or time.time() > close_time.time():
+            return 2
+    else:
+        if time.date().weekday() == 5 or (time.date().weekday() == 6 and time.hour < 18) or (time.date().weekday == 4 and time.hour > 16):
+            return 3
     price = stock["price"]
     db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     user = db.fetchall()
@@ -126,7 +140,6 @@ def buy_test(symbol, user_id, num_shares, type):
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
             "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
@@ -183,7 +196,7 @@ def buy_test(symbol, user_id, num_shares, type):
         con.commit()
         return 200
         
-def sell_test(symbol, user_id, num_shares):
+def sell_test(symbol, user_id, num_shares, type, time):
     """Sell shares of stock"""
     db.execute(
         "SELECT stock_symbol FROM portfolios WHERE user_id = (%s)", (user_id,)
@@ -205,8 +218,19 @@ def sell_test(symbol, user_id, num_shares):
         return 400
     if stock[0]["num_shares"] + num_shares < 0:
         return 400
+    utc_minus_5_dt = time
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if time.date().weekday() == 5 or time.date().weekday() == 6:
+            return 1
+        if time.time() < open_time.time() or time.time() > close_time.time():
+            return 2
+    else:
+        if time.date().weekday() == 5 or (time.date().weekday() == 6 and time.hour < 18) or (time.date().weekday == 4 and time.hour > 16):
+            return 3
     # Keep track of sells
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
     price = lookup(symbol)["price"]
     if stock[0]["num_shares"] + num_shares == 0:

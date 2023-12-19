@@ -92,6 +92,14 @@
                 </select>
             </div>
             <div class="mb-3">
+                <select name="type" id="assetTypeSelect_1" onchange="validateSelection()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
                 <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number To Sell" type="number">
             </div>
             <button class="btn btn-primary" type="submit" id="submitButton" disabled>Sell</button>
@@ -146,8 +154,10 @@
 <script>
     function validateSelection() {
         var symbolSelect = document.getElementById('symbolSelect');
+        var assetSelect = document.getElementById('assetTypeSelect_1');
         var submitButton = document.getElementById('submitButton');
-        if (symbolSelect.value != "") {
+        if (symbolSelect.value != "" && assetSelect.value != "Choose Asset Type") {
+            console.log(assetSelect.value)
             submitButton.disabled = false;
         } else {
             submitButton.disabled = true;
