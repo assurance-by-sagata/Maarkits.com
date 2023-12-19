@@ -7,13 +7,21 @@
 {% block main %}
     <div class="bg-dark text-center rounded p-4 shadow text-light opacity-75">
         <form action="/buy" method="post">
-            <h2 style="color:white">The current share price of {{stock.symbol}}({{stock.name}}) is {{stock.price | usd}}</h2>
+            <h2 style="color:white">The current price per unit of {{stock.symbol}}({{stock.name}}) is {{stock.price | usd}}</h2>
             <br>
             <div class="mb-3">
                 <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
             </div>
+            <div class="mb-3">
+                <select name="type" id="assetTypeSelect" onchange="validateSelection_1()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <input type="hidden" name="symbol" value="{{stock.symbol}}">
-            <button class="btn btn-primary" type="submit">Buy</button>
+            <button class="btn btn-primary" id="submitButton_1" type="submit" disabled>Buy</button>
         </form>
     </div>
     <br>
@@ -65,6 +73,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
     <script>
+        function validateSelection_1() {
+        var assetTypeSelect = document.getElementById('assetTypeSelect');
+        var submitButton = document.getElementById('submitButton_1');
+        if (assetTypeSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
        // Get today's date
         const today = new Date();
 
