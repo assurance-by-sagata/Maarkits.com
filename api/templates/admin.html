@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid text-center rounded p-4 shado opacity-75">
+    <div><h1 class="text-light">Welcome, Dojo Admin!</h1></div>
+    <!-- <div><h3 class="text-light">NLP Based Search- Ask your finance questions now!</h3></div> -->
+    <br>
+    <div class="d-flex justify-content-xl-center container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
+        <form action="/adminlearn" method="post">
+            <div>
+                <button class="btn btn-primary" type="submit">Create course</button>
+            </div>
+        </form>
+        <br>
+    </div>
+    </div>
+{% endblock %}
