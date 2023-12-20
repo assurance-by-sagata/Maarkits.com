@@ -76,9 +76,16 @@
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
             </div>
-            <br>
+            <div class="mb-3">
+                <select name="type" id="assetTypeSelect_2" onchange="validateSelection_2()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div>
-                <button class="btn btn-primary" type="submit">Get more info about this asset</button>
+                <button class="btn btn-primary" type="submit" id="submitButton_2" disabled>Get more info about this asset</button>
             </div>
         </form>
         <br>
@@ -167,6 +174,16 @@
     function validateSelection_1() {
         var assetTypeSelect = document.getElementById('assetTypeSelect');
         var submitButton = document.getElementById('submitButton_1');
+        if (assetTypeSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
+    function validateSelection_2() {
+        var assetTypeSelect = document.getElementById('assetTypeSelect_2');
+        var submitButton = document.getElementById('submitButton_2');
         if (assetTypeSelect.value != "") {
             submitButton.disabled = false;
         } else {
