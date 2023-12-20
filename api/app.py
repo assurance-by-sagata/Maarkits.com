@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 import pytz
-from helpers import apology, login_required, lookup, usd, answer, total_computation
+from helpers import apology, login_required, lookup, usd, answer, total_computation, admin_required
 from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
 
@@ -325,6 +325,12 @@ def quote():
         return apology("Invalid Symbol", 400)
     types = ["Stock (Equity)", "Forex", "Index", "ETF"]
     return render_template("quoted.html", stock=stock, types=types, type=type)
+
+@app.route("/admin", methods=["GET", "POST"])
+@admin_required
+def admin():
+    if request.method == "GET":
+        return render_template("admin.html")
 
 
 @app.route("/register", methods=["GET", "POST"])

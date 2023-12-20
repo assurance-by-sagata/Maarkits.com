@@ -79,6 +79,24 @@ def login_required(f):
 
     return decorated_function
 
+
+def admin_required(f):
+    """
+    Decorate admin routes to require admin to be logged in.
+
+    http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
+    """
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/")
+        elif session.get("user_id") != 18:
+            return redirect("/")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 def total_computation(username):
     db.execute(
         "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", (username, )
