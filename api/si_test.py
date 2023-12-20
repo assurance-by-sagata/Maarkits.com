@@ -12,9 +12,12 @@ db = con.cursor(cursor_factory=RealDictCursor)
 
 
 def test_lookup():
-    assert(lookup("TSLA")["symbol"] == "TSLA")
-    assert(lookup("TSLA")["name"] == "Tesla, Inc.")
-    assert(lookup("GOOG")["name"] == "Alphabet Inc.")
+    assert(lookup("TSLA", "Stock (Equity)")["symbol"] == "TSLA")
+    assert(lookup("TSLA", "Stock (Equity)")["name"] == "Tesla, Inc.")
+    assert(lookup("GOOG", "Stock (Equity)")["name"] == "Alphabet Inc.")
+    assert(lookup("AAPL", "CFD")["name"] == "AAPL")
+    assert(lookup("XAUUSD", "CFD")["name"] == "Gold")
+    assert(lookup("ETHUSD", "Cryptocurrency")["name"] == "Ethereum USD")
     
 def test_apology():
     assert(apology_test("Sorry") == ("Sorry", 400))
