@@ -12,16 +12,9 @@
             <div class="mb-3">
                 <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
             </div>
-            <div class="mb-3">
-                <select name="type" id="assetTypeSelect" onchange="validateSelection_1()">
-                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
-                    {% for type in types %}
-                        <option value="{{type}}">{{type}}</option>
-                    {% endfor %}
-                </select>
-            </div>
             <input type="hidden" name="symbol" value="{{stock.symbol}}">
-            <button class="btn btn-primary" id="submitButton_1" type="submit" disabled>Buy</button>
+            <input type="hidden" name="type" value="{{type}}">
+            <button class="btn btn-primary" id="submitButton_1" type="submit">Buy</button>
         </form>
     </div>
     <br>
@@ -32,8 +25,8 @@
                     <h6 class="mb-0">{{stock.name}} Historical Performance</h6>
                     <div>
                         <select id="time" class="form-select" aria-label="Default select example">
-                            <option value="month" selected>Past Month</option>
-                            <option value="year">Past Year</option>
+                            <option value="month">Past Month</option>
+                            <option value="year" selected>Past Year</option>
                         </select>
                     </div>
                 </div>
@@ -50,7 +43,11 @@
         <div class="col-sm-12 col-xl-4">
             <div class="bg-light text-center text-light rounded p-4 shadow opacity-75">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">{{stock.name}} Market Feed</h6>
+                    {% if type == "Forex" %}
+                        <h6 class="mb-0">Forex Market Feed</h6>
+                    {% else %}
+                        <h6 class="mb-0">{{stock.name}} Market Feed</h6>
+                    {% endif %}
                     <div>
                         <select class="form-select" aria-label="Default select example">
                             <option selected>Latest</option>
@@ -93,7 +90,7 @@
         let startDate = new Date(today);
         let choice = document.querySelector("#time");
         let symbol = "{{stock.symbol}}"
-        startDate.setMonth(startDate.getMonth() - 1);
+        startDate.setFullYear(startDate.getFullYear() - 1);
         const tempStartData = startDate.toISOString().split('T')[0];
         const tempEndData = endDate.toISOString().split('T')[0];
         console.log(tempStartData, tempEndData)
@@ -393,6 +390,47 @@
             renderWilliams(wiliamsData)
         }
         function updateNews() {
+            const type = "{{type}}"
+            console.log(type)
+            if (type === "Forex") {
+                fetch(`https://financialmodelingprep.com/api/v4/forex_news?page=0&apikey=6fbceaefb411ee907e9062098ef0fd66`)
+            .then(response => response.json())
+            .then(result => {
+            const news1 = document.querySelector("#news1")
+            const news1Image = document.querySelector("#news1_img")
+            const news2 = document.querySelector("#news2")
+            const news2Image = document.querySelector("#news2_img")
+            const news3 = document.querySelector("#news3")
+            const news3Image = document.querySelector("#news3_img")
+            const news4 = document.querySelector("#news4")
+            const news4Image = document.querySelector("#news4_img")
+            news1.innerHTML = result[0]["title"] + "<div>Date: " + result[0]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[0]["url"] + ">" + result[0]["url"] + "</a></div>"
+            news1Image.src = result[0]["image"]
+            news1.classList.add('slide-in');
+            news1.classList.add('news');
+            news1Image.classList.add('slide-in');
+            news1Image.classList.add('news');
+            news2.innerHTML = result[1]["title"] + "<div>Date: " + result[1]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[1]["url"] + ">" + result[1]["url"] + "</a></div>"
+            news2Image.src = result[1]["image"]
+            news2.classList.add('slide-in');
+            news2.classList.add('news');
+            news2Image.classList.add('slide-in');
+            news2Image.classList.add('news');
+            news3.innerHTML = result[2]["title"] + "<div>Date: " + result[2]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[2]["url"] + ">" + result[2]["url"] + "</a></div>"
+            news3Image.src = result[2]["image"]
+            news3.classList.add('slide-in');
+            news3.classList.add('news');
+            news3Image.classList.add('slide-in');
+            news3Image.classList.add('news');
+            news4.innerHTML = result[3]["title"] + "<div>Date: " + result[3]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[3]["url"] + ">" + result[3]["url"] + "</a></div>"
+            news4Image.src = result[3]["image"]
+            news4.classList.add('slide-in');
+            news4.classList.add('news');
+            news4Image.classList.add('slide-in');
+            news4Image.classList.add('news');
+        })
+            .catch(err => document.querySelector("#news1").innerHTML = "<div>Cannot find news feed specific to this asset at the moment</div>")
+            } else{
             fetch(`https://stocknewsapi.com/api/v1?tickers=${symbol}&items=4&page=1&token=qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n`)
             .then(response => response.json())
             .then(result => {
@@ -429,8 +467,8 @@
             news4Image.classList.add('slide-in');
             news4Image.classList.add('news');
         })
-            .catch(err => console.log(err))
-        };
+            .catch(err => document.querySelector("#news1").innerHTML = "<div>Cannot find news feed specific to this asset at the moment</div>")
+        }};
 
         document.addEventListener("DOMContentLoaded", () => {
 

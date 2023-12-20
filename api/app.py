@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 import pytz
-from helpers import apology, login_required, lookup, usd, answer, total_computation
+from helpers import apology, login_required, lookup, usd, answer, total_computation, admin_required
 from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
 
@@ -57,7 +57,7 @@ def index():
     for stock in portfolio:
         db.execute(
             "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
-            (lookup(stock["stock_symbol"])["price"],
+            (lookup(stock["stock_symbol"], stock["type"])["price"],
             session["user_id"],
             stock["stock_symbol"])
         )
@@ -80,7 +80,7 @@ def index():
     username = username[0]["username"]
     pl = round(total - 10000, 2)
     percent_pl = round((pl / 10000) * 100, 2)
-    types = ["Stock (Equity)", "Forex", "Index", "ETF"]
+    types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD"]
     
     
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
@@ -98,7 +98,7 @@ def learn():
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
     for elem in symbols:
-        assets.append(lookup(elem))
+        assets.append(lookup(elem), "Stock (Equity)")
     return render_template("learn.html", username=username, assets=assets)
 
 
@@ -111,8 +111,8 @@ def buy():
         return render_template("buy.html")
     symbol = request.form.get("symbol").upper()
     num_shares = request.form.get("shares")
-    stock = lookup(symbol)
     type = request.form.get("type")
+    stock = lookup(symbol, type)
     if not stock:
         return apology("Invalid Symbol", 400)
     if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
@@ -319,11 +319,18 @@ def quote():
     if request.method == "GET":
         return render_template("quote.html")
     symbol = request.form.get("symbol")
-    stock = lookup(symbol)
+    type = request.form.get("type")
+    stock = lookup(symbol, type)
     if not stock:
         return apology("Invalid Symbol", 400)
     types = ["Stock (Equity)", "Forex", "Index", "ETF"]
-    return render_template("quoted.html", stock=stock, types=types)
+    return render_template("quoted.html", stock=stock, types=types, type=type)
+
+@app.route("/admin", methods=["GET", "POST"])
+@admin_required
+def admin():
+    if request.method == "GET":
+        return render_template("admin.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -411,7 +418,7 @@ def sell():
     # Keep track of sells
     time = time.strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
-    price = lookup(symbol)["price"]
+    price = lookup(symbol, type)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
         db.execute(
             "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",

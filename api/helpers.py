@@ -79,6 +79,24 @@ def login_required(f):
 
     return decorated_function
 
+
+def admin_required(f):
+    """
+    Decorate admin routes to require admin to be logged in.
+
+    http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
+    """
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/")
+        elif session.get("user_id") != 18:
+            return redirect("/")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 def total_computation(username):
     db.execute(
         "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", (username, )
@@ -103,7 +121,7 @@ def leaderboard():
 
 def buy_test(symbol, user_id, num_shares, type, time):
     """Buy shares of stock"""
-    stock = lookup(symbol)
+    stock = lookup(symbol, type)
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
         return 400
@@ -232,7 +250,7 @@ def sell_test(symbol, user_id, num_shares, type, time):
             return 3
     # Keep track of sells
     # Update current portfolio
-    price = lookup(symbol)["price"]
+    price = lookup(symbol, type)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
         db.execute(
             "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
@@ -282,7 +300,7 @@ def sell_test(symbol, user_id, num_shares, type, time):
         con.commit()
         return 200
 
-def lookup(symbol):
+def lookup(symbol, type):
     """Look up quote for symbol."""
 
     # Prepare API request
@@ -291,13 +309,23 @@ def lookup(symbol):
     start = end - datetime.timedelta(days=7)
 
     # Financial Modeling Prep API
-    url = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    if (type == "CFD"):
+        url = f"https://marketdata.tradermade.com/api/v1/live?api_key=XZas9_pK9fByyYTKXbUa&currency={symbol}"
+    else:
+        url = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66"
     # url = (
     #     f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
     #     f"%speriod1={int(start.timestamp())}"
     #     f"&period2={int(end.timestamp())}"
     #     f"&interval=1d&events=history&includeAdjustedClose=true"
     # )
+    
+    metal_dict = {
+        "XAUUSD": "Gold",
+        "XAGUSD": "Silver",
+        "XPTUSD": "Platinum",
+        "XPDUSD": "Palladium"
+    }
 
     # Query API
     try:
@@ -305,11 +333,19 @@ def lookup(symbol):
         cookies={"session": str(uuid.uuid4())},
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
-    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
+    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume   
         quotes = response.json()
+        if type == "CFD":
+            quotes = quotes["quotes"][0]
+            price = round(float(quotes["mid"]), 2)
+            if quotes.get("instrument"):
+                return {"name": quotes["instrument"], "price": price, "symbol": quotes["instrument"], "exchange": "CFD"}
+            else:
+                return {"name": metal_dict[symbol], "price": price, "symbol": symbol, "exchange": "CFD"}
         # quotes.reverse()
-        price = round(float(quotes[0]["price"]), 2)
-        return {"name": quotes[0]["name"], "price": price, "symbol": symbol, "exchange": quotes[0]["exchange"]}
+        else:
+            price = round(float(quotes[0]["price"]), 2)
+            return {"name": quotes[0]["name"], "price": price, "symbol": quotes[0]["symbol"], "exchange": quotes[0]["exchange"]}
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
 
