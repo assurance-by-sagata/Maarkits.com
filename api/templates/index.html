@@ -5,6 +5,55 @@
 {% endblock %}
 
 {% block main %}
+<style>
+.banner {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f2f2f2; /* Background color */
+    padding: 10px;
+    border-bottom: 2px solid #ddd; /* Border style */
+}
+
+.banner-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: right;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: black;
+}
+
+.value {
+   
+}
+</style>
+<div class="banner">
+    <div class="banner-item">
+        <span class="label">Starting amount:</span>
+        <span class="value">$10,000.00</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Available Funds:</span>
+        <span class="value">{{cash}}</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Total Portfolio Value:</span>
+        <span id="portval" class="value">{{total}}</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Total P&L:</span>
+        <span id="tot_pl"class="value">${{pl}}</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Percentage P&L:</span>
+        <span id="perc_pl" class="value">{{percent_pl}}%</span>
+    </div>
+</div>
+
 <div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
 <table class="table table-dark table-hover">
     <thead>
@@ -30,29 +79,8 @@
         {% endfor %}
 
 </tbody>
-    <tfoot>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="5">Starting amount</td>
-            <td class="border-0 text-end">$10,000.00</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="5">Total Portfolio Value</td>
-            <td class="border-0 w-bold text-end">{{total}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="5">Available Funds</td>
-            <td class="border-0 text-end">{{cash}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="5">Total P&L</td>
-            <td class="border-0 text-end">{{pl}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="5">Percentage P&L</td>
-            <td class="border-0 text-end">{{percent_pl}}%</td>
-        </tr>
-    </tfoot>
 </table>
+<br><br>
     <div class="d-flex justify-content-xl-between container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
         <form action="/buy" method="post">
             <div class="mb-3">
@@ -159,6 +187,20 @@
 </div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
 <script>
+    let total = "{{total}}"
+    total = parseInt(total.replace(",", "").replace("$", ""))
+    let portval = document.getElementById("portval")
+    let tot_pl = document.getElementById("tot_pl")
+    let perc_pl = document.getElementById("perc_pl")
+    if (total >= 10000) {
+        portval.style.color = "green";
+        tot_pl.style.color = "green";
+        perc_pl.style.color = "green";
+    } else {
+        portval.style.color = "red";
+        tot_pl.style.color = "red";
+        perc_pl.style.color = "red";
+    }
     function validateSelection() {
         var symbolSelect = document.getElementById('symbolSelect');
         var assetSelect = document.getElementById('assetTypeSelect_1');

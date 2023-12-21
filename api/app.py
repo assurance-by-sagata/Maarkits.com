@@ -56,10 +56,11 @@ def index():
     portfolio = db.fetchall()
     for stock in portfolio:
         db.execute(
-            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
+            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
             (lookup(stock["stock_symbol"], stock["type"])["price"],
             session["user_id"],
-            stock["stock_symbol"])
+            stock["stock_symbol"],
+            stock["type"])
         )
         con.commit()
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
@@ -152,9 +153,10 @@ def buy():
     if (num_shares * price) > user[0]["cash"]:
         return apology("Cannot Afford", 400)
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
         (session["user_id"],
-        symbol)
+        symbol,
+        type)
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
@@ -381,15 +383,16 @@ def sell():
     valid_symbols = db.fetchall()
     if request.method == "GET":
         return render_template("sell.html", symbols=valid_symbols)
+    type = request.form.get("type")
     symbol = request.form.get("symbol").upper()
     num_shares = request.form.get("shares")
     db.execute(
-        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s) AND type = (%s)",
         (symbol,
-        session["user_id"])
+        session["user_id"],
+        type)
     )
     stock = db.fetchall()
-    type = request.form.get("type")
     db.execute("SELECT type FROM portfolios WHERE stock_symbol = (%s)", (symbol,))
     types = db.fetchall()
     type_ans = types[0]["type"]

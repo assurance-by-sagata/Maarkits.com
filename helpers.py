@@ -152,9 +152,10 @@ def buy_test(symbol, user_id, num_shares, type, time):
     if (num_shares * price) > user[0]["cash"]:
         return 400
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
         (user_id,
-        symbol)
+        symbol,
+        type)
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
@@ -221,9 +222,10 @@ def sell_test(symbol, user_id, num_shares, type, time):
     )
     valid_symbols = db.fetchall()
     db.execute(
-        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s) AND type = (%s)",
         (symbol,
-        user_id)
+        user_id,
+        type)
     )
     stock = db.fetchall()
     # Error checking (i.e. missing symbol, too many shares sold etc)
