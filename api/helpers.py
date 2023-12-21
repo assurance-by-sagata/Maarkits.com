@@ -79,6 +79,23 @@ def login_required(f):
 
     return decorated_function
 
+def list_lookup(type):
+    url = "https://financialmodelingprep.com/api/v3/stock/list?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    try:
+        response = requests.get(url,
+        cookies={"session": str(uuid.uuid4())},
+        headers={"User-Agent": "python-requests", "Accept": "*/*"},
+        )
+    # Get available asset list 
+        quotes = response.json()
+        supported = []
+        for quote in quotes:
+            if quote["type"] == type and quote["price"] != None:
+                price = round(float(quote["price"]), 2)
+                supported.append({"name": quote["name"], "symbol": quote["symbol"], "price": price, "exchange": quote["exchangeShortName"]})
+        return supported
+    except (requests.RequestException, ValueError, KeyError, IndexError):
+        return None
 
 def admin_required(f):
     """
