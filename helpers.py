@@ -79,6 +79,23 @@ def login_required(f):
 
     return decorated_function
 
+def list_lookup(type):
+    url = "https://financialmodelingprep.com/api/v3/stock/list?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    try:
+        response = requests.get(url,
+        cookies={"session": str(uuid.uuid4())},
+        headers={"User-Agent": "python-requests", "Accept": "*/*"},
+        )
+    # Get available asset list 
+        quotes = response.json()
+        supported = []
+        for quote in quotes:
+            if quote["type"] == type:
+                price = round(float(quote["price"]), 2)
+                supported.append({"name": quote["name"], "symbol": quote["symbol"], "price": price, "exchange": quote["exchangeShortName"]})
+        return supported
+    except (requests.RequestException, ValueError, KeyError, IndexError):
+        return None
 
 def admin_required(f):
     """
@@ -152,10 +169,9 @@ def buy_test(symbol, user_id, num_shares, type, time):
     if (num_shares * price) > user[0]["cash"]:
         return 400
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
         (user_id,
-        symbol,
-        type)
+        symbol)
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
@@ -222,10 +238,9 @@ def sell_test(symbol, user_id, num_shares, type, time):
     )
     valid_symbols = db.fetchall()
     db.execute(
-        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s) AND type = (%s)",
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
         (symbol,
-        user_id,
-        type)
+        user_id)
     )
     stock = db.fetchall()
     # Error checking (i.e. missing symbol, too many shares sold etc)

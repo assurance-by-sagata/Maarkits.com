@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 import pytz
-from helpers import apology, login_required, lookup, usd, answer, total_computation, admin_required
+from helpers import apology, login_required, lookup, usd, answer, total_computation, admin_required, list_lookup
 from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
 
@@ -85,6 +85,13 @@ def index():
     
     
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
+
+@app.route("/stocks", methods=["GET", "POST"])
+@login_required
+def stocks():
+    if request.method == "GET":
+        stocks = list_lookup("stock")
+        return render_template("stocks.html", stocks=stocks)
 
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
