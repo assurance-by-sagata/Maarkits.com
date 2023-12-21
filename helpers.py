@@ -90,7 +90,7 @@ def list_lookup(type):
         quotes = response.json()
         supported = []
         for quote in quotes:
-            if quote["type"] == type:
+            if quote["type"] == type and quote["price"] != None:
                 price = round(float(quote["price"]), 2)
                 supported.append({"name": quote["name"], "symbol": quote["symbol"], "price": price, "exchange": quote["exchangeShortName"]})
         return supported
