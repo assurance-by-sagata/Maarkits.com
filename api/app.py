@@ -101,6 +101,12 @@ def learn():
         assets.append(lookup(elem), "Stock (Equity)")
     return render_template("learn.html", username=username, assets=assets)
 
+@app.route("/adminlearn", methods=["GET", "POST"])
+@admin_required
+def adminlearn():
+    if request.method == "GET":
+        return render_template("adminlearn.html")
+
 
 
 @app.route("/buy", methods=["GET", "POST"])
