@@ -105,8 +105,6 @@ def learn():
     username = username[0]["username"]
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
-    for elem in symbols:
-        assets.append(lookup(elem), "Stock (Equity)")
     return render_template("learn.html", username=username, assets=assets)
 
 @app.route("/adminlearn", methods=["GET", "POST"])
