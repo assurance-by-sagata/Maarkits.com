@@ -84,22 +84,22 @@
     <h1>Module 1- Introduction to trading</h1>
     <button id="visitModuleBtn">Visit Module 1</button>
 </div>
-<br id="rm_1">
+<br id="rm_1" style="display:none">
 <div id="mod_2" class="module-button-container">
     <h1>Module 2- Introduction to Asset Classes</h1>
     <button id="visitModuleBtn_2">Visit Module 2</button>
 </div>
-<br id="rm_2">
+<br id="rm_2" style="display:none">
 <div id="mod_3" class="module-button-container">
     <h1>Module 3- Fundamental Analysis</h1>
     <button id="visitModuleBtn_3">Visit Module 3</button>
 </div>
-<br id="rm_3">
+<br id="rm_3" style="display:none">
 <div id="mod_4" class="module-button-container">
     <h1>Module 4- Technical Analysis Intro</h1>
     <button id="visitModuleBtn_4">Visit Module 4</button>
 </div>
-<br id="rm_4">
+<br id="rm_4" style="display:none">
 <div id="mod_5" class="module-button-container">
     <h1>Module 5- Risk and Return</h1>
     <button id="visitModuleBtn_5">Visit Module 5</button>
@@ -363,10 +363,10 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_5').parentElement.style.display = '';
-        document.getElementById("rm_1").style.display ='';
-        document.getElementById("rm_2").style.display ='';
-        document.getElementById("rm_3").style.display ='';
-        document.getElementById("rm_4").style.display =''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none'; 
     });
 
     document.getElementById('visitModuleBtn_2').addEventListener('click', function() {
@@ -389,10 +389,10 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
-        document.getElementById("rm_1").style.display ='';
-        document.getElementById("rm_2").style.display ='';
-        document.getElementById("rm_3").style.display ='';
-        document.getElementById("rm_4").style.display ='';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
     });
 
     document.getElementById('visitModuleBtn_3').addEventListener('click', function() {
@@ -415,10 +415,10 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
-        document.getElementById("rm_1").style.display ='';
-        document.getElementById("rm_2").style.display ='';
-        document.getElementById("rm_3").style.display ='';
-        document.getElementById("rm_4").style.display ='';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
     });
 
     document.getElementById('visitModuleBtn_4').addEventListener('click', function() {
@@ -441,10 +441,10 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_5').parentElement.style.display = '';
-        document.getElementById("rm_1").style.display ='';
-        document.getElementById("rm_2").style.display ='';
-        document.getElementById("rm_3").style.display ='';
-        document.getElementById("rm_4").style.display ='';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
     });
 
     document.getElementById('visitModuleBtn_5').addEventListener('click', function() {
@@ -467,10 +467,10 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
         document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
-        document.getElementById("rm_1").style.display ='';
-        document.getElementById("rm_2").style.display ='';
-        document.getElementById("rm_3").style.display ='';
-        document.getElementById("rm_4").style.display ='';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
     });
     const articleContents = {
         "article-1-1": "<h1>Welcome to Module 1! This is Lesson 1 Part 1</h1><ol><li><strong>Capital Appreciation:</strong><ul><li><strong>Investing:</strong> By allocating funds to assets like stocks, real estate, or mutual funds, individuals can benefit from capital appreciation as the value of these assets increases over time.</li><li><strong>Trading:</strong> Traders aim to profit from short-term price movements in financial instruments, seeking capital appreciation through buying and selling at opportune times.</li></ul></li><li><strong>Income Generation:</strong><ul><li><strong>Investing:</strong> Some investments, such as dividend-paying stocks or bonds, can generate regular income in the form of dividends or interest payments.</li><li><strong>Trading:</strong> Traders may also generate income through strategies like day trading or options trading.</li></ul></li><li><strong>Portfolio Diversification:</strong><ul><li><strong>Investing:</strong> Diversifying a portfolio with a mix of assets helps spread risk and reduce exposure to the performance of a single asset class.</li><li><strong>Trading:</strong> Traders may diversify their strategies and positions to manage risk effectively in various market conditions.</li></ul></li><li><strong>Long-Term Wealth Accumulation:</strong><ul><li><strong>Investing:</strong> Long-term investors benefit from the compounding of returns over time, allowing wealth to accumulate as earnings generate additional earnings.</li><li><strong>Trading:</strong> While trading is often associated with shorter time frames, some traders adopt a more strategic, longer-term approach to accumulate wealth.</li></ul></li><li><strong>Hedging Against Inflation:</strong><ul><li><strong>Investing:</strong> Certain investments, like real estate or commodities, can act as a hedge against inflation, preserving and potentially growing wealth as the cost of living increases.</li><li><strong>Trading:</strong> Traders may use strategies to navigate market conditions influenced by inflationary pressures.</li></ul></li><li><strong>Retirement Planning:</strong><ul><li><strong>Investing:</strong> Retirement accounts, such as 401(k)s or IRAs, allow individuals to invest in a tax-advantaged manner, building wealth over their working years to support retirement.</li><li><strong>Trading:</strong> While active trading might be less common in retirement planning, strategically managing investments over time can enhance retirement savings.</li></ul></li><li><strong>Wealth Preservation and Succession:</strong><ul><li><strong>Investing:</strong> Well-chosen investments can preserve wealth for future generations, serving as a legacy for heirs.</li><li><strong>Trading:</strong> Some traders incorporate long-term investment strategies as part of wealth preservation planning.</li></ul></li><li><strong>Financial Independence:</strong><ul><li><strong>Investing:</strong> Consistent and disciplined investing can contribute to financial independence, allowing individuals to achieve their financial goals and maintain a comfortable lifestyle.</li><li><strong>Trading:</strong> Successful trading can also lead to financial independence, although it often requires a high level of skill, knowledge, and discipline.</li></ul></li></ol><p>In summary, both investing and trading can be powerful tools for building wealth, but they come with different time horizons, risk profiles, and strategies. The key is for individuals to align their approach with their financial goals, risk tolerance, and time horizon. It's often beneficial to have a diversified approach that incorporates both investing and trading strategies.<br><br><br><iframe width='420' height='315' src='https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h' title='YouTube video player' allowfullscreen></iframe></p>",
