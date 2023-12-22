@@ -86,6 +86,7 @@ def index():
     
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
+print("Hello new developer")
 # @app.route("/stocks", methods=["GET", "POST"])
 # @login_required
 # def stocks():
@@ -105,8 +106,6 @@ def learn():
     username = username[0]["username"]
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
-    for elem in symbols:
-        assets.append(lookup(elem), "Stock (Equity)")
     return render_template("learn.html", username=username, assets=assets)
 
 @app.route("/adminlearn", methods=["GET", "POST"])
