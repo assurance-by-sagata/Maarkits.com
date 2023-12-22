@@ -114,6 +114,11 @@
                             <li class="nav-item"><a class="nav-link" href="/">My Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link" href="/learn">Learn</a></li>
                             <li class="nav-item"><a class="nav-link" href="/achievements">Achievements and Badges</a></li>
+                            <!-- <li class="nav-item"><a class="nav-link" href="/stocks">Supported Stocks</a></li> -->
+                            {% if session["user_id"] == 18 %}
+                            <li class="nav-item"><a class="nav-link" href="/admin">Admin Dashboard</a></li>
+                            {% endif %}
+                            
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/password-change">Change Password</a></li>
@@ -154,15 +159,15 @@
                 <div class="elementor-element elementor-element-19a444c elementor-widget elementor-widget-heading" data-id="19a444c" data-element_type="widget" data-widget_type="heading.default">
                 <div class="elementor-element elementor-element-f8fa1d2 elementor-widget__width-auto elementor-widget elementor-widget-jkit_heading" data-id="f8fa1d2" data-element_type="widget" data-widget_type="jkit_heading.default">
                 <div class="elementor-widget-container"> -->
-        {% if get_flashed_messages() %}
-            <header>
-                <div class="alert alert-primary mb-0 text-center" role="alert">
-                    {{ get_flashed_messages() | join(" ") }}
-                </div>
-            </header>
-        {% endif %}
         
-        <main class="container-fluid py-5 text-center">
+        <main class="container-fluid text-center">
+            {% if get_flashed_messages() %}
+                <header>
+                    <div class="alert alert-primary mb-0 text-center" role="alert">
+                        {{ get_flashed_messages() | join(" ") }}
+                    </div>
+                </header>
+            {% endif %}
             {% block main %}{% endblock %}
         </main>
 

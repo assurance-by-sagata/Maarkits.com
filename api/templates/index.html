@@ -5,14 +5,64 @@
 {% endblock %}
 
 {% block main %}
+<style>
+.banner {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f2f2f2; /* Background color */
+    padding: 10px;
+    border-bottom: 2px solid #ddd; /* Border style */
+}
+
+.banner-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: right;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: black;
+}
+
+.value {
+   
+}
+</style>
+<div class="banner">
+    <div class="banner-item">
+        <span class="label">Starting amount:</span>
+        <span class="value">$10,000.00</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Available Funds:</span>
+        <span class="value">{{cash}}</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Total Portfolio Value:</span>
+        <span id="portval" class="value">{{total}}</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Total P&L:</span>
+        <span id="tot_pl"class="value">${{pl}}</span>
+    </div>
+    <div class="banner-item">
+        <span class="label">Percentage P&L:</span>
+        <span id="perc_pl" class="value">{{percent_pl}}%</span>
+    </div>
+</div>
+
 <div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
 <table class="table table-dark table-hover">
     <thead>
         <tr>
             <th class="text-start">Symbol</th>
             <th class="text-start">Name</th>
-            <th class="text-end">Shares Owned</th>
-            <th class="text-end">Current Price (per share)</th>
+            <th class="text-start">Asset Type</th>
+            <th class="text-end">Number Owned</th>
+            <th class="text-end">Current Price (per unit)</th>
             <th class="text-end">TOTAL</th>
         </tr>
     </thead>
@@ -21,6 +71,7 @@
             <tr>
                 <td class="text-start">{{stock.stock_symbol}}</td>
                 <td class="text-start">{{stock.stock_name}}</td>
+                <td class="text-start">{{stock.type}}</td>
                 <td class="text-end">{{stock.num_shares}}</td>
                 <td class="text-end">{{stock.price | usd}}</td>
                 <td class="text-end">{{(stock.price * stock.num_shares) | usd}}</td>
@@ -28,69 +79,90 @@
         {% endfor %}
 
 </tbody>
-    <tfoot>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Starting amount</td>
-            <td class="border-0 text-end">$10,000.00</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Total Portfolio Value</td>
-            <td class="border-0 w-bold text-end">{{total}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Available Funds</td>
-            <td class="border-0 text-end">{{cash}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Total P&L</td>
-            <td class="border-0 text-end">{{pl}}</td>
-        </tr>
-        <tr>
-            <td class="border-0 fw-bold text-end" colspan="4">Percentage P&L</td>
-            <td class="border-0 text-end">{{percent_pl}}%</td>
-        </tr>
-    </tfoot>
 </table>
+<br><br>
     <div class="d-flex justify-content-xl-between container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
         <form action="/buy" method="post">
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
             </div>
             <div class="mb-3">
-                <input class="form-control mx-auto w-auto" name="shares" min = "1" placeholder="Number Of Shares" type="number">
+                <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
             </div>
-            <button class="btn btn-primary" type="submit">Buy</button>
+            <div class="mb-3">
+                <select name="type" id="assetTypeSelect" onchange="validateSelection_1()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit" id="submitButton_1" disabled>Buy</button>
         </form>
         <br>
         <form action="/quote" method="post">
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
             </div>
-            <br>
+            <div class="mb-3">
+                <select name="type" id="assetTypeSelect_2" onchange="validateSelection_2()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div>
-                <button class="btn btn-primary" type="submit">Get more info about this stock</button>
+                <button class="btn btn-primary" type="submit" id="submitButton_2" disabled>Get more info about this asset</button>
             </div>
         </form>
         <br>
         <form action="/sell" method="post">
             <div class="mb-3">
-                <select name = symbol placeholder = "Symbol">
+                <select name="symbol" id="symbolSelect" onchange="validateSelection()">
+                    <option selected="true" disabled="disabled">Choose Symbol</option> 
                     {% for stock in portfolio %}
-                        <option value = "{{stock.stock_symbol}}">{{stock.stock_symbol}}</option>
+                        <option value="{{stock.stock_symbol}}">{{stock.stock_symbol}}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="mb-3">
-                <input class="form-control mx-auto w-auto" name="shares" min = "1" placeholder="Number Of Shares" type="number">
+                <select name="type" id="assetTypeSelect_1" onchange="validateSelection()">
+                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    {% for type in types %}
+                        <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <button class="btn btn-primary" type="submit">Sell</button>
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number To Sell" type="number">
+            </div>
+            <button class="btn btn-primary" type="submit" id="submitButton" disabled>Sell</button>
         </form>
     </div>
 </div>
 <br>
-<div class="container-fluid rounded p-4 shad opacity-75">
+<div class="rounded p-4 shad opacity-75">
     <div class="row g-4">
-        <div class="col-sm-12 col-xl-8">
+        <div class="col-sm-12 col-xl-8 container-fluid">
+            <div class="bg-light text-center rounded p-4 shadow h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
+                    <div>
+                        <select id="time" class="form-select" aria-label="Default select example">
+                            <option value="month" selected>Past Month</option>
+                            <option value="year">Past Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                        {% for symbol in assets %}
+                            <div id ="{{symbol}}" class="w-100 d-flex"></div>
+                        {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-4 container-fluid">
             <div class="bg-light text-center text-light rounded p-4 shadow">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h6 class="mb-0">Market Feed</h6>
@@ -110,30 +182,57 @@
                 <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
             </div>
         </div>
-        <div class="col-sm-12 col-xl-4">
-            <div class="bg-light text-center rounded p-4 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
-                    <div>
-                        <select id="time" class="form-select" aria-label="Default select example">
-                            <option value="month" selected>Past Month</option>
-                            <option value="year">Past Year</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="w-100 d-flex justify-content-center">
-                    <div id="container" style="height: 370px; width: 450px;">
-                        {% for symbol in assets %}
-                            <div id ="{{symbol}}" class="w-100 d-flex justify-content-center container"></div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
 <script>
+    let total = "{{total}}"
+    total = parseInt(total.replace(",", "").replace("$", ""))
+    let portval = document.getElementById("portval")
+    let tot_pl = document.getElementById("tot_pl")
+    let perc_pl = document.getElementById("perc_pl")
+    if (total >= 10000) {
+        portval.style.color = "green";
+        tot_pl.style.color = "green";
+        perc_pl.style.color = "green";
+    } else {
+        portval.style.color = "red";
+        tot_pl.style.color = "red";
+        perc_pl.style.color = "red";
+    }
+    function validateSelection() {
+        var symbolSelect = document.getElementById('symbolSelect');
+        var assetSelect = document.getElementById('assetTypeSelect_1');
+        var submitButton = document.getElementById('submitButton');
+        if (symbolSelect.value != "" && assetSelect.value != "Choose Asset Type") {
+            console.log(assetSelect.value)
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
+    function validateSelection_1() {
+        var assetTypeSelect = document.getElementById('assetTypeSelect');
+        var submitButton = document.getElementById('submitButton_1');
+        if (assetTypeSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
+    function validateSelection_2() {
+        var assetTypeSelect = document.getElementById('assetTypeSelect_2');
+        var submitButton = document.getElementById('submitButton_2');
+        if (assetTypeSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+
     url = `https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66`
 
     // Get today's date
@@ -211,7 +310,7 @@
             }
         };
     
-        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout);
+        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout, {responsive: true});
     }
 
     symbols.forEach(symbol => fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err)));
@@ -252,19 +351,19 @@
         const news2Image = document.querySelector("#news2_img")
         const news3 = document.querySelector("#news3")
         const news3Image = document.querySelector("#news3_img")
-        news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a>"
+        news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div>" + "<div>\nLink to article:</div> " + "<div><a style='color:blue; font-size:12px' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a></div>"
         news1Image.src = result.data[0]["image_url"]
         news1.classList.add('slide-in');
         news1.classList.add('news');
         news1Image.classList.add('slide-in');
         news1Image.classList.add('news');
-        news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
+        news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div>" + "\nLink to article: " + "<br><a style='color:blue; font-size:12px' href=" + result.data[1]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
         news2Image.src = result.data[1]["image_url"]
         news2.classList.add('slide-in');
         news2.classList.add('news');
         news2Image.classList.add('slide-in');
         news2Image.classList.add('news');
-        news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<a style='color:blue' href=" + result.data[0]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
+        news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div>" + "\nLink to article: " + "<br><a style='color:blue; font-size:12px' href=" + result.data[2]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
         news3Image.src = result.data[2]["image_url"]
         news3.classList.add('slide-in');
         news3.classList.add('news');

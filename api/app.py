@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 import pytz
-from helpers import apology, login_required, lookup, usd, answer, total_computation
+from helpers import apology, login_required, lookup, usd, answer, total_computation, admin_required, list_lookup
 from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
 
@@ -56,10 +56,11 @@ def index():
     portfolio = db.fetchall()
     for stock in portfolio:
         db.execute(
-            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
-            (lookup(stock["stock_symbol"])["price"],
+            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
+            (lookup(stock["stock_symbol"], stock["type"])["price"],
             session["user_id"],
-            stock["stock_symbol"])
+            stock["stock_symbol"],
+            stock["type"])
         )
         con.commit()
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
@@ -78,11 +79,19 @@ def index():
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
-    pl = round(cash - total, 2)
-    percent_pl = round((pl / cash) * 100, 2)
+    pl = round(total - 10000, 2)
+    percent_pl = round((pl / 10000) * 100, 2)
+    types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD"]
     
     
-    return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl)
+    return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
+
+# @app.route("/stocks", methods=["GET", "POST"])
+# @login_required
+# def stocks():
+#     if request.method == "GET":
+#         stocks = list_lookup("stock")
+#         return render_template("stocks.html", stocks=stocks)
 
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
@@ -97,8 +106,14 @@ def learn():
     symbols = ["TSLA", "AAPL", "GOOG"]
     assets = []
     for elem in symbols:
-        assets.append(lookup(elem))
+        assets.append(lookup(elem), "Stock (Equity)")
     return render_template("learn.html", username=username, assets=assets)
+
+@app.route("/adminlearn", methods=["GET", "POST"])
+@admin_required
+def adminlearn():
+    if request.method == "GET":
+        return render_template("adminlearn.html")
 
 
 
@@ -110,37 +125,59 @@ def buy():
         return render_template("buy.html")
     symbol = request.form.get("symbol").upper()
     num_shares = request.form.get("shares")
-    stock = lookup(symbol)
-    # Error checking (i.e. missing symbol, too many shares bought etc)
+    type = request.form.get("type")
+    stock = lookup(symbol, type)
     if not stock:
         return apology("Invalid Symbol", 400)
+    if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
+        return apology("Asset Type does not match symbol", 400)
     if not num_shares.isdigit():
         return apology("Invalid Shares", 400)
     num_shares = int(num_shares)
-    if num_shares < 0:
+    if num_shares < 1:
         return apology("Invalid Shares", 400)
     price = stock["price"]
+    # Create a datetime object in UTC
+    utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
+
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = utc_dt.astimezone(pytz.timezone('Etc/GMT+5'))
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    time = utc_minus_5_dt
+    # Error checking (i.e. missing symbol, too many shares bought etc)
+    # Can only buy when market is open
+    if type and type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return apology("Cannot trade on a weekend!", 400)
+        if time < open_time or time > close_time:
+            return apology("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes) ", 400)
+    else:
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return apology("You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)", 400)
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     user = db.fetchall()
     if (num_shares * price) > user[0]["cash"]:
         return apology("Cannot Afford", 400)
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
         (session["user_id"],
-        symbol)
+        symbol,
+        type)
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
             (session["user_id"],
             stock["name"],
             stock["symbol"],
             price,
             num_shares,
-            time)
+            time,
+            type)
         )
         con.commit()
         db.execute(
@@ -204,11 +241,12 @@ def history():
         (session["user_id"],)
     )
     user_history = db.fetchall()
-    db.execute("SELECT username FROM users LIMIT 10")
+    db.execute("SELECT username FROM users")
     usernames = db.fetchall()
     for username in usernames:
         username["total"] = total_computation(username["username"])[0]
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
+    usernames = usernames[:10]
     db.execute (
         "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
     )
@@ -296,10 +334,18 @@ def quote():
     if request.method == "GET":
         return render_template("quote.html")
     symbol = request.form.get("symbol")
-    stock = lookup(symbol)
+    type = request.form.get("type")
+    stock = lookup(symbol, type)
     if not stock:
         return apology("Invalid Symbol", 400)
-    return render_template("quoted.html", stock=stock)
+    types = ["Stock (Equity)", "Forex", "Index", "ETF"]
+    return render_template("quoted.html", stock=stock, types=types, type=type)
+
+@app.route("/admin", methods=["GET", "POST"])
+@admin_required
+def admin():
+    if request.method == "GET":
+        return render_template("admin.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -344,15 +390,21 @@ def sell():
     valid_symbols = db.fetchall()
     if request.method == "GET":
         return render_template("sell.html", symbols=valid_symbols)
+    type = request.form.get("type")
     symbol = request.form.get("symbol").upper()
     num_shares = request.form.get("shares")
     db.execute(
-        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s)",
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s) AND type = (%s)",
         (symbol,
-        session["user_id"])
+        session["user_id"],
+        type)
     )
     stock = db.fetchall()
-    # Error checking (i.e. missing symbol, too many shares sold etc)
+    db.execute("SELECT type FROM portfolios WHERE stock_symbol = (%s)", (symbol,))
+    types = db.fetchall()
+    type_ans = types[0]["type"]
+    if type != type_ans:
+        return apology("Asset Type does not match symbol", 400)
     if len(stock) != 1:
         return apology("Invalid Symbol", 400)
     if not num_shares.isdigit():
@@ -362,10 +414,27 @@ def sell():
         return apology("Invalid Shares", 400)
     if stock[0]["num_shares"] + num_shares < 0:
         return apology("Too many shares", 400)
+     # Create a datetime object in UTC
+    utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
+
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = utc_dt.astimezone(pytz.timezone('Etc/GMT+5'))
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    time = utc_minus_5_dt
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return apology("Cannot trade on a weekend!", 400)
+        if time < open_time or time > close_time:
+            return apology("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes) ", 400)
+    else:
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return apology("You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)", 400)
     # Keep track of sells
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
-    price = lookup(symbol)["price"]
+    price = lookup(symbol, type)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
         db.execute(
             "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",

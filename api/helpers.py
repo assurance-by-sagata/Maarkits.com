@@ -58,6 +58,41 @@ def login_required(f):
 
     return decorated_function
 
+def list_lookup(type):
+    url = "https://financialmodelingprep.com/api/v3/stock/list?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    try:
+        response = requests.get(url,
+        cookies={"session": str(uuid.uuid4())},
+        headers={"User-Agent": "python-requests", "Accept": "*/*"},
+        )
+    # Get available asset list 
+        quotes = response.json()
+        supported = []
+        for quote in quotes:
+            if quote["type"] == type and quote["price"] != None:
+                price = round(float(quote["price"]), 2)
+                supported.append({"name": quote["name"], "symbol": quote["symbol"], "price": price, "exchange": quote["exchangeShortName"]})
+        return supported
+    except (requests.RequestException, ValueError, KeyError, IndexError):
+        return None
+
+def admin_required(f):
+    """
+    Decorate admin routes to require admin to be logged in.
+
+    http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
+    """
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/")
+        elif session.get("user_id") != 18:
+            return redirect("/")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 def total_computation(username):
     db.execute(
         "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", (username, )
@@ -80,17 +115,33 @@ def leaderboard():
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return usernames
 
-def buy_test(symbol, user_id, num_shares):
+def buy_test(symbol, user_id, num_shares, type, time):
     """Buy shares of stock"""
-    stock = lookup(symbol)
+    stock = lookup(symbol, type)
     # Error checking (i.e. missing symbol, too many shares bought etc)
     if not stock:
+        return 400
+    if stock["exchange"] and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
         return 400
     if not num_shares.isdigit():
         return 400
     num_shares = int(num_shares)
     if num_shares < 0:
         return 400
+    
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = time
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if time.date().weekday() == 5 or time.date().weekday() == 6:
+            return 1
+        if time.time() < open_time.time() or time.time() > close_time.time():
+            return 2
+    else:
+        if time.date().weekday() == 5 or (time.date().weekday() == 6 and time.hour < 18) or (time.date().weekday == 4 and time.hour > 16):
+            return 3
     price = stock["price"]
     db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     user = db.fetchall()
@@ -103,16 +154,16 @@ def buy_test(symbol, user_id, num_shares):
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought) VALUES(%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
             (user_id,
             stock["name"],
             stock["symbol"],
             price,
             num_shares,
-            time)
+            time,
+            type)
         )
         con.commit()
         db.execute(
@@ -159,7 +210,7 @@ def buy_test(symbol, user_id, num_shares):
         con.commit()
         return 200
         
-def sell_test(symbol, user_id, num_shares):
+def sell_test(symbol, user_id, num_shares, type, time):
     """Sell shares of stock"""
     db.execute(
         "SELECT stock_symbol FROM portfolios WHERE user_id = (%s)", (user_id,)
@@ -181,10 +232,21 @@ def sell_test(symbol, user_id, num_shares):
         return 400
     if stock[0]["num_shares"] + num_shares < 0:
         return 400
+    utc_minus_5_dt = time
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if time.date().weekday() == 5 or time.date().weekday() == 6:
+            return 1
+        if time.time() < open_time.time() or time.time() > close_time.time():
+            return 2
+    else:
+        if time.date().weekday() == 5 or (time.date().weekday() == 6 and time.hour < 18) or (time.date().weekday == 4 and time.hour > 16):
+            return 3
     # Keep track of sells
-    time = datetime.datetime.now(pytz.timezone("UTC")).strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
-    price = lookup(symbol)["price"]
+    price = lookup(symbol, type)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
         db.execute(
             "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
@@ -234,7 +296,7 @@ def sell_test(symbol, user_id, num_shares):
         con.commit()
         return 200
 
-def lookup(symbol):
+def lookup(symbol, type):
     """Look up quote for symbol."""
 
     # Prepare API request
@@ -242,14 +304,24 @@ def lookup(symbol):
     end = datetime.datetime.now(pytz.timezone("US/Eastern"))
     start = end - datetime.timedelta(days=7)
 
-    # Yahoo Finance API
-    url = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    # Financial Modeling Prep API
+    if (type == "CFD"):
+        url = f"https://marketdata.tradermade.com/api/v1/live?api_key=XZas9_pK9fByyYTKXbUa&currency={symbol}"
+    else:
+        url = f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66"
     # url = (
     #     f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
     #     f"%speriod1={int(start.timestamp())}"
     #     f"&period2={int(end.timestamp())}"
     #     f"&interval=1d&events=history&includeAdjustedClose=true"
     # )
+    
+    metal_dict = {
+        "XAUUSD": "Gold",
+        "XAGUSD": "Silver",
+        "XPTUSD": "Platinum",
+        "XPDUSD": "Palladium"
+    }
 
     # Query API
     try:
@@ -257,11 +329,19 @@ def lookup(symbol):
         cookies={"session": str(uuid.uuid4())},
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
-    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
+    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume   
         quotes = response.json()
+        if type == "CFD":
+            quotes = quotes["quotes"][0]
+            price = round(float(quotes["mid"]), 2)
+            if quotes.get("instrument"):
+                return {"name": quotes["instrument"], "price": price, "symbol": quotes["instrument"], "exchange": "CFD"}
+            else:
+                return {"name": metal_dict[symbol], "price": price, "symbol": symbol, "exchange": "CFD"}
         # quotes.reverse()
-        price = round(float(quotes[0]["price"]), 2)
-        return {"name": quotes[0]["name"], "price": price, "symbol": symbol}
+        else:
+            price = round(float(quotes[0]["price"]), 2)
+            return {"name": quotes[0]["name"], "price": price, "symbol": quotes[0]["symbol"], "exchange": quotes[0]["exchange"]}
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
 
