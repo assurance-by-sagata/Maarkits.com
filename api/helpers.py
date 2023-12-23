@@ -373,7 +373,7 @@ def usd(value):
 
 def answer(question):
     """Get answer to user question"""
-    openai.api_key = "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"
+    openai.api_key = "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"
     prompt = question 
     response = openai.completions.create(
         model="text-davinci-003",
