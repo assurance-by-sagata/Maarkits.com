@@ -86,13 +86,12 @@ def index():
     
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
-print("Hello new developer")
-# @app.route("/stocks", methods=["GET", "POST"])
-# @login_required
-# def stocks():
-#     if request.method == "GET":
-#         stocks = list_lookup("stock")
-#         return render_template("stocks.html", stocks=stocks)
+@app.route("/stocks", methods=["GET", "POST"])
+@login_required
+def stocks():
+    if request.method == "GET":
+        stocks = list_lookup("stock")
+        return render_template("stocks.html", stocks=stocks)
 
 @app.route("/learn", methods=["GET", "POST"])
 @login_required

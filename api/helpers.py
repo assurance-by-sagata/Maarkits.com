@@ -58,6 +58,7 @@ def login_required(f):
 
     return decorated_function
 
+
 def list_lookup(type):
     url = "https://financialmodelingprep.com/api/v3/stock/list?apikey=6fbceaefb411ee907e9062098ef0fd66"
     try:
@@ -65,6 +66,7 @@ def list_lookup(type):
         cookies={"session": str(uuid.uuid4())},
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
+
     # Get available asset list 
         quotes = response.json()
         supported = []
