@@ -67,7 +67,7 @@ def list_lookup(type):
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
 
-    # Get available asset list 
+    # Get available asset list
         quotes = response.json()
         supported = []
         for quote in quotes:
@@ -75,6 +75,22 @@ def list_lookup(type):
                 price = round(float(quote["price"]), 2)
                 supported.append({"name": quote["name"], "symbol": quote["symbol"], "price": price, "exchange": quote["exchangeShortName"]})
         return supported
+    except (requests.RequestException, ValueError, KeyError, IndexError):
+        return None
+def commodity_list():
+    url = "https://financialmodelingprep.com/api/v3/quotes/commodity?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    try:
+        response = requests.get(url,
+        cookies={"session": str(uuid.uuid4())},
+        headers={"User-Agent": "python-requests", "Accept": "*/*"},
+        )
+    # Get available asset list
+        commodities = response.json()
+        res = []
+        for commoditiy in commodities:
+            price = round(float(commoditiy["price"]), 2)
+            res.append({"name": commoditiy["name"], "symbol": commoditiy["symbol"], "price": price, "exchange": commoditiy["exchange"]})
+        return res
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
 
@@ -130,7 +146,7 @@ def buy_test(symbol, user_id, num_shares, type, time):
     num_shares = int(num_shares)
     if num_shares < 0:
         return 400
-    
+
     # Convert the datetime object to UTC-5 timezone
     utc_minus_5_dt = time
     open_time = utc_minus_5_dt.replace(hour=8, minute=30)
@@ -211,7 +227,7 @@ def buy_test(symbol, user_id, num_shares, type, time):
         )
         con.commit()
         return 200
-        
+
 def sell_test(symbol, user_id, num_shares, type, time):
     """Sell shares of stock"""
     db.execute(
@@ -317,7 +333,7 @@ def lookup(symbol, type):
     #     f"&period2={int(end.timestamp())}"
     #     f"&interval=1d&events=history&includeAdjustedClose=true"
     # )
-    
+
     metal_dict = {
         "XAUUSD": "Gold",
         "XAGUSD": "Silver",
@@ -331,7 +347,7 @@ def lookup(symbol, type):
         cookies={"session": str(uuid.uuid4())},
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
-    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume   
+    # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
         quotes = response.json()
         if type == "CFD":
             quotes = quotes["quotes"][0]
@@ -355,7 +371,7 @@ def usd(value):
 def answer(question):
     """Get answer to user question"""
     openai.api_key = "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"
-    prompt = question 
+    prompt = question
     response = openai.completions.create(
         model="text-davinci-003",
         prompt=prompt,
