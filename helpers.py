@@ -43,7 +43,6 @@ def apology_test(message, code=400):
     """Render message as an apology to user."""
     return (message, code)
 
-
 def login_required(f):
     """
     Decorate routes to require login.
@@ -59,13 +58,15 @@ def login_required(f):
 
     return decorated_function
 
+
 def list_lookup(type):
-    url = "https://financialmodelingprep.com/api/v3/x/list?apikey=6fbceaefb411ee907e9062098ef0fd66"
+    url = "https://financialmodelingprep.com/api/v3/stock/list?apikey=6fbceaefb411ee907e9062098ef0fd66"
     try:
         response = requests.get(url,
         cookies={"session": str(uuid.uuid4())},
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
         )
+
     # Get available asset list
         quotes = response.json()
         supported = []
@@ -76,8 +77,6 @@ def list_lookup(type):
         return supported
     except (requests.RequestException, ValueError, KeyError, IndexError):
         return None
-
-
 def commodity_list():
     url = "https://financialmodelingprep.com/api/v3/quotes/commodity?apikey=6fbceaefb411ee907e9062098ef0fd66"
     try:
