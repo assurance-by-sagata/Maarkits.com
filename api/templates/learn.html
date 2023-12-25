@@ -79,6 +79,9 @@
         width: 100%;
         text-align: center;
         padding: 20px 0;
+        display: flex; /* Use flexbox */
+        flex-direction: column; /* Stack children vertically */
+        align-items: center; /* Center align children horizontally */
     }
     
     #visitModuleBtn {
@@ -86,36 +89,61 @@
         font-size: 20px;
         cursor: pointer;
     }
+
+    .progress-bar {
+        width: 0%;
+        height: 20px;
+        background-color: green;
+        text-align: center;
+        line-height: 20px;
+        color: white;
+        transition: width 2s ease;
+    }
+    
+    
     
 </style>
+<div><div id="totalProgress" class="progress-bar"></div></div>
 <div id="mod_1" class="module-button-container">
     <h1>Module 1- Introduction to trading</h1>
     <button id="visitModuleBtn">Visit Module 1</button>
+    <br><br>
+    <div id="container" style="width: 100px; height: 100px;"></div>     
 </div>
 <br id="rm_1" style="display:none">
 <div id="mod_2" class="module-button-container">
     <h1>Module 2- Introduction to Asset Classes</h1>
     <button id="visitModuleBtn_2">Visit Module 2</button>
+    <br><br>
+    <div id="container_2" style="width: 100px; height: 100px;"></div>  
 </div>
 <br id="rm_2" style="display:none">
 <div id="mod_3" class="module-button-container">
     <h1>Module 3- Fundamental Analysis</h1>
     <button id="visitModuleBtn_3">Visit Module 3</button>
+    <br><br>
+    <div id="container_3" style="width: 100px; height: 100px;"></div>    
 </div>
 <br id="rm_3" style="display:none">
 <div id="mod_4" class="module-button-container">
     <h1>Module 4- Technical Analysis Intro</h1>
     <button id="visitModuleBtn_4">Visit Module 4</button>
+    <br><br>
+    <div id="container_4" style="width: 100px; height: 100px;"></div>   
 </div>
 <br id="rm_4" style="display:none">
 <div id="mod_5" class="module-button-container">
     <h1>Module 5- Risk and Return</h1>
     <button id="visitModuleBtn_5">Visit Module 5</button>
+    <br><br>
+    <div id="container_5" style="width: 100px; height: 100px;"></div>    
 </div>
 <br id="rm_5" style="display:none">
 <div id="mod_6" class="module-button-container">
     <h1>Module 6- Derivatives</h1>
     <button id="visitModuleBtn_6">Visit Module 6</button>
+    <br><br>
+    <div id="container_6" style="width: 100px; height: 100px;"></div>    
 </div>
 <div id="module_1" class="flex-container" style="display:none">
     <div class="sidebar">
@@ -353,7 +381,151 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         </article>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/1.1.0/progressbar.min.js"></script>
 <script>
+    // Functions for progress tracking animation
+    // Progress tracking for total progress front-end
+    function animateProgress(element, targetProgress) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < targetProgress) {
+                progress++;
+                element.style.width = progress + '%';
+                element.textContent = progress + '%';
+            } else {
+                clearInterval(interval);
+            }
+        }, 10);
+    }
+    
+    function animateCircularChart(chartId, targetProgress) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < targetProgress) {
+                progress++;
+                updateCircularChart(chartId, progress);
+            } else {
+                clearInterval(interval);
+            }
+        }, 10);
+    }
+    
+    
+    //console.log(prog)
+    // Progress tracking per module 
+    
+    animateProgress(document.getElementById('totalProgress'), 5);
+    var bar = new ProgressBar.Circle('#container', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_2 = new ProgressBar.Circle('#container_2', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_3 = new ProgressBar.Circle('#container_3', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_4 = new ProgressBar.Circle('#container_4', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_5 = new ProgressBar.Circle('#container_5', {
+        strokeWidth: 6,
+        color: "green", // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_6 = new ProgressBar.Circle('#container_6', {
+        strokeWidth: 6,
+        color: "green", // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+    
+    // Update the progress bar
+    bar.animate(0.5);
+    bar_2.animate(0.1);
+    bar_3.animate(0.3);
+    bar_4.animate(0.6);
+    bar_5.animate(0.2);
+    bar_6.animate(0.4);
+    
+    
     document.getElementById('visitModuleBtn').addEventListener('click', function() {
         document.querySelector('#module_1').style.display = 'flex'; // Show the flex-container
         this.parentElement.style.display = 'none'; // Hide the module button container
@@ -367,6 +539,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 50);
     });
 
     document.getElementById('goBack').addEventListener('click', function() {
@@ -382,6 +555,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none'; 
         document.getElementById("rm_5").style.display ='none'; 
+        animateProgress(document.getElementById('totalProgress'), 5);
     });
 
     document.getElementById('visitModuleBtn_2').addEventListener('click', function() {
@@ -397,6 +571,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 10);
     });
 
     document.getElementById('goBack_2').addEventListener('click', function() {
@@ -412,6 +587,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 5);
     });
 
     document.getElementById('visitModuleBtn_3').addEventListener('click', function() {
@@ -427,6 +603,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 30);
     });
 
     document.getElementById('goBack_3').addEventListener('click', function() {
@@ -442,6 +619,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 5);
     });
 
     document.getElementById('visitModuleBtn_4').addEventListener('click', function() {
@@ -457,6 +635,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 60);
     });
 
     document.getElementById('goBack_4').addEventListener('click', function() {
@@ -472,6 +651,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 5);
     });
 
     document.getElementById('visitModuleBtn_5').addEventListener('click', function() {
@@ -487,6 +667,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 20);
     });
 
     document.getElementById('goBack_5').addEventListener('click', function() {
@@ -502,6 +683,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 5);
     });
 
     document.getElementById('visitModuleBtn_6').addEventListener('click', function() {
@@ -517,6 +699,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 40);
     });
 
     document.getElementById('goBack_6').addEventListener('click', function() {
@@ -532,6 +715,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
         document.getElementById("rm_3").style.display ='none';
         document.getElementById("rm_4").style.display ='none';
         document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), 5);
     });
     const articleContents = {
         "article-1-1": "<h1>Welcome to Module 1! This is Lesson 1 Part 1</h1><ol><li><strong>Capital Appreciation:</strong><ul><li><strong>Investing:</strong> By allocating funds to assets like stocks, real estate, or mutual funds, individuals can benefit from capital appreciation as the value of these assets increases over time.</li><li><strong>Trading:</strong> Traders aim to profit from short-term price movements in financial instruments, seeking capital appreciation through buying and selling at opportune times.</li></ul></li><li><strong>Income Generation:</strong><ul><li><strong>Investing:</strong> Some investments, such as dividend-paying stocks or bonds, can generate regular income in the form of dividends or interest payments.</li><li><strong>Trading:</strong> Traders may also generate income through strategies like day trading or options trading.</li></ul></li><li><strong>Portfolio Diversification:</strong><ul><li><strong>Investing:</strong> Diversifying a portfolio with a mix of assets helps spread risk and reduce exposure to the performance of a single asset class.</li><li><strong>Trading:</strong> Traders may diversify their strategies and positions to manage risk effectively in various market conditions.</li></ul></li><li><strong>Long-Term Wealth Accumulation:</strong><ul><li><strong>Investing:</strong> Long-term investors benefit from the compounding of returns over time, allowing wealth to accumulate as earnings generate additional earnings.</li><li><strong>Trading:</strong> While trading is often associated with shorter time frames, some traders adopt a more strategic, longer-term approach to accumulate wealth.</li></ul></li><li><strong>Hedging Against Inflation:</strong><ul><li><strong>Investing:</strong> Certain investments, like real estate or commodities, can act as a hedge against inflation, preserving and potentially growing wealth as the cost of living increases.</li><li><strong>Trading:</strong> Traders may use strategies to navigate market conditions influenced by inflationary pressures.</li></ul></li><li><strong>Retirement Planning:</strong><ul><li><strong>Investing:</strong> Retirement accounts, such as 401(k)s or IRAs, allow individuals to invest in a tax-advantaged manner, building wealth over their working years to support retirement.</li><li><strong>Trading:</strong> While active trading might be less common in retirement planning, strategically managing investments over time can enhance retirement savings.</li></ul></li><li><strong>Wealth Preservation and Succession:</strong><ul><li><strong>Investing:</strong> Well-chosen investments can preserve wealth for future generations, serving as a legacy for heirs.</li><li><strong>Trading:</strong> Some traders incorporate long-term investment strategies as part of wealth preservation planning.</li></ul></li><li><strong>Financial Independence:</strong><ul><li><strong>Investing:</strong> Consistent and disciplined investing can contribute to financial independence, allowing individuals to achieve their financial goals and maintain a comfortable lifestyle.</li><li><strong>Trading:</strong> Successful trading can also lead to financial independence, although it often requires a high level of skill, knowledge, and discipline.</li></ul></li></ol><p>In summary, both investing and trading can be powerful tools for building wealth, but they come with different time horizons, risk profiles, and strategies. The key is for individuals to align their approach with their financial goals, risk tolerance, and time horizon. It's often beneficial to have a diversified approach that incorporates both investing and trading strategies.</p><iframe width='420' height='315' src='https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h' title='YouTube video player' allowfullscreen></iframe>",

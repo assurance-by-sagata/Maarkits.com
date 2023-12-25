@@ -108,19 +108,26 @@ def learn():
         session["answer"] = _answer
         session["question"] = question
         return redirect("/")
-        return render_template("answer.html", _answer=_answer)
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
-    symbols = ["TSLA", "AAPL", "GOOG"]
+    db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+    progress = db.fetchall()
+    progress = progress[0]
     assets = []
-    return render_template("learn.html", username=username, assets=assets)
+    return render_template("learn.html", username=username, assets=assets, progress=progress)
 
 @app.route("/adminlearn", methods=["GET", "POST"])
 @admin_required
 def adminlearn():
     if request.method == "GET":
-        return render_template("adminlearn.html")
+        db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+        progress = db.fetchall()
+        progress = progress[0]
+        db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+        username = db.fetchall()
+        username = username[0]["username"]
+        return render_template("adminlearn.html", username=username, progress=progress)
 
 
 
@@ -379,6 +386,8 @@ def register():
         db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
         user = db.fetchall()
         # Log user in  after registration
+        db.execute("INSERT INTO progress (user_id, total_prog, mod_1, mod_2, mod_3, mod_4, mod_5, mod_6) VALUES(%s, 0, 0, 0, 0, 0, 0, 0)", (user[0]["id"],))
+        con.commit()
         session["user_id"] = user[0]["id"]
         flash("Registered!")
         return redirect("/")
