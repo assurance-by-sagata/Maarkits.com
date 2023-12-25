@@ -87,7 +87,6 @@ def index():
 
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
-
 @app.route("/stocks", methods=["GET", "POST"])
 @login_required
 def stocks():
