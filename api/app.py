@@ -84,17 +84,15 @@ def index():
     username = username[0]["username"]
     pl = round(total - 10000, 2)
     percent_pl = round((pl / 10000) * 100, 2)
-    types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD"]
-
-
+    types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
-@app.route("/stocks", methods=["GET", "POST"])
-@login_required
-def stocks():
-    if request.method == "GET":
-        stocks = list_lookup("stock")
-        return render_template("stocks.html", stocks=stocks)
+# @app.route("/stocks", methods=["GET", "POST"])
+# @login_required
+# def stocks():
+#     if request.method == "GET":
+#         stocks = list_lookup("stock")
+#         return render_template("stocks.html", stocks=stocks)
 
 @app.route("/commodity", methods=["GET"])
 @login_required
@@ -109,19 +107,101 @@ def learn():
     if request.method == "POST":
         question = request.form.get("symbol")
         _answer = answer(question)
-        return render_template("answer.html", _answer=_answer)
+        session["answer"] = _answer
+        session["question"] = question
+        return redirect("/")
     db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
     username = db.fetchall()
     username = username[0]["username"]
-    symbols = ["TSLA", "AAPL", "GOOG"]
+    db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+    progress = db.fetchall()
+    progress = progress[0]
     assets = []
-    return render_template("learn.html", username=username, assets=assets)
+    return render_template("learn.html", username=username, assets=assets, progress=progress)
+
+@app.route("/update", methods = ["POST"])
+@login_required
+def update():
+    complete = request.form.get("complete")
+    # Error handling (Can't allow progress to exceed 1)
+    db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+    progress = db.fetchall()
+    progress = progress[0]
+    if progress["total_prog"]== 1:
+        return redirect("/learn")
+    if complete == "1":
+        if progress["mod_1"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_1 = mod_1 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/4,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "2":
+        if progress["mod_2"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_2 = mod_2 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/3,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "3":
+        if progress["mod_3"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_3 = mod_3 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/2,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "4":
+        if progress["mod_4"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_4 = mod_4 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/2,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "5":
+        if progress["mod_5"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_5 = mod_5 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/2,
+                session["user_id"])
+            )
+        con.commit()
+    else:
+        if progress["mod_6"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_6 = mod_6 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/4,
+                session["user_id"])
+            )
+        con.commit()
+    return redirect("/learn")
 
 @app.route("/adminlearn", methods=["GET", "POST"])
 @admin_required
 def adminlearn():
     if request.method == "GET":
-        return render_template("adminlearn.html")
+        db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+        progress = db.fetchall()
+        progress = progress[0]
+        db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+        username = db.fetchall()
+        username = username[0]["username"]
+        return render_template("adminlearn.html", username=username, progress=progress)
 
 
 
@@ -276,6 +356,7 @@ def beginner():
         return render_template("answer_b.html", _answer=_answer)
     return render_template("beginner.html")
 
+
 @app.route("/advanced", methods=["GET", "POST"])
 @login_required
 def advanced():
@@ -346,7 +427,7 @@ def quote():
     stock = lookup(symbol, type)
     if not stock:
         return apology("Invalid Symbol", 400)
-    types = ["Stock (Equity)", "Forex", "Index", "ETF"]
+    types = ["Stock (Equity)", "Forex", "Index", "ETF", "Commodity"]
     return render_template("quoted.html", stock=stock, types=types, type=type)
 
 @app.route("/admin", methods=["GET", "POST"])
@@ -380,6 +461,8 @@ def register():
         db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
         user = db.fetchall()
         # Log user in  after registration
+        db.execute("INSERT INTO progress (user_id, total_prog, mod_1, mod_2, mod_3, mod_4, mod_5, mod_6) VALUES(%s, 0, 0, 0, 0, 0, 0, 0)", (user[0]["id"],))
+        con.commit()
         session["user_id"] = user[0]["id"]
         flash("Registered!")
         return redirect("/")
