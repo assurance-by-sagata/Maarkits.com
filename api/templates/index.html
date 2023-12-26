@@ -28,8 +28,20 @@
 }
 
 .value {
-   
+
 }
+.time-navigation .bg-gray-200 {
+    background-color: #f0f3f6 !important;
+}
+.time-navigation li.nav-item > a {
+    margin-right: 10px;
+    color: black !important;
+}
+.time-navigation li.nav-item  > a.active:focus, .time-navigation li.nav-item  > a.active {
+    background-color: #46bc5c !important;
+    color: #ffffff;
+}
+
 </style>
 <div class="banner">
     <div class="banner-item">
@@ -53,8 +65,80 @@
         <span id="perc_pl" class="value">{{percent_pl}}%</span>
     </div>
 </div>
+<div class="rounded p-4 shad opacity-75">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-8 container-fluid">
+            <div class="bg-light text-center rounded p-4 shadow h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <!-- <h6 class="mb-0">Historical Performance of assets in portfolio</h6> -->
+
+                    <div class="box-controls pull-right time-navigation">
+                        <ul class="nav nav-pills nav-pills-sm" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link py-2 px-4 b-0 bg-gray-200" data-bs-toggle="tab" data-value="Day" href="#">
+                                    <span class="nav-text base-font">Day</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2 px-4 b-0 bg-gray-200 active" data-bs-toggle="tab"  data-value="Week" href="#">
+                                    <span class="nav-text base-font">Week</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2 px-4 b-0 bg-gray-200" data-bs-toggle="tab"  data-value="Month" href="#">
+                                    <span class="nav-text base-font">Month</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2 px-4 b-0 bg-gray-200 " data-bs-toggle="tab" data-value="Year" href="#">
+                                    <span class="nav-text base-font">Year</span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div>
+                        <select name="stock-symbol" id="stock-symbol" >
+
+                            {% for stock in portfolio %}
+                                <option  data-name="{{stock.stock_name}}" value="{{stock.stock_symbol}}">{{stock.stock_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div>
+
+                        <div id ="chart_plot" class="w-100 d-flex"></div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-4 container-fluid">
+            <div class="bg-light text-center text-light rounded p-4 shadow">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">Market Feed</h6>
+                    <div>
+                        <select class="form-select" aria-label="Default select example">
+                            <option selected>Latest</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- <canvas id="worldwide-sales"></canvas> -->
+                <img id="news1_img">
+                <h5 id="news1"></h5>
+                <img id="news2_img">
+                <h5 id="news2"></h5>
+                <img id="news3_img">
+                <h5 id="news3"></h5>
+                <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
+            </div>
+        </div>
+
+    </div>
+</div>
 
 <div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
+    <h1 style="color:white">My Portfolio</h1>
 <table class="table table-dark table-hover">
     <thead>
         <tr>
@@ -84,14 +168,14 @@
     <div class="d-flex justify-content-xl-between container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
         <form action="/buy" method="post">
             <div class="mb-3">
-                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
+                <input autocomplete="off" class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
             </div>
             <div class="mb-3">
                 <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
             </div>
             <div class="mb-3">
                 <select name="type" id="assetTypeSelect" onchange="validateSelection_1()">
-                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    <option selected="true" disabled="disabled">Choose Asset Type</option>
                     {% for type in types %}
                         <option value="{{type}}">{{type}}</option>
                     {% endfor %}
@@ -102,11 +186,11 @@
         <br>
         <form action="/quote" method="post">
             <div class="mb-3">
-                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
+                <input autocomplete="off" class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
             </div>
             <div class="mb-3">
                 <select name="type" id="assetTypeSelect_2" onchange="validateSelection_2()">
-                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    <option selected="true" disabled="disabled">Choose Asset Type</option>
                     {% for type in types %}
                         <option value="{{type}}">{{type}}</option>
                     {% endfor %}
@@ -120,7 +204,7 @@
         <form action="/sell" method="post">
             <div class="mb-3">
                 <select name="symbol" id="symbolSelect" onchange="validateSelection()">
-                    <option selected="true" disabled="disabled">Choose Symbol</option> 
+                    <option selected="true" disabled="disabled">Choose Symbol</option>
                     {% for stock in portfolio %}
                         <option value="{{stock.stock_symbol}}">{{stock.stock_symbol}}</option>
                     {% endfor %}
@@ -128,7 +212,7 @@
             </div>
             <div class="mb-3">
                 <select name="type" id="assetTypeSelect_1" onchange="validateSelection()">
-                    <option selected="true" disabled="disabled">Choose Asset Type</option> 
+                    <option selected="true" disabled="disabled">Choose Asset Type</option>
                     {% for type in types %}
                         <option value="{{type}}">{{type}}</option>
                     {% endfor %}
@@ -148,7 +232,7 @@
         <div class="d-flex justify-content-xl-center container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
             <form action="/learn" method="post">
                 <div class="mb-3">
-                    <input autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" type="hidden" value="">
+                    <input class="form-control mx-auto w-auto" id="symbol" name="symbol" type="hidden" value="">
                 </div>
                 <br>
                 <div>
@@ -165,7 +249,7 @@
         <div class="d-flex justify-content-xl-center container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
             <form action="/learn" method="post">
                 <div class="mb-3">
-                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Question" type="text">
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Question" type="text">
                 </div>
                 <br>
                 <div>
@@ -181,46 +265,6 @@
     </div>
 </div>
 <br>
-<div class="rounded p-4 shad opacity-75">
-    <div class="row g-4">
-        <div class="col-sm-12 col-xl-8 container-fluid">
-            <div class="bg-light text-center rounded p-4 shadow h-100">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Historical Performance of assets in portfolio</h6>
-                    <div>
-                        <select id="time" class="form-select" aria-label="Default select example">
-                            <option value="month" selected>Past Month</option>
-                            <option value="year">Past Year</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                        {% for symbol in assets %}
-                            <div id ="{{symbol}}" class="w-100 d-flex"></div>
-                        {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-12 col-xl-4 container-fluid">
-            <div class="bg-light text-center text-light rounded p-4 shadow">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Market Feed</h6>
-                    <div>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>Latest</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- <canvas id="worldwide-sales"></canvas> -->
-                <img id="news1_img">
-                <h5 id="news1"></h5>
-                <img id="news2_img">
-                <h5 id="news2"></h5>
-                <img id="news3_img">
-                <h5 id="news3"></h5>
-                <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
-            </div>
-        </div>
 
     </div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
@@ -282,9 +326,9 @@
 
     // Get the date one month ago
     let startDate = new Date(today);
-    let choice = document.querySelector("#time");
-    let symbols = {{assets | tojson}};
-    console.log(typeof symbols)
+    let stock_symbol = document.querySelector("#stock-symbol");
+    let navLinks = document.querySelectorAll('.nav-link'); // $('.nav-link')
+
     startDate.setMonth(startDate.getMonth() - 1);
     const tempStartData = startDate.toISOString().split('T')[0];
     const tempEndData = endDate.toISOString().split('T')[0];
@@ -301,18 +345,18 @@
         return data
     }
 
-    async function renderCandlestickChart(data, symbol, start, end) {
+    async function renderCandlestickChart(data, symbol,selected_name, start, end) {
         const trace = {
             x: data.map(item => item.date),
             close: data.map(item => item.close),
             high: data.map(item => item.high),
             low: data.map(item => item.low),
             open: data.map(item => item.open),
-    
+
             // Customization of the candlestick chart
             increasing: { line: { color: 'green' } },
             decreasing: { line: { color: 'red' } },
-            
+
             type: 'candlestick',
             name: `${symbol}`
         };
@@ -335,9 +379,9 @@
             mode: 'lines',
             name: '10-day SMA'
         };
-    
+
         const layout = {
-            title: `${symbol} Perfomance`,
+            title: `${selected_name} Perfomance`,
             xaxis: {
                 type: 'date',
                 title: 'Date'
@@ -347,35 +391,69 @@
                 title: 'Stock Price'
             }
         };
-    
-        Plotly.newPlot(symbol, [trace, movingAverageTrace, vwapDataTrace], layout, {responsive: true});
+
+        Plotly.newPlot('chart_plot', [trace, movingAverageTrace, vwapDataTrace], layout, {responsive: true});
     }
 
-    symbols.forEach(symbol => fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err)));
-    choice.onchange = async () => {
-        if (choice.value === "month") {
-            startDate = new Date(today);
-            startDate.setMonth(startDate.getMonth() - 1);
-            month = true;
-        } else {
-            startDate = new Date(today);
-            startDate.setFullYear(startDate.getFullYear() - 1);
-            month = false;
+    const symbol=stock_symbol.value;
+    const selectedOption = stock_symbol.options[stock_symbol.selectedIndex];
+    const selected_name = selectedOption.getAttribute('data-name');
+
+    fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol, selected_name,tempStartData, tempEndData)}).catch(err => console.log(err));
+    stock_symbol.onchange =  async (el) =>{
+        const symbol=stock_symbol.value;
+        const selectedOption = stock_symbol.options[stock_symbol.selectedIndex];
+        const selected_name = selectedOption.getAttribute('data-name');
+        fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderCandlestickChart(data, symbol,selected_name, tempStartData, tempEndData)}).catch(err => console.log(err));
+    }
+    navLinks.forEach(function(link) {
+        // Add the async function as the click event handler
+        link.addEventListener('click', handleClick);
+    });
+    async function handleClick() {
+        let interval = this.getAttribute('data-value');
+        const currentDate = new Date();
+        let endDate = new Date(currentDate);
+        let startDate;
+        switch (interval) {
+            case 'Day':
+                startDate = new Date(currentDate);
+                break;
+            case 'Week':
+                startDate = new Date(currentDate);
+                startDate.setDate(currentDate.getDate() - currentDate.getDay()); // Start of the week
+                break;
+            case 'Month':
+                startDate = new Date(currentDate);
+                startDate.setMonth(startDate.getMonth() - 1);
+                break;
+            case 'Year':
+                startDate = new Date(currentDate);
+                startDate.setFullYear(startDate.getFullYear() - 1); // Start of the previous year
+                break;
+            case '5years':
+                startDate = new Date(currentDate);
+                startDate.setFullYear(startDate.getFullYear() - 5); // Start of 5 years ago
+                break;
+            default:
+                console.error('Invalid interval specified');
+                return;
         }
+
 
         // Format the dates as YYYY-MM-DD
         const formattedStartDate = startDate.toISOString().split('T')[0];
         const formattedEndDate = endDate.toISOString().split('T')[0];
-        console.log(formattedStartDate,formattedEndDate)
-        symbols.forEach(symbol => fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate).then(data => {renderCandlestickChart(data, symbol, formattedStartDate, formattedEndDate)}).catch(err => console.log(err)));
+        console.log("start date and end date", formattedStartDate,formattedEndDate);
+        fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate).then(data => {renderCandlestickChart(data, symbol,selected_name, formattedStartDate, formattedEndDate)}).catch(err => console.log(err));
     }
     function restartAnimation(element) {
         // Remove the class
         element.classList.remove('slide-in');
-    
+
         // Force a reflow/repaint
         void element.offsetWidth;
-    
+
         // Re-add the class
         element.classList.add('slide-in');
     }
@@ -411,7 +489,7 @@
         .catch(err => console.log(err))
     };
     document.addEventListener("DOMContentLoaded", () => {
-        
+
         updateNews();
         setInterval(updateNews, 300000); // Update every 5 minutes
     });
