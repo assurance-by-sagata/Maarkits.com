@@ -72,6 +72,8 @@ def index():
         (session["user_id"],)
     )
     portfolio = db.fetchall()
+    print(portfolio)
+
     assets = []
     total = cash
     for stock in portfolio:
