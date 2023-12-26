@@ -1,7 +1,7 @@
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -202,6 +202,7 @@ def adminlearn():
         username = db.fetchall()
         username = username[0]["username"]
         return render_template("adminlearn.html", username=username, progress=progress)
+    
 
 
 
@@ -434,8 +435,30 @@ def quote():
 @admin_required
 def admin():
     if request.method == "GET":
-        return render_template("admin.html")
-
+        db.execute("SELECT course_name FROM admin_courses")
+        courses = db.fetchall()
+        names = []
+        for course in courses:
+            names.append(course["course_name"])
+        names = set(names)
+        
+        return render_template("admin.html", courses=names)
+    course_name = request.form['courseName']
+    num_modules = request.form['numModules']
+    course_data = {'courseName': course_name, 'modules': {}, "numModules": num_modules}
+    for key in request.form:
+        if key.startswith('module-'):
+            course_data['modules'][key] = request.form[key]
+    for lesson, num_sub in course_data["modules"].items():
+        db.execute("INSERT INTO admin_courses(course_name, lesson_name, num_sub) VALUES (%s, %s, %s)", (course_name, lesson, int(num_sub)))
+    con.commit()
+    db.execute("SELECT course_name FROM admin_courses")
+    courses = db.fetchall()
+    names = []
+    for course in courses:
+        names.append(course["course_name"])
+    names = set(names)
+    return render_template("admin.html", courses=names)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

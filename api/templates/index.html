@@ -138,6 +138,7 @@
 </div>
 
 <div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
+    <h1 style="color:white">My Portfolio</h1>
 <table class="table table-dark table-hover">
     <thead>
         <tr>
@@ -167,7 +168,7 @@
     <div class="d-flex justify-content-xl-between container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
         <form action="/buy" method="post">
             <div class="mb-3">
-                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
+                <input autocomplete="off" class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
             </div>
             <div class="mb-3">
                 <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
@@ -185,7 +186,7 @@
         <br>
         <form action="/quote" method="post">
             <div class="mb-3">
-                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
+                <input autocomplete="off" class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Symbol" type="text">
             </div>
             <div class="mb-3">
                 <select name="type" id="assetTypeSelect_2" onchange="validateSelection_2()">
@@ -231,7 +232,7 @@
         <div class="d-flex justify-content-xl-center container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
             <form action="/learn" method="post">
                 <div class="mb-3">
-                    <input autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" type="hidden" value="">
+                    <input class="form-control mx-auto w-auto" id="symbol" name="symbol" type="hidden" value="">
                 </div>
                 <br>
                 <div>
@@ -248,7 +249,7 @@
         <div class="d-flex justify-content-xl-center container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
             <form action="/learn" method="post">
                 <div class="mb-3">
-                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Question" type="text">
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="symbol" name="symbol" placeholder="Question" type="text">
                 </div>
                 <br>
                 <div>
@@ -265,12 +266,8 @@
 </div>
 <br>
 
-<<<<<<< HEAD
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-=======
     </div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
->>>>>>> fcfa5f20a02fcad1b43263af526703b8dffb7d23
 <script>
     let total = "{{total}}"
     total = parseInt(total.replace(",", "").replace("$", ""))
