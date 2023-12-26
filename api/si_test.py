@@ -2,13 +2,34 @@ from helpers import lookup, list_lookup, commodity_list
 from helpers import apology_test
 from helpers import total_computation
 from helpers import leaderboard
-from helpers import buy_test, sell_test
+from helpers import buy_test, sell_test, update_test
 from datetime import datetime, timedelta, timezone
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
 db = con.cursor(cursor_factory=RealDictCursor)
+
+def test_update():
+    db.execute("UPDATE progress set total_prog = 0.882352941176471, mod_5 = 0 WHERE user_id = (%s)", (22, ))
+    con.commit()
+    assert(update_test("1", 21) == 1)
+    assert(update_test("1", 22) == 2)
+    assert(update_test("2", 22) == 3)
+    assert(update_test("3", 22) == 4)
+    assert(update_test("4", 22) == 5)
+    assert(update_test("6", 22) == 7)
+    assert(update_test("5", 22) == 200)
+    db.execute("SELECT mod_5 FROM progress WHERE user_id = (%s)", (22, ))
+    mod5p = db.fetchall()
+    mod5p = mod5p[0]["mod_5"]
+    assert(mod5p == 0.5)
+    db.execute("UPDATE progress set total_prog = 0.882352941176471, mod_5 = 0 WHERE user_id = (%s)", (22, ))
+    con.commit()
+    db.execute("SELECT mod_5 FROM progress WHERE user_id = (%s)", (22, ))
+    mod5p = db.fetchall()
+    mod5p = mod5p[0]["mod_5"]
+    assert(mod5p == 0)
 
 
 def test_lookup():

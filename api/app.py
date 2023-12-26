@@ -117,6 +117,78 @@ def learn():
     assets = []
     return render_template("learn.html", username=username, assets=assets, progress=progress)
 
+@app.route("/update", methods = ["POST"])
+@login_required
+def update():
+    complete = request.form.get("complete")
+    # Error handling (Can't allow progress to exceed 1)
+    db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+    progress = db.fetchall()
+    progress = progress[0]
+    if progress["total_prog"]== 1:
+        return redirect("/learn")
+    if complete == "1":
+        if progress["mod_1"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_1 = mod_1 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/4,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "2":
+        if progress["mod_2"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_2 = mod_2 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/3,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "3":
+        if progress["mod_3"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_3 = mod_3 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/2,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "4":
+        if progress["mod_4"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_4 = mod_4 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/2,
+                session["user_id"])
+            )
+        con.commit()
+    elif complete == "5":
+        if progress["mod_5"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_5 = mod_5 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/2,
+                session["user_id"])
+            )
+        con.commit()
+    else:
+        if progress["mod_6"] == 1:
+            return redirect("/learn")
+        db.execute(
+                "UPDATE progress SET total_prog = total_prog + (%s), mod_6 = mod_6 + (%s)  WHERE user_id = (%s)",
+                (1/17,
+                 1/4,
+                session["user_id"])
+            )
+        con.commit()
+    return redirect("/learn")
+
 @app.route("/adminlearn", methods=["GET", "POST"])
 @admin_required
 def adminlearn():
@@ -281,6 +353,7 @@ def beginner():
         _answer = answer(question)
         return render_template("answer_b.html", _answer=_answer)
     return render_template("beginner.html")
+
 
 @app.route("/advanced", methods=["GET", "POST"])
 @login_required
