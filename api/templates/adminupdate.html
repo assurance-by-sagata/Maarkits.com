@@ -484,7 +484,7 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
     
     //console.log(prog)
     // Progress tracking per module 
-    let totprog = {{progress.total_prog}}
+    let totprog = 0.3
     
     animateProgress(document.getElementById('totalProgress'), totprog * 100);
     var bar = new ProgressBar.Circle('#container', {
@@ -590,12 +590,12 @@ src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTu
     });
     
     // Update the progress bar
-    let mod1p = {{progress.mod_1}};
-    let mod2p = {{progress.mod_2}};
-    let mod3p = {{progress.mod_3}};
-    let mod4p = {{progress.mod_4}};
-    let mod5p = {{progress.mod_5}};
-    let mod6p = {{progress.mod_6}};
+    let mod1p = 0.1;
+    let mod2p = 0.1;
+    let mod3p = 0;
+    let mod4p = 0.2;
+    let mod5p = 0.3;
+    let mod6p = 0.2;
     bar.animate(mod1p);
     bar_2.animate(mod2p);
     bar_3.animate(mod3p);

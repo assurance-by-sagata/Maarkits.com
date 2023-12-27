@@ -27,7 +27,7 @@
     </style>
     
 <div class="container-fluid text-center rounded p-4 shado opacity-75">
-    <div><h1 class="text-light">Welcome, Dojo Admin!</h1></div>
+    <div><h1 class="text-light">Welcome, {{username}}!</h1></div>
     <!-- <div><h3 class="text-light">NLP Based Search- Ask your finance questions now!</h3></div> -->
     <br>
     <div id="custom-alert-box" style="display: none;">
@@ -51,7 +51,7 @@
         {% for name in courses %}
             <form action="/adminupdate" method="get" class="mb-3">
                 <div>
-                    <input type=hidden name="course" value={{name}}>
+                    <input type=hidden name="course" value="{{name}}">
                     <button class="btn btn-primary" type="submit">{{name}}</button>
                 </div>
             </form>
@@ -143,20 +143,34 @@
                 const courseName = document.getElementById("course-name").value;
                 const form = createForm('/admin', 'POST');
                 appendHiddenInput(form, 'courseName', courseName);
-        
-                // Append module and lesson counts
-                const moduleInputs = customAlertBox.querySelectorAll("input[type='number']");
-                moduleInputs.forEach(input => {
-                    if (input.id.indexOf("count") === -1) {
-                        appendHiddenInput(form, input.id, input.value);
+            
+                // Get the number of modules
+                let numModules = modulesCount; // Assuming 'modulesCount' is already defined
+                appendHiddenInput(form, 'numModules', numModules);
+            
+                for (let moduleId = 1; moduleId <= numModules; moduleId++) {
+                    const lessonsCountInput = document.getElementById(`module-${moduleId}-count`);
+                    if (lessonsCountInput) {
+                        const lessonsCount = parseInt(lessonsCountInput.value);
+            
+                        for (let lessonNum = 1; lessonNum <= lessonsCount; lessonNum++) {
+                            const subLessonsCountInput = document.getElementById(`module-${moduleId}-lesson-${lessonNum}`);
+                            if (subLessonsCountInput) {
+                                const subLessonsCount = parseInt(subLessonsCountInput.value);
+            
+                                for (let subLessonNum = 1; subLessonNum <= subLessonsCount; subLessonNum++) {
+                                    const subLessonKey = `module-${moduleId}-lesson-${lessonNum}-part-${subLessonNum}`;
+                                    appendHiddenInput(form, subLessonKey, ''); // Empty string for sub-lesson value
+                                }
+                            }
+                        }
                     }
-                });
-
-                appendHiddenInput(form, 'numModules', modulesCount);
-        
+                }
+            
                 document.body.appendChild(form);
                 form.submit();
             }
+            
         
             function createForm(action, method) {
                 let form = document.createElement("form");
