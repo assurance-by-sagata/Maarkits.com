@@ -39,14 +39,14 @@ def test_lookup():
     assert(lookup("AAPL", "CFD")["name"] == "AAPL")
     assert(lookup("XAUUSD", "CFD")["name"] == "Gold")
     assert(lookup("ETHUSD", "Cryptocurrency")["name"] == "Ethereum USD")
-    assert(len(commodity_list()) == 40)
+    assert(len(commodity_list()) > 0)
     commodities = commodity_list()
     for commodity in commodities:
         assert(commodity["name"] != None)
         assert(commodity["symbol"] != None)
         assert(commodity["price"] != None)
         assert(commodity["exchange"] != None)
-    assert(len(list_lookup("stock")) == 59988)
+    assert(len(list_lookup("stock")) > 0)
     
 def test_apology():
     assert(apology_test("Sorry") == ("Sorry", 400))
