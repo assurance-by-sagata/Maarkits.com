@@ -191,6 +191,15 @@ def update():
         con.commit()
     return redirect("/learn")
 
+@app.route("/adminupdate", methods=["GET", "POST"])
+@admin_required
+def adminupdate():
+    if request.method == "GET":
+        course_name = request.args.get("course")
+        db.execute("SELECT * FROM admin_courses_duplicate WHERE course_name = (%s)", (course_name, ))
+        course = db.fetchall()
+        return course
+
 @app.route("/adminlearn", methods=["GET", "POST"])
 @admin_required
 def adminlearn():
@@ -435,30 +444,36 @@ def quote():
 @admin_required
 def admin():
     if request.method == "GET":
-        db.execute("SELECT course_name FROM admin_courses")
+        db.execute("SELECT course_name FROM admin_courses_duplicate")
         courses = db.fetchall()
         names = []
         for course in courses:
             names.append(course["course_name"])
         names = set(names)
+        db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"], ))
+        username = db.fetchall()
+        username = username[0]["username"]
         
-        return render_template("admin.html", courses=names)
+        return render_template("admin.html", courses=names, username=username)
     course_name = request.form['courseName']
     num_modules = request.form['numModules']
     course_data = {'courseName': course_name, 'modules': {}, "numModules": num_modules}
     for key in request.form:
         if key.startswith('module-'):
             course_data['modules'][key] = request.form[key]
-    for lesson, num_sub in course_data["modules"].items():
-        db.execute("INSERT INTO admin_courses(course_name, lesson_name, num_sub) VALUES (%s, %s, %s)", (course_name, lesson, int(num_sub)))
+    for lesson, article in course_data["modules"].items():
+        db.execute("INSERT INTO admin_courses_duplicate(course_name, lesson_name, article) VALUES (%s, %s, %s)", (course_name, lesson, article))
     con.commit()
-    db.execute("SELECT course_name FROM admin_courses")
+    db.execute("SELECT course_name FROM admin_courses_duplicate")
     courses = db.fetchall()
     names = []
     for course in courses:
         names.append(course["course_name"])
     names = set(names)
-    return render_template("admin.html", courses=names)
+    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"], ))
+    username = db.fetchall()
+    username = username[0]["username"]
+    return render_template("admin.html", courses=names, username=username)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

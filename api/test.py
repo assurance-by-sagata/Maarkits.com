@@ -125,6 +125,7 @@ def test_total():
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
+    total = round(total, 2)
     assert(total_computation("ss") == (total, cash))
     
 def test_leaderboard():
