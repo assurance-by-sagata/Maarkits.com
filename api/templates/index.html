@@ -464,6 +464,13 @@ Powered by OpenAI
         const symbol = stock_symbol.value;
         const selectedOption = stock_symbol.options[stock_symbol.selectedIndex];
         const selected_name = selectedOption.getAttribute('data-name');
+        navLinks.forEach(function (link) {
+            link.classList.remove('active');
+        });
+        const element = document.querySelector('[data-value="Month"]');
+        if (element) {
+            element.classList.add('active');
+        }
         fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => { renderCandlestickChart(data, symbol, selected_name, tempStartData, tempEndData) }).catch(err => console.log(err));
     }
     navLinks.forEach(function (link) {
