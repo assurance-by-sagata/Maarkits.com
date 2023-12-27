@@ -6,6 +6,7 @@ Portfolio
 
 {% block main %}
 <style>
+<<<<<<< HEAD
     .banner {
         display: flex;
         justify-content: space-around;
@@ -22,6 +23,62 @@ Portfolio
         align-items: center;
         text-align: right;
     }
+=======
+.banner {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f2f2f2; /* Background color */
+    padding: 10px;
+    border-bottom: 2px solid #ddd; /* Border style */
+}
+
+.banner-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: right;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .banner {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .banner-item {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Adjust font sizes, padding, and margins as needed */
+    .label, .value {
+        font-size: smaller;
+        margin: 5px;
+    }
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: black;
+}
+
+.value {
+
+}
+.time-navigation .bg-gray-200 {
+    background-color: #f0f3f6 !important;
+}
+.time-navigation li.nav-item > a {
+    margin-right: 10px;
+    color: black !important;
+}
+.time-navigation li.nav-item  > a.active:focus, .time-navigation li.nav-item  > a.active {
+    background-color: #46bc5c !important;
+    color: #ffffff;
+}
+>>>>>>> 91cc6355241c983eeb70ad5077b75ec844930e8e
 
     .label {
         font-weight: bold;
