@@ -122,6 +122,7 @@ def total_computation(username):
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
+    total = round(total, 2)
     return total, cash
 
 def leaderboard():
