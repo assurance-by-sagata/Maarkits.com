@@ -21,6 +21,25 @@
     text-align: right;
 }
 
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .banner {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .banner-item {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Adjust font sizes, padding, and margins as needed */
+    .label, .value {
+        font-size: smaller;
+        margin: 5px;
+    }
+}
+
 .label {
     font-weight: bold;
     margin-bottom: 5px;
