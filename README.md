@@ -46,7 +46,7 @@ GET https://www.marketsdojo.com/portfolio_api
 - The response includes the user's total cash, the total value of the portfolio, the user's net profit or loss (pl), and the percentage of profit or loss (percent_pl).
 - The starting amount is provided for reference (in this example, it's set at 10,000).
 - The `types` array lists all the different types of assets that can be part of the portfolio.
-- I plan to add in some exception handling the connection and database issues that could occur.
+- I plan to add in some exception handling in order to account for the case of the connection and database issues that could occur.
 
 ---
 
