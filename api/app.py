@@ -87,6 +87,45 @@ def index():
     types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
+@app.route("/portfolio_api")
+@login_required
+def portfolio_api():
+    # Current request format: https://www.marketsdojo.com/portfolio_api and only works when we have a logged in user, with Flask Session handling the login
+    # Request possible format: https://www.marketsdojo.com/portfolio_api?user_id=USERID
+    """Show portfolio of stocks"""
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
+    )
+    portfolio = db.fetchall()
+    for stock in portfolio:
+        db.execute(
+            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
+            (lookup(stock["stock_symbol"], stock["type"])["price"],
+            session["user_id"],
+            stock["stock_symbol"],
+            stock["type"])
+        )
+        con.commit()
+    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    cash = db.fetchall()
+    cash = float(cash[0]["cash"])
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
+        (session["user_id"],)
+    )
+    portfolio = db.fetchall()
+    total = cash
+    for stock in portfolio:
+        total += stock["price"] * stock["num_shares"]
+    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+    username = db.fetchall()
+    username = username[0]["username"]
+    pl = round(total - 10000, 2)
+    percent_pl = round((pl / 10000) * 100, 2)
+    types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
+    data = {"portfolio": portfolio, "cash": usd(cash), "total": usd(total), "starting_amt": 10000, "username": username, "pl": pl, "percent_pl": percent_pl, "types": types}
+    return data
+
 # @app.route("/stocks", methods=["GET", "POST"])
 # @login_required
 # def stocks():
@@ -100,6 +139,17 @@ def commodity():
     if request.method == "GET":
         commodities = commodity_list()
         return render_template("commodity.html", commodities=commodities)
+    
+# api route to get commodities list
+@app.route("/commodity_api", methods=["GET"])
+@login_required
+def commodity_api():
+    # Current endpoint: https://www.marketsdojo.com/commodity_api
+    # TODO- Cache list
+    if request.method == "GET":
+        commodities = commodity_list()
+        data = {"commodities": commodities}
+        return data
 
 @app.route("/learn", methods=["GET", "POST"])
 @login_required
@@ -117,7 +167,7 @@ def learn():
     progress = db.fetchall()
     progress = progress[0]
     assets = []
-    return render_template("learn.html", username=username, assets=assets, progress=progress)
+    return render_template("learn.html", username=username, progress=progress)
 
 @app.route("/update", methods = ["POST"])
 @login_required
@@ -328,6 +378,120 @@ def buy():
     else:
         flash("Bought!")
     return redirect("/")
+
+@app.route("/buy_api", methods=["GET"])
+@login_required
+def buy_api():
+    """Buy shares of stock"""
+    # Current endpoint: https://www.marketsdojo.com/buy_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE
+    # This will conduct a complete buy operation on the backend and then send you back to https://www.marketsdojo.com/portfolio_api
+    # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
+    symbol = request.args.get("symbol")
+    num_shares = request.args.get("shares")
+    type = request.args.get("type")
+    if symbol == None or num_shares == None or type == None:
+        return {400: "Missing or incorrect query parameters"}
+    symbol = symbol.upper()
+    stock = lookup(symbol, type)
+    if not stock:
+        return {400:"Invalid Symbol"}
+    if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
+        return {400: "Asset Type does not match symbol"}
+    if not num_shares.isdigit():
+        return {400: "Invalid Shares"}
+    num_shares = int(num_shares)
+    if num_shares < 1:
+        return {400: "Invalid Shares"}
+    price = stock["price"]
+    # Create a datetime object in UTC
+    utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
+
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = utc_dt.astimezone(pytz.timezone('Etc/GMT+5'))
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    time = utc_minus_5_dt
+    # Error checking (i.e. missing symbol, too many shares bought etc)
+    # Can only buy when market is open
+    if type and type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return {400: "Cannot trade on a weekend!"}
+        if time < open_time or time > close_time:
+            return {400: "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)"}
+    else:
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return {400: "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}
+    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    user = db.fetchall()
+    if (num_shares * price) > user[0]["cash"]:
+        return {400: "Cannot Afford"}
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
+        (session["user_id"],
+        symbol,
+        type)
+    )
+    portfolio = db.fetchall()
+    # Start a stock for a new user if it doesn't exist
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
+    if (len(portfolio)) == 0:
+        db.execute(
+            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+            (session["user_id"],
+            stock["name"],
+            stock["symbol"],
+            price,
+            num_shares,
+            time,
+            type)
+        )
+        con.commit()
+        db.execute(
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+            (session["user_id"],
+            stock["symbol"],
+            price,
+            num_shares,
+            time)
+        )
+        con.commit()
+        db.execute(
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1  WHERE id = (%s)",
+            (num_shares * price,
+            session["user_id"])
+        )
+        con.commit()
+    # Update current portfolio
+    else:
+        db.execute(
+            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+            (price,
+            num_shares,
+            session["user_id"],
+            stock["symbol"])
+        )
+        con.commit()
+        db.execute(
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+            (session["user_id"],
+            stock["symbol"],
+            price,
+            num_shares,
+            time)
+        )
+        con.commit()
+        db.execute(
+            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
+            (num_shares * price,
+            session["user_id"])
+        )
+        con.commit()
+    db.execute (
+        "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    bought = db.fetchall()
+    bought = bought[0]["bought"]
+    return redirect("/portfolio_api")
 
 
 @app.route("/history")
@@ -621,6 +785,113 @@ def sell():
         flash("Sold!")
     return redirect("/")
 
+@app.route("/sell_api", methods=["GET"])
+@login_required
+def sell_api():
+    """Sell shares of stock"""
+    # Current endpoint: https://www.marketsdojo.com/sell_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE
+    # This will conduct a complete buy operation on the backend and then send you back to https://www.marketsdojo.com/portfolio_api
+    # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
+    type = request.args.get("type")
+    symbol = request.args.get("symbol")
+    num_shares = request.args.get("shares")
+    if not type or not symbol or not num_shares:
+        return {400: "Missing or inccorect query parameters!"}
+    symbol = symbol.upper()
+    db.execute(
+        "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s) AND type = (%s)",
+        (symbol,
+        session["user_id"],
+        type)
+    )
+    stock = db.fetchall()
+    db.execute("SELECT type FROM portfolios WHERE stock_symbol = (%s)", (symbol,))
+    types = db.fetchall()
+    type_ans = types[0]["type"]
+    if type != type_ans:
+        return {400: "Asset Type does not match symbol"}
+    if len(stock) != 1:
+        return {400:"Invalid Symbol"}
+    if not num_shares.isdigit():
+        return {400:"Invalid Shares"}
+    num_shares = (int(num_shares)) * -1
+    if num_shares > 0:
+        return {400: "Invalid Shares"}
+    if stock[0]["num_shares"] + num_shares < 0:
+        return {400: "Too many shares"}
+     # Create a datetime object in UTC
+    utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
+
+    # Convert the datetime object to UTC-5 timezone
+    utc_minus_5_dt = utc_dt.astimezone(pytz.timezone('Etc/GMT+5'))
+    open_time = utc_minus_5_dt.replace(hour=8, minute=30)
+    close_time = utc_minus_5_dt.replace(hour=17, minute=0)
+    time = utc_minus_5_dt
+    # Error checking (i.e. missing symbol, too many shares sold etc)
+    if type and type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return {400: "Cannot trade on a weekend!"}
+        if time < open_time or time > close_time:
+            return {400: "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes) "}
+    else:
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return {400: "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}
+    # Keep track of sells
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
+    # Update current portfolio
+    price = lookup(symbol, type)["price"]
+    if stock[0]["num_shares"] + num_shares == 0:
+        db.execute(
+            "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
+            (session["user_id"],
+            symbol)
+        )
+        con.commit()
+        db.execute(
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+            (session["user_id"],
+            symbol,
+            price,
+            num_shares,
+            time)
+        )
+        con.commit()
+        db.execute(
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
+            (num_shares * price,
+            session["user_id"])
+        )
+        con.commit()
+    else:
+        db.execute(
+            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
+            (price,
+            num_shares,
+            session["user_id"],
+            symbol)
+        )
+        con.commit()
+        db.execute(
+            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+            (session["user_id"],
+            symbol,
+            price,
+            num_shares,
+            time)
+        )
+        con.commit()
+        db.execute(
+            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
+            (num_shares * price,
+            session["user_id"])
+        )
+        con.commit()
+    db.execute (
+        "SELECT sold FROM users WHERE id = (%s)", (session["user_id"], )
+    )
+    sold = db.fetchall()
+    sold = sold[0]["sold"]
+    return redirect("/portfolio_api")
 
 @app.route("/password-change", methods=["GET", "POST"])
 @login_required
