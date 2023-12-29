@@ -1,156 +1,70 @@
-# REST API Documentation
-This is the documentation for the endpoints of the APIs I have completed so far and how they behave. All front-end developers can reference this in order to see how the different endpoints currently behave, and what the responses are.
+# Getting Started with Create React App
 
----
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-### 1. Portfolio API
+## Available Scripts
 
-**Endpoint Description**: Displays the user's portfolio of stocks, including the current value of each stock, total cash available, and overall portfolio performance.
+In the project directory, you can run:
 
-**HTTP Method**: GET
+### `npm start`
 
-**URL**: `https://www.marketsdojo.com/portfolio_api`
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-**Parameters**: None at the moment
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-**Authentication**: User must be logged in (handled by Flask Session), otherwise the endpoint redirects to the landing page.
+### `npm test`
 
-**Request Example**:
-```
-GET https://www.marketsdojo.com/portfolio_api
-```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-**Response Example**:
-```
-{
-  "portfolio": [
-    {"stock_symbol": "APPL", "price": 150.00, "num_shares": 10, "type": "Stock (Equity)"},
-    // ... other stocks ...
-  ],
-  "cash": "$5000.00",
-  "total": "$20000.00",
-  "starting_amt": 10000,
-  "username": "john_doe",
-  "pl": 10000.00,
-  "percent_pl": 100.00,
-  "types": ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
-}
-```
+### `npm run build`
 
-**Error Handling**:
-- If the user is not logged in, they will not be able to access this endpoint.
-- Any database connection issues or errors in fetching data will currently affect this endpoint.
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-**Additional Notes**: 
-- The `portfolio_api` endpoint updates the price of each stock in the user's portfolio to the current market price before returning the data.
-- The response includes the user's total cash, the total value of the portfolio, the user's net profit or loss (pl), and the percentage of profit or loss (percent_pl).
-- The starting amount is provided for reference (in this example, it's set at 10,000).
-- The `types` array lists all the different types of assets that can be part of the portfolio.
-- I plan to add in some exception handling in order to account for the case of the connection and database issues that could occur.
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
----
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### `npm run eject`
 
-### 2. Buy API
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-**Endpoint Description**: This endpoint is used to buy shares of stock.
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-**HTTP Method**: GET
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-**URL**: `https://www.marketsdojo.com/buy_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE`
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-**Parameters**:
-- `symbol` (String): Stock symbol to buy.
-- `shares` (Integer): Number of shares to buy.
-- `type` (String): Type of stock (Forex, Stock (Equity), CFD, Commodity, Index, ETF).
+## Learn More
 
-**Authentication**: User must be logged in (handled by Flask Session), otherwise the endpoint redirects to the landing page.
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-**Request Example**:
-```
-GET https://www.marketsdojo.com/buy_api?symbol=APPL&shares=10&type=Stock%20(Equity)
-```
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-**Response Example**:
-```
-Redirects to https://www.marketsdojo.com/portfolio_api
-```
+### Code Splitting
 
-**Error Handling**:
-- Missing or incorrect query parameters.
-- Invalid stock symbol.
-- Asset type does not match symbol.
-- Invalid number of shares.
-- Trading time restrictions.
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-**Additional Notes**: Trades are restricted based on the type of stock and current time. Users can't trade on weekends, and trading hours are limited.
+### Analyzing the Bundle Size
 
----
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### 3. Sell API
+### Making a Progressive Web App
 
-**Endpoint Description**: Allows users to sell shares of stock.
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-**HTTP Method**: GET
+### Advanced Configuration
 
-**URL**: `https://www.marketsdojo.com/sell_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE`
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-**Parameters**:
-- `symbol` (String): Stock symbol to sell.
-- `shares` (Integer): Number of shares to sell.
-- `type` (String): Type of stock.
+### Deployment
 
-**Authentication**: User must be logged in (handled by Flask Session), otherwise the endpoint redirects to the landing page.
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-**Request Example**:
-```
-GET https://www.marketsdojo.com/sell_api?symbol=APPL&shares=5&type=Stock%20(Equity)
-```
+### `npm run build` fails to minify
 
-**Response Example**:
-```
-Redirects to https://www.marketsdojo.com/portfolio_api
-```
-
-**Error Handling**:
-- Missing or incorrect query parameters.
-- Invalid stock symbol.
-- Asset type does not match symbol.
-- Invalid number of shares or selling more shares than owned.
-- Trading time restrictions.
-
-**Additional Notes**: Similar to the buy API, trading is restricted based on time and day.
-
----
-
-### 3. Commodity API
-
-**Endpoint Description**: Retrieves a list of available commodities.
-
-**HTTP Method**: GET
-
-**URL**: `https://www.marketsdojo.com/commodity_api`
-
-**Parameters**: None.
-
-**Authentication**: User must be logged in (handled by Flask Session), otherwise the endpoint redirects to the landing page.
-
-**Request Example**:
-```
-GET https://www.marketsdojo.com/commodity_api
-```
-
-**Response Example**:
-```
-{
-  "commodities": ["Gold", "Silver", "Oil"]
-}
-```
-
-**Error Handling**: Not applicable for this endpoint.
-
-**Additional Notes**: This endpoint is used to fetch a current list of commodities. Next, I will cache the result of this endpoint in the static folder (as it currently queries the FMP API for data) and then make request read from that file. That should be faster (and better for large data) than the current third party API query.
-
----
-
-I will continue to update the documentation as I add in more api endpoints and as I make any changes to the current api endpoints behaviour.
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
