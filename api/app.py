@@ -169,6 +169,25 @@ def learn():
     assets = []
     return render_template("learn.html", username=username, progress=progress)
 
+@app.route("/learn_api", methods=["GET", "POST"])
+@login_required
+def learn_api():
+    if request.method == "POST":
+        question = request.form.get("symbol")
+        _answer = answer(question)
+        session["answer"] = _answer
+        session["question"] = question
+        return redirect("/")
+    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+    username = db.fetchall()
+    username = username[0]["username"]
+    db.execute("SELECT * FROM progress WHERE user_id = (%s)", (session["user_id"],))
+    progress = db.fetchall()
+    progress = progress[0]
+    assets = []
+    data=[{"username": username, "progress": progress}]
+    return jsonify(data)
+
 @app.route("/update", methods = ["POST"])
 @login_required
 def update():
@@ -520,16 +539,6 @@ def history():
     sold = db.fetchall()
     sold = sold[0]["sold"]
     return render_template("history.html", history=user_history, usernames=usernames, size=len(usernames), bought=bought, sold=sold)
-
-@app.route("/beginner", methods=["GET", "POST"])
-@login_required
-def beginner():
-    if request.method == "POST":
-        question = request.form.get("symbol")
-        _answer = answer(question)
-        return render_template("answer_b.html", _answer=_answer)
-    return render_template("beginner.html")
-
 
 @app.route("/advanced", methods=["GET", "POST"])
 @login_required
