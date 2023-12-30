@@ -19,9 +19,18 @@ import Notfound from './notfound';
 export default function index() {
   return (
     <>
-      <Layout>
-        <Switch>
+      <Switch>
           <Route exact path="/">
+            <Login />
+          </Route>
+          <Route path="/signup">
+            <Signup />
+          </Route>
+          <Route exact path="/login">
+            <Login />
+          </Route>
+        <Layout>
+          <Route exact path="/dashboard">
             <Exchange />
           </Route>
           <Route path="/markets">
@@ -35,12 +44,6 @@ export default function index() {
           </Route>
           <Route path="/settings">
             <Settings />
-          </Route>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/signup">
-            <Signup />
           </Route>
           <Route path="/reset">
             <Reset />
@@ -63,8 +66,8 @@ export default function index() {
           <Route path="/notfound">
             <Notfound />
           </Route>
-        </Switch>
-      </Layout>
+        </Layout>
+      </Switch>
     </>
   );
 }
