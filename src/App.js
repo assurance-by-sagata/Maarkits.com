@@ -12,7 +12,7 @@ export default class App extends Component {
       <>
         <BrowserRouter>
           <Route component={ScrollToTop} />'
-          <RecoilRoot>
+
             <ThemeProvider
               value={{
                 data: this.state,
@@ -26,9 +26,12 @@ export default class App extends Component {
                 },
               }}
             >
-              <Index />
+              <RecoilRoot>
+                <Index />
+              </RecoilRoot>
+
             </ThemeProvider>
-          </RecoilRoot>
+
         </BrowserRouter>
       </>
     );

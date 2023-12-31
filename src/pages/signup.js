@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link ,useHistory} from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
-import { userState } from '../state'
-
+import { userState,isLoggedInState } from '../state'
 
 const Signup = () => {
 
@@ -15,6 +14,8 @@ const Signup = () => {
   });
   const [errors, setErrors] = useState({});
   const setUser = useSetRecoilState(userState); // Recoil hook to set user information
+  const setLoggedIn = useSetRecoilState(isLoggedInState); // Recoil hook to set user isLoggedInState
+  const history = useHistory();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,8 +61,9 @@ const Signup = () => {
           const userData = await response.json();
           // Save user data to Recoil state for future use
           setUser(userData);
-          console.log('Registration successful');
-
+          setLoggedIn(true);
+          console.log('Registration successfull');
+          history.push('/dashboard')
         } else {
           // Registration failed, handle error scenario
           const errorData = await response.json();

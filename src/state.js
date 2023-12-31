@@ -1,12 +1,13 @@
 import { atom } from 'recoil';
+import { isLoggedIn,getUserData } from './auth';
 
 export const userState = atom({
   key: 'userState',
-  default: null, // Initial value is null; it will be updated after successful registration
+  default: getUserData,
 });
 
 
 export const isLoggedInState = atom({
     key: 'isLoggedInState',
-    default: false, // Initially the user is not logged in
+    default: isLoggedIn
   });

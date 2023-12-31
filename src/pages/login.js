@@ -1,7 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { isLoggedInState } from '../state';
+import { useRecoilValue } from 'recoil';
 
-export default function login() {
+const Login =  () =>{
+
+  const isLoggedIn = useRecoilValue(isLoggedInState);
+  console.log('isLoggedIn at signin:', isLoggedIn); // Log the isLoggedIn state
   return (
     <>
       <div className="vh-100 d-flex justify-content-center">
@@ -49,3 +54,5 @@ export default function login() {
     </>
   );
 }
+
+export default Login;
