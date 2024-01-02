@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import HistoryOrder from '../components/HistoryOrder';
 import MarketHistory from '../components/MarketHistory';
 import MarketNews from '../components/MarketNews';
@@ -8,9 +7,15 @@ import OrderBook from '../components/OrderBook';
 import TradingChart from '../components/TradingChart';
 import TradingChartDark from '../components/TradingChartDark';
 import { ThemeConsumer } from '../context/ThemeContext';
+import { isLoggedInState,userState } from '../state';
+import { useRecoilValue } from 'recoil';
 
-export default class exchange extends Component {
-  render() {
+const Exchange = () => {
+    const isLoggedIn = useRecoilValue(isLoggedInState);
+    const userData = useRecoilValue(userState);
+
+    console.log('isLoggedIn at signin:', isLoggedIn); // Log the isLoggedIn state
+    console.log('userData at signin:', userData); // Log the isLoggedIn state
     return (
       <>
         <div className="container-fluid mtb15 no-fluid">
@@ -44,5 +49,5 @@ export default class exchange extends Component {
         </div>
       </>
     );
-  }
 }
+export default Exchange;

@@ -1,17 +1,30 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { Navbar, Nav, NavDropdown, Dropdown, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { ThemeConsumer } from '../context/ThemeContext';
-export default class Header extends Component {
-  componentDidMount() {
-    let el = document.querySelector('#darkTheme');
-    if (el) {
-      el.addEventListener('click', function () {
-        document.body.classList.toggle('dark');
-      });
-    }
-  }
-  render() {
+import { useHistory } from 'react-router-dom';
+import { userState,isLoggedInState } from '../state'
+import { clearUserDataAndLogout } from '../auth';
+import { useSetRecoilState } from 'recoil';
+
+const Header = () => {
+    const history = useHistory(); // Initialize useHistory
+    const setUserState = useSetRecoilState(userState); // Recoil hook to set user information
+    const setLoggedInState = useSetRecoilState(isLoggedInState); // Recoil hook to set user isLoggedInState
+    useEffect(() => {
+      let el = document.querySelector('#darkTheme');
+      if (el) {
+        el.addEventListener('click', function () {
+          document.body.classList.toggle('dark');
+        });
+      }
+    }, []);
+
+    const handleLogout = () => {
+      clearUserDataAndLogout(setUserState,setLoggedInState);
+      // Redirect to the login page after logout
+      history.push('/'); // Change the path to your login page
+    };
     return (
       <>
         <header className="light-bb">
@@ -186,7 +199,7 @@ export default class Header extends Component {
                           </Link>
                         </li>
                         <li className="nav-item">
-                          <Link to="/login" className="nav-link red">
+                          <Link  className="nav-link red" onClick={handleLogout}>
                             <i className="icon ion-md-power"></i>
                             <span>Log Out</span>
                           </Link>
@@ -201,5 +214,5 @@ export default class Header extends Component {
         </header>
       </>
     );
-  }
-}
+};
+export default Header;

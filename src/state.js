@@ -3,11 +3,11 @@ import { isLoggedIn,getUserData } from './auth';
 
 export const userState = atom({
   key: 'userState',
-  default: getUserData,
+  default: getUserData(),
 });
 
 
 export const isLoggedInState = atom({
     key: 'isLoggedInState',
-    default: isLoggedIn
-  });
+    default: isLoggedIn()
+});

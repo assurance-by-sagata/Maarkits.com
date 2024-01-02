@@ -5,7 +5,6 @@ import { useRecoilValue } from 'recoil';
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
     const isLoggedIn = useRecoilValue(isLoggedInState);
-    console.log('isLoggedIn:', isLoggedIn); // Log the isLoggedIn state
     return (
       <Route
         {...rest}
