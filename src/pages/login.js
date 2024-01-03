@@ -1,46 +1,44 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { isLoggedInState, userState } from "../state";
-import { useRecoilValue } from "recoil";
 import FlashMessage from "../components/FlashMessage";
 import { useSetRecoilState } from "recoil";
 import { setLoggedIn, setUserData } from "../auth";
+import { BASE_URL, ENDPOINT } from "../config";
 
 const Login = () => {
   const history = useHistory();
-  const isLoggedIn = useRecoilValue(isLoggedInState);
-  const userData = useRecoilValue(userState);
+  const setUserState = useSetRecoilState(userState); // Recoil hook to set user information
+  const setLoggedInState = useSetRecoilState(isLoggedInState); // Recoil hook to set user isLoggedInState
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  console.log("isLoggedIn at signin:", isLoggedIn); // Log the isLoggedIn state
-  console.log("userData at signin:", userData); // Log the isLoggedIn state
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `http://localhost:8000/users?email=${username}&password=${password}`,
+        BASE_URL+ ENDPOINT.LOGIN,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          //body: JSON.stringify({'username':username,'password':password}),
+          body: JSON.stringify({'email':username,'password':password}),
         }
       );
-
-      if (response.ok) {
+      if (response.status===200) {
         const userData = await response.json();
-        if (!userData.length ==0) {
+        if (userData) {
           // Save user data to Recoil state for future use as well in local storage
           setUserData(userData, setUserState);
           setLoggedIn(true, setLoggedInState);
-          console.log("Login successfull");
           history.push("/dashboard");
-        } else {
-          setError("Invalid credentials. Please try again.");
         }
+      }else{
+        const resData = await response.json();
+        throw new Error(resData.error.message);
       }
     } catch (err) {
       setError(err.message);
@@ -53,8 +51,7 @@ const Login = () => {
     setShowMessage(false);
     setFlashMessage("");
   };
-  const setUserState = useSetRecoilState(userState); // Recoil hook to set user information
-  const setLoggedInState = useSetRecoilState(isLoggedInState); // Recoil hook to set user isLoggedInState
+
 
   return (
     <>

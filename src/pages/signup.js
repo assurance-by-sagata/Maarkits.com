@@ -3,6 +3,8 @@ import { Link, useHistory } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import { userState, isLoggedInState } from "../state";
 import { setLoggedIn, setUserData } from "../auth";
+import FlashMessage from "../components/FlashMessage";
+import { BASE_URL, ENDPOINT } from "../config";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,9 @@ const Signup = () => {
   const setUserState = useSetRecoilState(userState); // Recoil hook to set user information
   const setLoggedInState = useSetRecoilState(isLoggedInState); // Recoil hook to set user isLoggedInState
   const history = useHistory();
+  const [showMessage, setShowMessage] = useState(false);
+  const [flashMessage, setFlashMessage] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,7 +31,8 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    // Omitting confirmPassword and termsChecked from formData before making the API call
+    const { confirmPassword, termsChecked, ...finalData } = formData;
     // Basic client-side validation
     const validationErrors = {};
     if (!formData.username.trim()) {
@@ -49,37 +55,54 @@ const Signup = () => {
       setErrors(validationErrors);
     } else {
       try {
-        const response = await fetch("http://localhost:8000/users", {
+        const response = await fetch(BASE_URL + ENDPOINT.REGISTER, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(finalData),
         });
 
-        if (response.ok) {
+        if (response.status===200) {
           const userData = await response.json();
           // Save user data to Recoil state for future use as well in local storage
           setUserData(userData, setUserState);
           setLoggedIn(true, setLoggedInState);
-
-          console.log("Registration successfull");
           history.push("/dashboard");
         } else {
-          // Registration failed, handle error scenario
-          const errorData = await response.json();
-          console.error("Registration failed:", errorData.message);
-          // Handle error messages or display to the user
+          const resData = await response.json();
+          throw new Error(resData.error.message);
         }
       } catch (error) {
-        console.error("Error during registration:", error);
+         setErrorMsg(error.message);
         // Handle network errors or other exceptions
       }
     }
   };
+
+
+  const handleCloseFlashMessage = () => {
+    setShowMessage(false);
+    setFlashMessage("");
+  };
   return (
     <>
-      <div className="vh-100 d-flex justify-content-center">
+      <div className="container d-flex flex-column justify-content-center justify-content-center align-items-center">
+
+        {showMessage && (
+          <FlashMessage
+            message={flashMessage}
+            onClose={handleCloseFlashMessage}
+            alertClass="alert-danger"
+          />
+        )}
+        {errorMsg && (
+          <FlashMessage
+            alertClass="alert-danger"
+            message={errorMsg}
+            onClose={() => setErrorMsg("")}
+          />
+        )}
         <div className="form-access my-auto">
           <form onSubmit={handleSubmit}>
             <span>Create Account</span>
