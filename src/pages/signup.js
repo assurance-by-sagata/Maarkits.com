@@ -5,6 +5,8 @@ import { userState, isLoggedInState } from "../state";
 import { setLoggedIn, setUserData } from "../auth";
 import FlashMessage from "../components/FlashMessage";
 import { BASE_URL, ENDPOINT } from "../config";
+import { BeatLoader } from "react-spinners";
+
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -21,6 +23,7 @@ const Signup = () => {
   const [showMessage, setShowMessage] = useState(false);
   const [flashMessage, setFlashMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,6 +58,7 @@ const Signup = () => {
       setErrors(validationErrors);
     } else {
       try {
+        setLoading(true);
         const response = await fetch(BASE_URL + ENDPOINT.REGISTER, {
           method: "POST",
           headers: {
@@ -76,6 +80,9 @@ const Signup = () => {
       } catch (error) {
          setErrorMsg(error.message);
         // Handle network errors or other exceptions
+      }
+      finally {
+        setLoading(false);
       }
     }
   };
@@ -170,7 +177,12 @@ const Signup = () => {
               )}
             </div>
             <button type="submit" className="btn btn-primary">
-              Create Account
+            {loading ? (
+                <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
+              ) : (
+                "Create Account"
+              )}
+
             </button>
           </form>
           <h2>

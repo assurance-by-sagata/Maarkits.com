@@ -5,6 +5,7 @@ import FlashMessage from "../components/FlashMessage";
 import { useSetRecoilState } from "recoil";
 import { setLoggedIn, setUserData } from "../auth";
 import { BASE_URL, ENDPOINT } from "../config";
+import { BeatLoader } from "react-spinners";
 
 const Login = () => {
   const history = useHistory();
@@ -13,22 +14,20 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(
-        BASE_URL+ ENDPOINT.LOGIN,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({'email':username,'password':password}),
-        }
-      );
-      if (response.status===200) {
+      setLoading(true);
+      const response = await fetch(BASE_URL + ENDPOINT.LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: username, password: password }),
+      });
+      if (response.status === 200) {
         const userData = await response.json();
         if (userData) {
           // Save user data to Recoil state for future use as well in local storage
@@ -36,12 +35,14 @@ const Login = () => {
           setLoggedIn(true, setLoggedInState);
           history.push("/dashboard");
         }
-      }else{
+      } else {
         const resData = await response.json();
         throw new Error(resData.error.message);
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
   const [showMessage, setShowMessage] = useState(false);
@@ -51,7 +52,6 @@ const Login = () => {
     setShowMessage(false);
     setFlashMessage("");
   };
-
 
   return (
     <>
@@ -107,7 +107,11 @@ const Login = () => {
               </label>
             </div>
             <button type="submit" className="btn btn-primary">
-              Sign In
+              {loading ? (
+                <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
           <h2>
