@@ -4,3 +4,9 @@
     LOGIN: 'v1/api/login',
     PORTFOLIO: 'v1/api/portfolio',
 };
+
+ export const FMPENDPOINT = {
+    MARKETOPEN: 'v3/is-the-market-open',
+};
+export const FMPAPIURL='https://financialmodelingprep.com/api/'
+export const  FMPAPIKEY = '6fbceaefb411ee907e9062098ef0fd66'

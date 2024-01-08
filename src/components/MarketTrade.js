@@ -1,7 +1,58 @@
-import React from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Tabs, Tab } from "react-bootstrap";
+import { FMPAPIURL, FMPENDPOINT,FMPAPIKEY } from "../config";
 
-export default function MarketTrade() {
+const MarketTrade= () => {
+  const [selectedValue, setSelectedValue] = useState('');
+  const [isMarketOpen, setMarketOpen] = useState(false);
+
+
+  useEffect(() => {
+    // Define a function to fetch data from your API
+    const fetchData = async () => {
+      try {
+
+        const response = await fetch(FMPAPIURL + FMPENDPOINT.MARKETOPEN+ "?apikey="+FMPAPIKEY, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+        }});
+
+        if (response.status===200) {
+          const marketData = await response.json();
+
+          if(selectedValue==='Stock' || selectedValue==='Index' || selectedValue==='Commodity')
+          {
+            setMarketOpen(marketData.isTheStockMarketOpen);
+          }else if( selectedValue==='Forex' ){
+            setMarketOpen(marketData.isTheForexMarketOpen);
+          }else if( selectedValue==='ETF' ){
+            setMarketOpen(marketData.isTheEuronextMarketOpen);
+          }
+
+        } else {
+          const resData = await response.json();
+          throw new Error(resData.error.message);
+        }
+      } catch (error) {
+          console.log(error.message);
+        // Handle network errors or other exceptions
+      }
+      finally {
+        console.log("Final call")
+      }
+    };
+
+    // Call the fetchData function when selectedValue changes
+    if (selectedValue !== '') {
+      fetchData();
+    }
+  }, [selectedValue]); // This will re-run the effect whenever selectedValue changes
+
+  // Handler function to handle select box change
+  const handleSelectChange = (event) => {
+    setSelectedValue(event.target.value);
+  };
   return (
     <>
       <div className="market-trade">
@@ -11,6 +62,17 @@ export default function MarketTrade() {
               <div className="market-trade-buy">
                 <form action="#">
                   <div className="input-group">
+                    <select value={selectedValue} onChange={handleSelectChange}  className="form-control">
+                      <option value="">Asset Type</option>
+                      <option value="Stock">Stock (Equity)</option>
+                      <option value="Forex">Forex</option>
+                      <option value="Index">Index</option>
+                      <option value="ETF">ETF</option>
+                      <option value="CFD">CFD</option>
+                      <option value="Commodity">Commodity</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
                     <input
                       type="number"
                       className="form-control"
@@ -58,14 +120,25 @@ export default function MarketTrade() {
                   <p>
                     Fee: <span>0 BTC = 0 USD</span>
                   </p>
-                  <button type="submit" className="btn buy">
-                    Buy
+                  <button disabled={!isMarketOpen}  type="submit" className="btn buy">
+                     {isMarketOpen ? 'Buy' : 'Market Closed'}
                   </button>
                 </form>
               </div>
               <div className="market-trade-sell">
                 <form action="#">
                   <div className="input-group">
+                    <select value={selectedValue} onChange={handleSelectChange}  className="form-control">
+                      <option value="">Asset Type</option>
+                      <option value="Stock">Stock (Equity)</option>
+                      <option value="Forex">Forex</option>
+                      <option value="Index">Index</option>
+                      <option value="ETF">ETF</option>
+                      <option value="CFD">CFD</option>
+                      <option value="Commodity">Commodity</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
                     <input
                       type="number"
                       className="form-control"
@@ -113,7 +186,9 @@ export default function MarketTrade() {
                   <p>
                     Fee: <span>0 BTC = 0 USD</span>
                   </p>
-                  <button className="btn sell">Sell</button>
+                  <button disabled={!isMarketOpen} className="btn sell">
+                      {isMarketOpen ? 'Sell' : 'Market Closed'}
+                  </button>
                 </form>
               </div>
             </div>
@@ -459,3 +534,5 @@ export default function MarketTrade() {
     </>
   );
 }
+
+export default MarketTrade;
