@@ -82,7 +82,7 @@ export default function HistoryOrder() {
                     </div>
                   </div>
                 </div>
-                {portfolioData.portfolio.length > 0 ? (
+                {portfolioData.portfolio.length === 0 ? (
                   <div className="table-responsive-1">
                     <table className="table star-active1">
                       <thead>
@@ -106,7 +106,14 @@ export default function HistoryOrder() {
                           </td>
                           <td className="">$5.90</td>
                           <td>$9999.0</td>
-                          <td className="green">+$3110.80</td>
+                          <td className="green"><div className="w10" style={{ width: "200px" }}>
+
+                              <span style={{ marginBottom: "4px" }}></span>
+                              <span className="green" >+2.3%</span>
+                            </div>
+                            +$3110.80
+
+                          </td>
                           <td className="green">+$13110.0</td>
                         </tr>
                       </tbody>
