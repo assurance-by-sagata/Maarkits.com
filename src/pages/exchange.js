@@ -7,20 +7,26 @@ import OrderBook from "../components/OrderBook";
 import TradingChart from "../components/TradingChart";
 import TradingChartDark from "../components/TradingChartDark";
 import { ThemeConsumer } from "../context/ThemeContext";
-import { isLoggedInState, userState } from "../state";
-import { useRecoilValue } from "recoil";
+import {flashMsg } from "../state";
+import { useRecoilValue ,useSetRecoilState} from "recoil";
+import FlashMessage from "../components/FlashMessage";
+
 
 const Exchange = () => {
-  const isLoggedIn = useRecoilValue(isLoggedInState);
-  const userData = useRecoilValue(userState);
-
-  console.log("isLoggedIn at signin:", isLoggedIn); // Log the isLoggedIn state
-  console.log("userData at signin:", userData); // Log the isLoggedIn state
+  const flashMsgData = useRecoilValue(flashMsg);
+  const setflashMsgData = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
   return (
     <>
       <div className="container-fluid mtb15 no-fluid">
+        {flashMsgData && (
+          <FlashMessage
+            alertClass={flashMsgData.class}
+            message={flashMsgData.msg}
+            onClose={() => setflashMsgData(null)}
+          />
+        )}
         <div className="row sm-gutters">
-          <div className="col-sm-12 col-md-9">
+          <div className="col-sm-12 col-md-6">
             <ThemeConsumer>
               {({ data }) => {
                 return data.theme === "light" ? (
@@ -32,7 +38,7 @@ const Exchange = () => {
             </ThemeConsumer>
             <MarketTrade />
           </div>
-          <div className="col-sm-12 col-md-3">
+          <div className="col-sm-12 col-md-6">
             <MarketPairs />
           </div>
 

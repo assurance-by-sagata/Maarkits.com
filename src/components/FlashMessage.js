@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 
 const FlashMessage = ({ message, alertClass,  onClose }) => {
   const [showMessage, setShowMessage] = useState(true);
-
+  useEffect(() => {
+    // Scroll to the top of the window when the component mounts or when a flash message is received
+    window.scrollTo(0, 0);
+  }, []);
   const handleClose = () => {
     setShowMessage(false);
     onClose();

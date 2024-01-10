@@ -11,3 +11,7 @@ export const isLoggedInState = atom({
     key: 'isLoggedInState',
     default: isLoggedIn()
 });
+export const flashMsg = atom({
+  key: 'flashMsg',
+  default: null
+});

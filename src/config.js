@@ -7,6 +7,12 @@
 
  export const FMPENDPOINT = {
     MARKETOPEN: 'v3/is-the-market-open',
+    FOREXNEWS: 'v4/forex_news?page=0&apikey=',
+};
+export const STOCKNEWSENDPOINT = {
+  NEWS: 'v1?tickers=',
 };
 export const FMPAPIURL='https://financialmodelingprep.com/api/'
-export const  FMPAPIKEY = '6fbceaefb411ee907e9062098ef0fd66'
+export const STOCKNEWSAPIURL='https://stocknewsapi.com/api/'
+export const FMPAPIKEY = '6fbceaefb411ee907e9062098ef0fd66'
+export const NEWSAPIKEY = 'qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n'

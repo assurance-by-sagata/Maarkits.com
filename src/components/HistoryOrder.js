@@ -4,10 +4,12 @@ import { BASE_URL, ENDPOINT } from "../config";
 import { userState } from "../state";
 import { useRecoilValue } from "recoil";
 import { ClockLoader } from "react-spinners";
+import { useSetRecoilState } from "recoil";
+import { flashMsg } from "../state";
 
 export default function HistoryOrder() {
   const [portfolioData, setPortfolioData] = useState(null);
-  const [errorMsg, setErrorMsg] = useState("");
+  const setErrorMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
   const userData = useRecoilValue(userState);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -30,7 +32,7 @@ export default function HistoryOrder() {
           throw new Error(resData.error.message);
         }
       } catch (error) {
-        setErrorMsg(error.message);
+        setErrorMsg({msg:error.message, class:'alert-danger'});
         // Handle network errors or other exceptions
       }
       finally {
@@ -82,7 +84,7 @@ export default function HistoryOrder() {
                     </div>
                   </div>
                 </div>
-                {portfolioData.portfolio.length === 0 ? (
+                {portfolioData.portfolio.length > 0 ? (
                   <div className="table-responsive-1">
                     <table className="table star-active1">
                       <thead>
@@ -141,38 +143,6 @@ export default function HistoryOrder() {
             </>
              )}
           </Tab>
-          <Tab eventKey="open-orders" title="Open Orders">
-            <ul className="d-flex justify-content-between market-order-item">
-              <li>Time</li>
-              <li>All pairs</li>
-              <li>All Types</li>
-              <li>Buy/Sell</li>
-              <li>Price</li>
-              <li>Amount</li>
-              <li>Executed</li>
-              <li>Unexecuted</li>
-            </ul>
-            <span className="no-data">
-              <i className="icon ion-md-document"></i>
-              No data
-            </span>
-          </Tab>
-          <Tab eventKey="closed-orders" title="Closed Orders">
-            <ul className="d-flex justify-content-between market-order-item">
-              <li>Time</li>
-              <li>All pairs</li>
-              <li>All Types</li>
-              <li>Buy/Sell</li>
-              <li>Price</li>
-              <li>Amount</li>
-              <li>Executed</li>
-              <li>Unexecuted</li>
-            </ul>
-            <span className="no-data">
-              <i className="icon ion-md-document"></i>
-              No data
-            </span>
-          </Tab>
           <Tab eventKey="order-history" title="Order history">
             <ul className="d-flex justify-content-between market-order-item">
               <li>Time</li>
@@ -189,22 +159,7 @@ export default function HistoryOrder() {
               No data
             </span>
           </Tab>
-          <Tab eventKey="balance" title="Balance">
-            <ul className="d-flex justify-content-between market-order-item">
-              <li>Time</li>
-              <li>All pairs</li>
-              <li>All Types</li>
-              <li>Buy/Sell</li>
-              <li>Price</li>
-              <li>Amount</li>
-              <li>Executed</li>
-              <li>Unexecuted</li>
-            </ul>
-            <span className="no-data">
-              <i className="icon ion-md-document"></i>
-              No data
-            </span>
-          </Tab>
+
         </Tabs>
       </div>
     </>
