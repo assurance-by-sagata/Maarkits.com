@@ -6,6 +6,7 @@ import { flashMsg } from "../state";
 
 const MarketNews = () => {
   const [symbol, setSymbol] = useState('');
+  const [marketNewsData, setMarketNews] = useState([]);
   const setErrorMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
 
   useEffect(() => {
@@ -26,6 +27,7 @@ const MarketNews = () => {
 
         if (response.status === 200) {
           const marketData = await response.json();
+          setMarketNews(marketData)
           console.log("newsData",marketData);
         } else {
           const resData = await response.json();
@@ -59,46 +61,18 @@ const MarketNews = () => {
       <div className="market-news mt15">
         <h2 className="heading">Market News</h2>
         <ul>
+        {marketNewsData.map((item, index) => (
           <li>
-            <Link to="/news-details">
-              <strong>KCS Pay Fees Feature is Coming Soon</strong>
-              To accelerate the ecosystem construction of KuCoin Share (KCS) and
-              promote the implementation of the KCS application.
-              <span>2019-12-04 20:22</span>
-            </Link>
+            <a href={item.url} target="_blank" rel="noopener noreferrer">
+              <strong>{item.title}</strong>
+              {item.image && (
+                 <img src={item.image} alt={item.title} />
+              )}
+              {item.text}
+              <span>{item.publishedDate}</span>
+            </a>
           </li>
-          <li>
-            <Link to="/news-details">
-              <strong>KCS Pay Fees Feature is Coming Soon</strong>
-              To accelerate the ecosystem construction of KuCoin Share (KCS) and
-              promote the implementation of the KCS application.
-              <span>2019-12-04 20:22</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/news-details">
-              <strong>KCS Pay Fees Feature is Coming Soon</strong>
-              To accelerate the ecosystem construction of KuCoin Share (KCS) and
-              promote the implementation of the KCS application.
-              <span>2019-12-04 20:22</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/news-details">
-              <strong>KCS Pay Fees Feature is Coming Soon</strong>
-              To accelerate the ecosystem construction of KuCoin Share (KCS) and
-              promote the implementation of the KCS application.
-              <span>2019-12-04 20:22</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/news-details">
-              <strong>KCS Pay Fees Feature is Coming Soon</strong>
-              To accelerate the ecosystem construction of KuCoin Share (KCS) and
-              promote the implementation of the KCS application.
-              <span>2019-12-04 20:22</span>
-            </Link>
-          </li>
+          ))}
         </ul>
       </div>
     </>
