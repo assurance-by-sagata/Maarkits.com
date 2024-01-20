@@ -4,7 +4,7 @@ import { BASE_URL, ENDPOINT, SETTING, FMPAPIURL, FMPAPIKEY } from "../config";
 import { getColorClass, formatPLValue, formatValue } from "../utility";
 import { userState } from "../state";
 import { useRecoilValue } from "recoil";
-import { ClockLoader } from "react-spinners";
+import { ClipLoader } from "react-spinners";
 import { useSetRecoilState } from "recoil";
 import { flashMsg } from "../state";
 
@@ -21,7 +21,7 @@ export default function HistoryOrder() {
 
   useEffect(() => {
     const fetchDataForSymbol = async (symbol) => {
-      const APIURL = `${FMPAPIURL}v3/quote/${symbol.stock_symbol}?apikey=${FMPAPIKEY}`;
+      const APIURL = `${FMPAPIURL}v3/quote/${symbol.symbol}?apikey=${FMPAPIKEY}`;
       try {
         const response = await fetch(APIURL, {
           method: "GET",
@@ -38,8 +38,8 @@ export default function HistoryOrder() {
           const returnAmnt = currentValue - invested_amount;
 
           const finalPortfolioData = {
-            product: symbol.stock_name,
-            symbol: symbol.stock_symbol,
+            product: symbol.name,
+            symbol: symbol.symbol,
             qnty: symbol.quantity,
             avg_cost: symbol.avg_cost,
             mkt_price: mkt_price,
@@ -63,7 +63,7 @@ export default function HistoryOrder() {
     };
     const fetchDataForSymbol1 = (symbol) => {
       const socket = new WebSocket(
-        `wss://websockets.financialmodelingprep.com/api/v3/quote/${symbol.stock_symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66`
+        `wss://websockets.financialmodelingprep.com/api/v3/quote/${symbol.symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66`
       );
       console.log("WebSocket object:", socket);
       return () => {
@@ -175,7 +175,7 @@ export default function HistoryOrder() {
           <Tab eventKey="portfolio" title="Portfolio">
             {loading ? (
               <div style={{ marginTop: "14%", marginLeft: "45%" }}>
-                <ClockLoader color={"#26de81"} loading={loading} size={80} />
+                <ClipLoader color={"#1E53E5"} loading={loading} size={80} />
               </div>
             ) : (
               <>
@@ -242,11 +242,12 @@ export default function HistoryOrder() {
                       {portfolioData.map((item, index)  => (
                         <tr data-href="exchange-light.html">
                           <td>
-                          {item.product} ({item.symbol})
+                          {/* {item.symbol} ({item.symbol}) */}
+                          {item.symbol}
                             <div className="w10" style={{ width: "200px" }}>
                               <span>{item.qnty} Shares </span>
                               <span style={{ marginBottom: "4px" }}></span>
-                              <span>Avg. {formatValue(item.avg_cost,SETTING.CURRENCY)}</span>
+
                             </div>
                           </td>
                           <td className="">{formatValue(item.mkt_price,SETTING.CURRENCY)}</td>

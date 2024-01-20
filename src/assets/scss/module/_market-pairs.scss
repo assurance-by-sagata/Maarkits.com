@@ -57,27 +57,11 @@
 .market-pairs tbody tr td {
   font-weight: 400;
 }
-
-.market-pairs tbody {
-  height: 800px;
-  overflow-y: auto;
+.market-pairs table{
+  width: 100%; /* Set the desired width for the table */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 632px;
   display: block;
 }
-.no-fluid .market-pairs tbody {
-  height: 815px;
-}
-.market-pairs table,
-.market-pairs tr {
-  width: 100%;
-  table-layout: fixed;
-}
-.market-pairs tr {
-  float: left;
-  clear: both;
-  overflow: hidden;
-}
 
-.market-pairs thead th,
-.market-pairs tbody td {
-  width: 65%;
-}

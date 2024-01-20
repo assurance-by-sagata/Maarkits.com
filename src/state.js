@@ -15,3 +15,11 @@ export const flashMsg = atom({
   key: 'flashMsg',
   default: null
 });
+export const globalProduct = atom({
+  key: 'globalProduct',
+  default: null
+});
+export const globalAsset = atom({
+  key: 'globalAsset',
+  default: null
+});
