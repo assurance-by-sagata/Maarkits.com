@@ -1,9 +1,129 @@
-import React from 'react';
+import React, { useState, useEffect,useCallback } from "react";
 import { Tabs, Tab } from 'react-bootstrap';
+import {
+  FMPAPIURL,
+  FMPENDPOINT,
+  FMPAPIKEY,
+  BASE_URL,
+  ENDPOINT,
+  SETTING,
+  SWA,
 
-export default function MarketPairs() {
+} from "../config";
+import { getColorClass, formatPLValue, formatValue } from "../utility";
+import { useSetRecoilState } from "recoil";
+import { flashMsg,globalAsset,globalProduct} from "../state";
+import { ClipLoader } from "react-spinners";
+import SymbolList from "../components/SymbolList";
+
+
+
+const MarketPairs = () => {
+
+  const setFlashMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
+  const setGlobalAsset = useSetRecoilState(globalAsset); // Recoil hook to set globalAsset
+  const setGlobalProduct = useSetRecoilState(globalProduct); // Recoil hook to set globalProduct
+  const [assets, setAssets] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [initialProduct, setInitialProduct] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const limit =10;
+  const globalSymbol="AAPL";
+
+  useEffect(() => {
+    const fetchProductList = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          SWA+ENDPOINT.PRODUCTLIST,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          const productsData = await response.json();
+          console.log("productsData",productsData);
+          setInitialProduct(productsData[0].id);
+          setProducts(productsData);
+          fetchData(productsData[0].id);
+          const selected =productsData.find(product => product.id == productsData[0].id);
+          setGlobalProduct(selected.product_name)
+        } else {
+          const resData = await response.json();
+          throw new Error(resData.error.message);
+        }
+      } catch (error) {
+        console.log(error.message);
+        setFlashMsg({ msg: error.message, class: "alert-danger" });
+      } finally {
+        console.log("Final call");
+        setLoading(false);
+      }
+    };
+
+    // Define a function to fetch data from your API
+     setGlobalAsset(globalSymbol)
+     fetchProductList()
+
+    // if (!loading){
+    //   alert(initialProduct)
+    //   fetchData(initialProduct);
+    //   const selected =products.find(product => product.id == initialProduct);
+    //  setGlobalProduct(selected.product_name)
+    // }
+
+
+
+  }, []);
+
+  const fetchData = async (initialProduct) => {
+    try {
+      const response = await fetch(
+        //`${SWA+ENDPOINT.ASSETSLIST}?id=${initialProduct}&limit=${limit}`,
+        'https://financialmodelingprep.com/api/v3/quote/AGOL.BO,NYKAA.BO,ITC.BO,AAPL,META,GOOG,PMGOLD.AX,INDIGRID.NS,INDIGRID.NS?apikey=6fbceaefb411ee907e9062098ef0fd66',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const assetsData = await response.json();
+        setAssets(assetsData);
+
+      } else {
+        const resData = await response.json();
+        throw new Error(resData.error.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+      setFlashMsg({ msg: error.message, class: "alert-danger" });
+      // Handle network errors or other exceptions
+    } finally {
+      console.log("Final call");
+    }
+  };
+  const handleTabChange = (selectedKey) => {
+    console.log("Selected selectedKey:", selectedKey);
+    const arrKey = selectedKey.split('-');
+    fetchData(arrKey[1])
+    const selected =products.find(product => product.id == arrKey[1]);
+    setGlobalProduct(selected.product_name)
+  };
+  const handleRowClick = (selectedAssest) => {
+      setGlobalAsset(selectedAssest)
+  };
   return (
     <>
+
+      <SymbolList symbol={'aapl'} />
       <div className="market-pairs">
         <div className="input-group">
           <div className="input-group-prepend">
@@ -18,990 +138,50 @@ export default function MarketPairs() {
             aria-describedby="inputGroup-sizing-sm"
           />
         </div>
-        <Tabs defaultActiveKey="btc">
-          <Tab eventKey="star" title="★">
-            <table className="table star-active">
-              <thead>
-                <tr>
-                  <th>Pairs</th>
-                  <th>Last Price</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ETH/BTC
-                  </td>
-                  <td>0.00020255</td>
-                  <td className="red">-2.58%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KCS/BTC
-                  </td>
-                  <td>0.00013192</td>
-                  <td className="green">+5.6%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XRP/BTC
-                  </td>
-                  <td>0.00002996</td>
-                  <td className="red">-1.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> VET/BTC
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="green">+1.8%</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tab>
-          <Tab eventKey="btc" title="BTC">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Pairs</th>
-                  <th>Last Price</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ETH/BTC
-                  </td>
-                  <td>0.00020255</td>
-                  <td className="red">-2.58%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KCS/BTC
-                  </td>
-                  <td>0.00013192</td>
-                  <td className="green">+5.6%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XRP/BTC
-                  </td>
-                  <td>0.00002996</td>
-                  <td className="red">-1.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> VET/BTC
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="green">+1.8%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> EOS/BTC
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BTT/BTC
-                  </td>
-                  <td>0.00002303</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> LTC/BTC
-                  </td>
-                  <td>0.03520103</td>
-                  <td className="green">+1.5%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRX/BTC
-                  </td>
-                  <td>0.00330103</td>
-                  <td className="red">-3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BSV/BTC
-                  </td>
-                  <td>0.00300103</td>
-                  <td className="green">+2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> COTI/BTC
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="green">+2.85%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XYT/BTC
-                  </td>
-                  <td>0.00003103</td>
-                  <td className="green">+3.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BNB/BTC
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XMR/BTC
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRY/BTC
-                  </td>
-                  <td>0.00000123</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ADA/BTC
-                  </td>
-                  <td>0.00050103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> NEO/BTC
-                  </td>
-                  <td>0.00340103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XLM/BTC
-                  </td>
-                  <td>0.00035103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ENQ/BTC
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="green">+2.02%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AVA/BTC
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AMB/BTC
-                  </td>
-                  <td>0.05335103</td>
-                  <td className="green">+1.0%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> MAP/BTC
-                  </td>
-                  <td>0.00234103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GO/BTC
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="red">-6.50%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KICK/BTC
-                  </td>
-                  <td>0.02053103</td>
-                  <td className="red">-6.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> DBC/BTC
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+7.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GGC/BTC
-                  </td>
-                  <td>0.00353103</td>
-                  <td className="red">-4.05%</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tab>
-          <Tab eventKey="eth" title="ETH">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Pairs</th>
-                  <th>Last Price</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BTC/ETH
-                  </td>
-                  <td>0.00020255</td>
-                  <td className="green">+1.58%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KCS/ETH
-                  </td>
-                  <td>0.00013192</td>
-                  <td className="red">-0.6%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XRP/ETH
-                  </td>
-                  <td>0.00002996</td>
-                  <td className="red">-0.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> VET/ETH
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="green">+1.8%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> EOS/ETH
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BTT/ETH
-                  </td>
-                  <td>0.00002303</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> LTC/ETH
-                  </td>
-                  <td>0.03520103</td>
-                  <td className="green">+1.5%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRX/ETH
-                  </td>
-                  <td>0.00330103</td>
-                  <td className="red">-3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BSV/ETH
-                  </td>
-                  <td>0.00300103</td>
-                  <td className="green">+2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> COTI/ETH
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="green">+2.85%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XYT/ETH
-                  </td>
-                  <td>0.00003103</td>
-                  <td className="green">+3.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BNB/ETH
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XMR/ETH
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRY/ETH
-                  </td>
-                  <td>0.00000123</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ADA/ETH
-                  </td>
-                  <td>0.00050103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> NEO/ETH
-                  </td>
-                  <td>0.00340103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XLM/ETH
-                  </td>
-                  <td>0.00035103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ENQ/ETH
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="green">+2.02%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AVA/ETH
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AMB/ETH
-                  </td>
-                  <td>0.05335103</td>
-                  <td className="green">+1.0%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> MAP/ETH
-                  </td>
-                  <td>0.00234103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GO/ETH
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="red">-6.50%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KICK/ETH
-                  </td>
-                  <td>0.02053103</td>
-                  <td className="red">-6.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> DBC/ETH
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+7.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GGC/ETH
-                  </td>
-                  <td>0.00353103</td>
-                  <td className="red">-4.05%</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tab>
-          <Tab eventKey="neo" title="NEO">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Pairs</th>
-                  <th>Last Price</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ETH/NEO
-                  </td>
-                  <td>0.00350255</td>
-                  <td className="red">-6.58%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KCS/NEO
-                  </td>
-                  <td>0.00013192</td>
-                  <td className="green">+0.6%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XRP/NEO
-                  </td>
-                  <td>0.00002996</td>
-                  <td className="red">-0.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> VET/NEO
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="green">+1.8%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> EOS/NEO
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BTT/NEO
-                  </td>
-                  <td>0.00002303</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> LTC/NEO
-                  </td>
-                  <td>0.03520103</td>
-                  <td className="green">+1.5%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRX/NEO
-                  </td>
-                  <td>0.00330103</td>
-                  <td className="red">-3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BSV/NEO
-                  </td>
-                  <td>0.00300103</td>
-                  <td className="green">+2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> COTI/NEO
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="green">+2.85%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XYT/NEO
-                  </td>
-                  <td>0.00003103</td>
-                  <td className="green">+3.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BNB/NEO
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XMR/NEO
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRY/NEO
-                  </td>
-                  <td>0.00000123</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ADA/NEO
-                  </td>
-                  <td>0.00050103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> NEO/NEO
-                  </td>
-                  <td>0.00340103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XLM/NEO
-                  </td>
-                  <td>0.00035103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ENQ/NEO
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="green">+2.02%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AVA/NEO
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AMB/NEO
-                  </td>
-                  <td>0.05335103</td>
-                  <td className="green">+1.0%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> MAP/NEO
-                  </td>
-                  <td>0.00234103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GO/NEO
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="red">-6.50%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KICK/NEO
-                  </td>
-                  <td>0.02053103</td>
-                  <td className="red">-6.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> DBC/NEO
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+7.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GGC/NEO
-                  </td>
-                  <td>0.00353103</td>
-                  <td className="red">-4.05%</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tab>
-          <Tab eventKey="usdt" title="USDT">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Pairs</th>
-                  <th>Last Price</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ETH/USDT
-                  </td>
-                  <td>0.00350255</td>
-                  <td className="red">-2.58%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KCS/USDT
-                  </td>
-                  <td>0.00013192</td>
-                  <td className="green">+6.6%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XRP/USDT
-                  </td>
-                  <td>0.00002996</td>
-                  <td className="red">-0.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> VET/USDT
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="green">+1.8%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> EOS/USDT
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BTT/USDT
-                  </td>
-                  <td>0.00002303</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> LTC/USDT
-                  </td>
-                  <td>0.03520103</td>
-                  <td className="green">+1.5%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRX/USDT
-                  </td>
-                  <td>0.00330103</td>
-                  <td className="red">-3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BSV/USDT
-                  </td>
-                  <td>0.00300103</td>
-                  <td className="green">+2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> COTI/USDT
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="green">+2.85%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XYT/USDT
-                  </td>
-                  <td>0.00003103</td>
-                  <td className="green">+3.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BNB/USDT
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XMR/USDT
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRY/USDT
-                  </td>
-                  <td>0.00000123</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ADA/USDT
-                  </td>
-                  <td>0.00050103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> USDT/USDT
-                  </td>
-                  <td>0.00340103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XLM/USDT
-                  </td>
-                  <td>0.00035103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ENQ/USDT
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="green">+2.02%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AVA/USDT
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AMB/USDT
-                  </td>
-                  <td>0.05335103</td>
-                  <td className="green">+1.0%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> MAP/USDT
-                  </td>
-                  <td>0.00234103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GO/USDT
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="red">-6.50%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KICK/USDT
-                  </td>
-                  <td>0.02053103</td>
-                  <td className="red">-6.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> DBC/USDT
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+7.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GGC/USDT
-                  </td>
-                  <td>0.00353103</td>
-                  <td className="red">-4.05%</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tab>
-          <Tab eventKey="dai" title="DAI">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Pairs</th>
-                  <th>Last Price</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ETH/DAI
-                  </td>
-                  <td>0.05320255</td>
-                  <td className="green">+6.58%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KCS/DAI
-                  </td>
-                  <td>0.00013192</td>
-                  <td className="green">+0.6%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XRP/DAI
-                  </td>
-                  <td>0.00002996</td>
-                  <td className="red">-0.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> VET/DAI
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="green">+1.8%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> EOS/DAI
-                  </td>
-                  <td>0.00000103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BTT/DAI
-                  </td>
-                  <td>0.00002303</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> LTC/DAI
-                  </td>
-                  <td>0.03520103</td>
-                  <td className="green">+1.5%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRX/DAI
-                  </td>
-                  <td>0.00330103</td>
-                  <td className="red">-3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BSV/DAI
-                  </td>
-                  <td>0.00300103</td>
-                  <td className="green">+2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> COTI/DAI
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="green">+2.85%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XYT/DAI
-                  </td>
-                  <td>0.00003103</td>
-                  <td className="green">+3.55%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> BNB/DAI
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XMR/DAI
-                  </td>
-                  <td>0.003500103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> TRY/DAI
-                  </td>
-                  <td>0.00000123</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ADA/DAI
-                  </td>
-                  <td>0.00050103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> DAI/DAI
-                  </td>
-                  <td>0.00340103</td>
-                  <td className="red">-1.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> XLM/DAI
-                  </td>
-                  <td>0.00035103</td>
-                  <td className="green">+5.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> ENQ/DAI
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="green">+2.02%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AVA/DAI
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+3.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> AMB/DAI
-                  </td>
-                  <td>0.05335103</td>
-                  <td className="green">+1.0%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> MAP/DAI
-                  </td>
-                  <td>0.00234103</td>
-                  <td className="red">-2.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GO/DAI
-                  </td>
-                  <td>0.00354103</td>
-                  <td className="red">-6.50%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> KICK/DAI
-                  </td>
-                  <td>0.02053103</td>
-                  <td className="red">-6.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> DBC/DAI
-                  </td>
-                  <td>0.02535103</td>
-                  <td className="green">+7.05%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <i className="icon ion-md-star"></i> GGC/DAI
-                  </td>
-                  <td>0.00353103</td>
-                  <td className="red">-4.05%</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tab>
-        </Tabs>
+        {loading ? (
+              <div style={{ marginTop: "14%", marginLeft: "45%" }}>
+                <ClipLoader color={"#1E53E5"} loading={loading} size={80} />
+              </div>
+            ) : (
+          <Tabs defaultActiveKey={`tab-${initialProduct}`}  onSelect={handleTabChange}>
+          {products.map((item, index)=>(
+            <Tab eventKey={`tab-${item.id}`} title={item.product_name}>
+              <table className="table star-active">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Change</th>
+                    <th>Change(%)</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                {assets.map((item, index) => (
+                  <tr onClick={() => handleRowClick(item.symbol)} >
+                    <td>{item.symbol}</td>
+                    <td  className={getColorClass(item.change)}> {item.change} </td>
+                    <td  className={getColorClass(item.changesPercentage)}> {item.changesPercentage} </td>
+                    <td>{item.open}</td>
+                    <td>{item.dayHigh}</td>
+                    <td>{item.dayLow}</td>
+                    <td>{item.previousClose}</td>
+
+                  </tr>
+                ))}
+
+
+                </tbody>
+              </table>
+            </Tab>
+          ))}
+          </Tabs>
+           )}
       </div>
     </>
   );
 }
+export default MarketPairs;
