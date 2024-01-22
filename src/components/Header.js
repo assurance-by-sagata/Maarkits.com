@@ -5,9 +5,10 @@ import { ThemeConsumer } from '../context/ThemeContext';
 import { useHistory } from 'react-router-dom';
 import { userState,isLoggedInState } from '../state'
 import { clearUserDataAndLogout } from '../auth';
-import { useSetRecoilState } from 'recoil';
+import { useSetRecoilState,useRecoilValue } from 'recoil';
 
 const Header = () => {
+    const userData = useRecoilValue(userState);
     const history = useHistory(); // Initialize useHistory
     const setUserState = useSetRecoilState(userState); // Recoil hook to set user information
     const setLoggedInState = useSetRecoilState(isLoggedInState); // Recoil hook to set user isLoggedInState
@@ -33,9 +34,11 @@ const Header = () => {
               <ThemeConsumer>
                 {({ data }) => {
                   return data.theme === 'light' ? (
-                    <img src={'img/logo-dark.svg'} alt="logo" />
+                    // <img src={'img/logo-dark.svg'} alt="logo" />
+                     <h1>MarketsDojo</h1>
                   ) : (
-                    <img src={'img/logo-light.svg'} alt="logo" />
+                    //<img src={'img/logo-light.svg'} alt="logo" />
+                    <h1>MarketsDojo</h1>
                   );
                 }}
               </ThemeConsumer>
@@ -172,9 +175,9 @@ const Header = () => {
                         <img src={'img/avatar.svg'} alt="" />
                       </div>
                       <div className="info text-center">
-                        <p className="name font-weight-bold mb-0">Tony Stark</p>
+                        <p className="name font-weight-bold mb-0">{userData.username}</p>
                         <p className="email text-muted mb-3">
-                          tonystark@gmail.com
+                          {userData.email}
                         </p>
                       </div>
                     </div>

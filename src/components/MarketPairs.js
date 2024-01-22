@@ -28,6 +28,8 @@ const MarketPairs = () => {
   const [initialProduct, setInitialProduct] = useState(0);
   const [loading, setLoading] = useState(false);
 
+
+
   const limit =10;
   const globalSymbol="AAPL";
 
@@ -120,10 +122,21 @@ const MarketPairs = () => {
   const handleRowClick = (selectedAssest) => {
       setGlobalAsset(selectedAssest)
   };
+  const [symbolData, setSymbolData] = useState({});
+  const handleUpdate = (symbol, data) => {
+    // Update the state with the received data for the specific symbol
+    setSymbolData((prevData) => ({
+      ...prevData,
+      [symbol]: data,
+    }));
+  };
   return (
     <>
 
-      <SymbolList symbol={'aapl'} />
+
+      {/* {assets.map((symbol) => (
+        <SymbolList key={symbol} symbol={symbol} onUpdate={handleUpdate} />
+      ))} */}
       <div className="market-pairs">
         <div className="input-group">
           <div className="input-group-prepend">

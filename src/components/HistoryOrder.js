@@ -117,17 +117,17 @@ export default function HistoryOrder() {
       try {
         setLoading(true);
         const response = await fetch(BASE_URL + ENDPOINT.PORTFOLIO, {
-          method: "POST",
+          method: "GET",
           headers: {
-            Authorization: userData.access_token,
+            Authorization: "Bearer " + userData.access_token,
             "Content-Type": "application/json",
           },
         });
 
         if (response.status === 200) {
-          const data = await response.json();
-
-          if (data.portfolio.length > 0) {
+          const arrData = await response.json();
+          const data = arrData.data;
+         if (data.portfolio.length > 0) {
             const promises = data.portfolio.map((symbol) =>
               fetchDataForSymbol(symbol)
             );
@@ -184,6 +184,29 @@ export default function HistoryOrder() {
                   style={{ margin: "10px" }}
                 >
                   <div className="row">
+                    <div className="col-sm-3">
+                      <h2>
+                        {formatValue(
+                          startingAmnt,
+                          SETTING.CURRENCY
+                        )}
+                      </h2>
+                      <p>Opening Balance</p>
+                    </div>
+                    <div className="col-sm-2">
+                      <h2>{formatValue(
+                          (startingAmnt-investedAmount),
+                          SETTING.CURRENCY
+                        )}</h2>
+                      <p>Avaialable Balance</p>
+                    </div>
+                    <div className="col-sm-3">
+                      <h2>{formatValue(
+                          investedAmount,
+                          SETTING.CURRENCY
+                        )}</h2>
+                      <p>Gross Invested Value</p>
+                    </div>
                     <div className="col-sm-2">
                       <h2>
                         {formatValue(
@@ -200,30 +223,10 @@ export default function HistoryOrder() {
                       </h2>
                       <p>Profit/Loss</p>
                     </div>
-                    <div className="col-sm-3">
-                      <h2>
-                        {formatValue(
-                          startingAmnt,
-                          SETTING.CURRENCY
-                        )}
-                      </h2>
-                      <p>Starting Amount</p>
-                    </div>
 
-                    <div className="col-sm-3">
-                      <h2>{formatValue(
-                          investedAmount,
-                          SETTING.CURRENCY
-                        )}</h2>
-                      <p>Total Amount Invested</p>
-                    </div>
-                    <div className="col-sm-2">
-                      <h2>{formatValue(
-                          (startingAmnt-investedAmount),
-                          SETTING.CURRENCY
-                        )}</h2>
-                      <p>Avaialable Amount</p>
-                    </div>
+
+
+
                   </div>
                 </div>
                 {portfolioData.length > 0 ? (
@@ -232,10 +235,11 @@ export default function HistoryOrder() {
                       <thead>
                         <tr>
                           <th>PRODUCT</th>
-                          <th>MKT PRICE</th>
-                          <th>INVESTED</th>
+                          <th>UNITS OWNED</th>
+                          <th>AVG COST</th>
+                          <th>MARKET PRICE</th>
+                          <th>MARKET VALUE</th>
                           <th>RETURNS</th>
-                          <th>CURRENT </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -244,22 +248,16 @@ export default function HistoryOrder() {
                           <td>
                           {/* {item.symbol} ({item.symbol}) */}
                           {item.symbol}
-                            <div className="w10" style={{ width: "200px" }}>
-                              <span>{item.qnty} Shares </span>
-                              <span style={{ marginBottom: "4px" }}></span>
 
-                            </div>
                           </td>
+                          <td>
+                          {item.qnty}
+                          </td>
+                          <td>0</td>
                           <td className="">{formatValue(item.mkt_price,SETTING.CURRENCY)}</td>
-                          <td>{formatValue(item.invested_amount,SETTING.CURRENCY)}</td>
-                          <td className={getColorClass(item.return_amnt)}>
-                          {formatPLValue(item.return_amnt,SETTING.CURRENCY)}
-                            {/* <div className="w10" style={{ width: "200px" }}>
-                              <span style={{ marginBottom: "4px" }}></span>
-                              <span className="green">+2.3%</span>
-                            </div> */}
-                          </td>
-                          <td className={getColorClass(item.current_amnt)}> {formatPLValue(item.current_amnt,SETTING.CURRENCY)}</td>
+
+                          <td className={getColorClass(item.current_amnt)}> {formatValue(item.current_amnt,SETTING.CURRENCY)}</td>
+                          <td className={getColorClass(item.return_amnt)}>{formatPLValue(item.return_amnt,SETTING.CURRENCY)}</td>
                         </tr>
                       ))}
                       </tbody>

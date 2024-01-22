@@ -1,14 +1,27 @@
- export const BASE_URL = 'https://marketsdojo.vercel.app/';
+export const AWSDEV='http://13.60.18.208:5000/'
+export const AWSPROD='http://16.171.19.211:5000/'
+export const VERCEL= 'https://marketsdojo.vercel.app/'
+ export const BASE_URL = AWSDEV;
  export const ENDPOINT = {
-    REGISTER: 'v1/api/register',
-    LOGIN: 'v1/api/login',
-    PORTFOLIO: 'v1/api/portfolio',
-    BUY:'v1/api/buy',
-    SELL:'v1/api/sell',
-    PRODUCTLIST:'v1/api/product_list',
-    ASSETSLIST:'v1/api/assets_list',
+  REGISTER: 'v1/api/register',
+  LOGIN: 'v1/users/login',
+  PORTFOLIO: "v1/users/portfolio",
+  BUY:'v1/api/buy',
+  SELL:'v1/api/sell',
+  PRODUCTLIST:'v1/api/product_list',
+  ASSETSLIST:'v1/api/assets_list',
 
 };
+//  export const ENDPOINT = {
+//     REGISTER: 'v1/api/register',
+//     LOGIN: 'v1/api/login',
+//     PORTFOLIO: 'v1/api/portfolio',
+//     BUY:'v1/api/buy',
+//     SELL:'v1/api/sell',
+//     PRODUCTLIST:'v1/api/product_list',
+//     ASSETSLIST:'v1/api/assets_list',
+
+// };
 
  export const FMPENDPOINT = {
     MARKETOPEN: 'v3/is-the-market-open',
@@ -28,3 +41,4 @@ export const SETTING = {
 };
 
 export const SWA='https://virtserver.swaggerhub.com/ARMANJASUJA_1/marketsdojo/'
+
