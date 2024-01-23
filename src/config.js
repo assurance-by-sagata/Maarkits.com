@@ -1,5 +1,5 @@
-export const AWSDEV='http://13.60.18.208:5000/'
-export const AWSPROD='http://16.171.19.211:5000/'
+export const AWSDEV='https://13.60.18.208:5000/'
+export const AWSPROD='https://16.171.19.211:5000/'
 export const VERCEL= 'https://marketsdojo.vercel.app/'
  export const BASE_URL = AWSDEV;
  export const ENDPOINT = {
