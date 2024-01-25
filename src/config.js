@@ -3,11 +3,11 @@ export const AWSPROD='https://16.171.19.211:5000/'
 export const VERCEL= 'https://marketsdojo.vercel.app/'
  export const BASE_URL = AWSDEV;
  export const ENDPOINT = {
-  REGISTER: 'v1/api/register',
+  REGISTER: 'v1/users',
   LOGIN: 'v1/users/login',
   PORTFOLIO: "v1/users/portfolio",
-  BUY:'v1/api/buy',
-  SELL:'v1/api/sell',
+  BUY_SELL:'v1/users/history',
+
   PRODUCTLIST:'v1/api/product_list',
   ASSETSLIST:'v1/api/assets_list',
 

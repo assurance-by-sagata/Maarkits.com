@@ -30,7 +30,6 @@ const Login = () => {
       if (response.status === 200) {
         const userData = await response.json();
         if (userData) {
-          console.log("userData",userData);
           // Save user data to Recoil state for future use as well in local storage
           setUserData(userData.data, setUserState);
           setLoggedIn(true, setLoggedInState);
@@ -38,7 +37,7 @@ const Login = () => {
         }
       } else {
         const resData = await response.json();
-        throw new Error(resData.error.message);
+        throw new Error(resData.message);
       }
     } catch (err) {
       setError(err.message);

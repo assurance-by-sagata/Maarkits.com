@@ -70,12 +70,12 @@ const Signup = () => {
         if (response.status===200) {
           const userData = await response.json();
           // Save user data to Recoil state for future use as well in local storage
-          setUserData(userData, setUserState);
+          setUserData(userData.data, setUserState);
           setLoggedIn(true, setLoggedInState);
           history.push("/dashboard");
         } else {
           const resData = await response.json();
-          throw new Error(resData.error.message);
+          throw new Error(resData.message);
         }
       } catch (error) {
          setErrorMsg(error.message);

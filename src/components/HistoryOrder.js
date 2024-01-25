@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Tabs, Tab } from "react-bootstrap";
 import { BASE_URL, ENDPOINT, SETTING, FMPAPIURL, FMPAPIKEY } from "../config";
 import { getColorClass, formatPLValue, formatValue } from "../utility";
-import { userState } from "../state";
-import { useRecoilValue } from "recoil";
+import { userState ,flashMsg,portfolioState} from "../state";
+import { useRecoilValue ,useRecoilState,useSetRecoilState} from "recoil";
 import { ClipLoader } from "react-spinners";
-import { useSetRecoilState } from "recoil";
-import { flashMsg } from "../state";
+
+
 
 export default function HistoryOrder() {
   const [portfolioData, setPortfolioData] = useState([]);
@@ -18,6 +18,7 @@ export default function HistoryOrder() {
   const [currentValue, setCurrentValue] = useState(0);
   const [returnAmnt, setReturnAmnt] = useState(0);
   const [startingAmnt, setStartingAmnt] = useState(0);
+  const [updateFlag, setUpdateFlag] = useRecoilState(portfolioState);
 
   useEffect(() => {
     const fetchDataForSymbol = async (symbol) => {
@@ -45,13 +46,16 @@ export default function HistoryOrder() {
             mkt_price: mkt_price,
             invested_amount: invested_amount,
             current: currentValue,
-            current_amnt: currentValue<invested_amount?"-"+currentValue :currentValue,
+            current_amnt:
+              currentValue < invested_amount
+                ? "-" + currentValue
+                : currentValue,
             return_amnt: returnAmnt,
           };
           return finalPortfolioData;
         } else {
           const resData = await response.json();
-          throw new Error(resData.error.message);
+          throw new Error(resData.message);
         }
       } catch (error) {
         console.log(error.message);
@@ -127,12 +131,13 @@ export default function HistoryOrder() {
         if (response.status === 200) {
           const arrData = await response.json();
           const data = arrData.data;
-         if (data.portfolio.length > 0) {
+          setStartingAmnt(data.starting_amt);
+          if (data.portfolio.length > 0) {
             const promises = data.portfolio.map((symbol) =>
               fetchDataForSymbol(symbol)
             );
             const results = await Promise.all(promises);
-            console.log('results',results);
+            console.log("results", results);
             setPortfolioData(results);
             const totals = results.reduce(
               (accumulator, currentValue) => {
@@ -144,17 +149,15 @@ export default function HistoryOrder() {
               { invested_amount: 0, current: 0, return_amnt: 0 }
             );
 
-
             setInvestedAmount(totals.invested_amount);
             setCurrentValue(totals.current);
             setReturnAmnt(totals.return_amnt);
-            setStartingAmnt(data.starting_amt);
+
             setPortfolioData(results);
           }
-
         } else {
           const resData = await response.json();
-          throw new Error(resData.error.message);
+          throw new Error(resData.message);
         }
       } catch (error) {
         setErrorMsg({ msg: error.message, class: "alert-danger" });
@@ -164,9 +167,11 @@ export default function HistoryOrder() {
       }
     };
     // Call fetchData initially when the component mounts
-    fetchPortfolioData();
-
-  }, []);
+    if (updateFlag) {
+      fetchPortfolioData();
+      setUpdateFlag(false);
+    }
+  }, [updateFlag]);
 
   return (
     <>
@@ -185,35 +190,24 @@ export default function HistoryOrder() {
                 >
                   <div className="row">
                     <div className="col-sm-3">
-                      <h2>
-                        {formatValue(
-                          startingAmnt,
-                          SETTING.CURRENCY
-                        )}
-                      </h2>
+                      <h2>{formatValue(startingAmnt, SETTING.CURRENCY)}</h2>
                       <p>Opening Balance</p>
                     </div>
                     <div className="col-sm-2">
-                      <h2>{formatValue(
-                          (startingAmnt-investedAmount),
-                          SETTING.CURRENCY
-                        )}</h2>
-                      <p>Avaialable Balance</p>
-                    </div>
-                    <div className="col-sm-3">
-                      <h2>{formatValue(
-                          investedAmount,
-                          SETTING.CURRENCY
-                        )}</h2>
-                      <p>Gross Invested Value</p>
-                    </div>
-                    <div className="col-sm-2">
                       <h2>
                         {formatValue(
-                          currentValue,
+                          startingAmnt - investedAmount,
                           SETTING.CURRENCY
                         )}
                       </h2>
+                      <p>Avaialable Balance</p>
+                    </div>
+                    <div className="col-sm-3">
+                      <h2>{formatValue(investedAmount, SETTING.CURRENCY)}</h2>
+                      <p>Gross Invested Value</p>
+                    </div>
+                    <div className="col-sm-2">
+                      <h2>{formatValue(currentValue, SETTING.CURRENCY)}</h2>
                       <p>Current Value</p>
                     </div>
 
@@ -223,10 +217,6 @@ export default function HistoryOrder() {
                       </h2>
                       <p>Profit/Loss</p>
                     </div>
-
-
-
-
                   </div>
                 </div>
                 {portfolioData.length > 0 ? (
@@ -236,30 +226,37 @@ export default function HistoryOrder() {
                         <tr>
                           <th>PRODUCT</th>
                           <th>UNITS OWNED</th>
-                          <th>AVG COST</th>
+                          {/* <th>AVG COST</th> */}
                           <th>MARKET PRICE</th>
                           <th>MARKET VALUE</th>
                           <th>RETURNS</th>
                         </tr>
                       </thead>
                       <tbody>
-                      {portfolioData.map((item, index)  => (
-                        <tr data-href="exchange-light.html">
-                          <td>
-                          {/* {item.symbol} ({item.symbol}) */}
-                          {item.symbol}
+                        {portfolioData.map((item, index) => (
+                          <tr data-href="exchange-light.html">
+                            <td>
+                              {/* {item.symbol} ({item.symbol}) */}
+                              {item.symbol}
+                            </td>
+                            <td>{item.qnty}</td>
+                            {/* <td>0</td> */}
+                            <td className="">
+                              {formatValue(item.mkt_price, SETTING.CURRENCY)}
+                            </td>
 
-                          </td>
-                          <td>
-                          {item.qnty}
-                          </td>
-                          <td>0</td>
-                          <td className="">{formatValue(item.mkt_price,SETTING.CURRENCY)}</td>
-
-                          <td className={getColorClass(item.current_amnt)}> {formatValue(item.current_amnt,SETTING.CURRENCY)}</td>
-                          <td className={getColorClass(item.return_amnt)}>{formatPLValue(item.return_amnt,SETTING.CURRENCY)}</td>
-                        </tr>
-                      ))}
+                            <td className={getColorClass(item.current_amnt)}>
+                              {" "}
+                              {formatValue(item.current_amnt, SETTING.CURRENCY)}
+                            </td>
+                            <td className={getColorClass(item.return_amnt)}>
+                              {formatPLValue(
+                                item.return_amnt,
+                                SETTING.CURRENCY
+                              )}
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>

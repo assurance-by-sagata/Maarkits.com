@@ -57,7 +57,7 @@ const MarketPairs = () => {
           setGlobalProduct(selected.product_name)
         } else {
           const resData = await response.json();
-          throw new Error(resData.error.message);
+          throw new Error(resData.message);
         }
       } catch (error) {
         console.log(error.message);
@@ -102,7 +102,7 @@ const MarketPairs = () => {
 
       } else {
         const resData = await response.json();
-        throw new Error(resData.error.message);
+        throw new Error(resData.message);
       }
     } catch (error) {
       console.log(error.message);
