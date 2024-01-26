@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, Tab } from "react-bootstrap";
 import { BASE_URL, ENDPOINT, SETTING, FMPAPIURL, FMPAPIKEY } from "../config";
-import { getColorClass, formatPLValue, formatValue } from "../utility";
+import { getColorClass, formatPLValue, formatValue,fetchStremDataForSymbol } from "../utility";
 import { userState ,flashMsg,portfolioState} from "../state";
-import { useRecoilValue ,useRecoilState,useSetRecoilState} from "recoil";
+import { useRecoilValue ,useSetRecoilState} from "recoil";
 import { ClipLoader } from "react-spinners";
 
 
@@ -18,10 +18,10 @@ export default function HistoryOrder() {
   const [currentValue, setCurrentValue] = useState(0);
   const [returnAmnt, setReturnAmnt] = useState(0);
   const [startingAmnt, setStartingAmnt] = useState(0);
-  const [updateFlag, setUpdateFlag] = useRecoilState(portfolioState);
+  const updateFlag = useRecoilValue(portfolioState);
 
   useEffect(() => {
-    const fetchDataForSymbol = async (symbol) => {
+    const fetchDataForSymbol1 = async (symbol) => {
       const APIURL = `${FMPAPIURL}v3/quote/${symbol.symbol}?apikey=${FMPAPIKEY}`;
       try {
         const response = await fetch(APIURL, {
@@ -65,57 +65,41 @@ export default function HistoryOrder() {
         console.log("Final call");
       }
     };
-    const fetchDataForSymbol1 = (symbol) => {
-      const socket = new WebSocket(
-        `wss://websockets.financialmodelingprep.com/api/v3/quote/${symbol.symbol}?apikey=6fbceaefb411ee907e9062098ef0fd66`
-      );
-      console.log("WebSocket object:", socket);
-      return () => {
-        if (socket.readyState === 1) {
-          // <-- This is important
-          socket.close();
-        }
-        //socket.close();
-      };
-      // socket.onopen = (event) => {
-      //   console.log("WebSocket opened:", event);
-      // };
 
-      // socket.onmessage = (event) => {
-      //   const stockData = JSON.parse(event.data);
-      //   console.log("stockData", stockData);
-      //   // const finalPortfolioData = {
-      //   //   product: symbol.stock_name,
-      //   //   qnty: symbol.quantity,
-      //   //   avg_cost: symbol.avg_cost,
-      //   //   mkt_price: stockData.price,
-      //   //   invested_amount: symbol.invested_amount,
-      //   //   current: stockData.price * symbol.quantity,
-      //   // };
-      //   // setPortfolioData((prevData) => ({
-      //   //   ...prevData,
-      //   //   portfolio: [...prevData.portfolio, finalPortfolioData],
-      //   // }));
-      // };
+    const fetchDataForSymbol = async (symbol) => {
 
-      // socket.onclose = (event) => {
-      //   console.log("WebSocket closed:", event);
-      //   console.log("Close code:", event.code);
-      //   console.log("Close reason:", event.reason);
-      // };
-      // socket.onerror = (event) => {
-      //   console.error("WebSocket error:", event);
-      //   if (event.message) {
-      //     console.error("WebSocket Error message:", event.message);
-      //   }
-      // };
-      // return () => {
-      //   if (socket.readyState === 1) { // <-- This is important
-      //       socket.close();
-      //   }
-      //   //socket.close();
-      // };
+      try {
+
+          const currentValue = 0 * symbol.quantity;
+          const mkt_price = 0;
+          const invested_amount = symbol.invested_amount;
+          const returnAmnt = currentValue - invested_amount;
+
+          const finalPortfolioData = {
+            product: symbol.name,
+            symbol: symbol.symbol,
+            qnty: symbol.quantity,
+            avg_cost: symbol.avg_cost,
+            mkt_price: mkt_price,
+            invested_amount: invested_amount,
+            current: currentValue,
+            current_amnt:
+              currentValue < invested_amount
+                ? "-" + currentValue
+                : currentValue,
+            return_amnt: returnAmnt,
+          };
+          return finalPortfolioData;
+
+      } catch (error) {
+        console.log(error.message);
+        setErrorMsg({ msg: error.message, class: "alert-danger" });
+        // Handle network errors or other exceptions
+      } finally {
+        console.log("Final call");
+      }
     };
+
 
     const fetchPortfolioData = async () => {
       try {
@@ -138,7 +122,7 @@ export default function HistoryOrder() {
             );
             const results = await Promise.all(promises);
             console.log("results", results);
-            setPortfolioData(results);
+
             const totals = results.reduce(
               (accumulator, currentValue) => {
                 accumulator.invested_amount += currentValue.invested_amount;
@@ -166,11 +150,8 @@ export default function HistoryOrder() {
         setLoading(false);
       }
     };
-    // Call fetchData initially when the component mounts
-    if (updateFlag) {
-      fetchPortfolioData();
-      setUpdateFlag(false);
-    }
+
+    fetchPortfolioData();
   }, [updateFlag]);
 
   return (

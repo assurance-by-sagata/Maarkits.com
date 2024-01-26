@@ -41,4 +41,5 @@ export const SETTING = {
 };
 
 export const SWA='https://virtserver.swaggerhub.com/ARMANJASUJA_1/marketsdojo/'
+export const COMANYWEBSOCKET= 'wss://websockets.financialmodelingprep.com'
 

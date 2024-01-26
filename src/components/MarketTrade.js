@@ -77,6 +77,7 @@ const MarketTrade = () => {
 
 
   const handleBuySellStock = async (action) => {
+    const qty=  action==='buy'?quantity:sellQuantity;
     try {
       setLoading(action);
       const response = await fetch( BASE_URL + ENDPOINT.BUY_SELL,
@@ -86,7 +87,7 @@ const MarketTrade = () => {
             Authorization: "Bearer " + userData.access_token,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({symbol,quantity,asset_type:product,action}),
+          body: JSON.stringify({symbol,quantity:qty,asset_type:product,action}),
         }
       );
       if (response.status === 200) {
@@ -171,7 +172,7 @@ const MarketTrade = () => {
                   placeholder="No of Shares"
                   required
                   value={sellQuantity}
-                  onChange={(e) => setSellQuantity(e.target.value)}
+                  onChange={(e) => setSellQuantity(Number(e.target.value))}
                 />
                 <div className="input-group-append">
                   <span className="input-group-text">{product}</span>

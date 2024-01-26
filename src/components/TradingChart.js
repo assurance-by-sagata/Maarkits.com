@@ -23,7 +23,7 @@ export default function TradingChart() {
         <AdvancedChart
           widgetProps={{
             theme: 'light',
-            symbol,
+            symbol:getBeforeDotValue(symbol),
             allow_symbol_change: true,
             toolbar_bg: '#fff',
             height: 550,

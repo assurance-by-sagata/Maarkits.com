@@ -135,7 +135,7 @@ const MarketPairs = () => {
 
 
       {/* {assets.map((symbol) => (
-        <SymbolList key={symbol} symbol={symbol} onUpdate={handleUpdate} />
+        <SymbolList key={symbol.symbol} symbol={symbol.symbol} onUpdate={handleUpdate} />
       ))} */}
       <div className="market-pairs">
         <div className="input-group">
