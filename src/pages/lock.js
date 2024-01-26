@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from "react";
-import useWebSocket from "react-use-websocket";
+
 import { Link } from "react-router-dom";
-import { fetchStremDataForSymbol } from "../utility";
 const OtpVerify = () => {
-  const symbol = "eurusd"; // Replace with your list of symbols
-  const apiKey = "pranav.chaudhary@sagataltd.io";
-  // const [sendMessage, lastMessage, readyState] = useWebSocket(
-  //   "wss://demos.kaazing.com/echo"
-  // );
-  useEffect(() => {
-    fetchStremDataForSymbol({symbol:'aapl'});
-  }, []);
+
 
   return (
     <>
