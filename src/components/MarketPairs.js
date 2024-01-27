@@ -82,7 +82,7 @@ const MarketPairs = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${FMPAPIURL + CRYPTOLIST}?apikey=${FMPAPIKEY}`,
+        `${FMPAPIURL + STOCKLIST}?apikey=${FMPAPIKEY}`,
         {
           method: "GET",
           headers: {
@@ -116,7 +116,7 @@ const MarketPairs = () => {
 
         // Subscribe to ticker prices
         const symbols = assetsData.map((r) => r.symbol?.toLowerCase());
-        fetchStremData("crypto", symbols, (newData) => {
+        fetchStremData("websockets", symbols, (newData) => {
           setTickerPrices((prev) => ({ ...prev, ...newData }));
         });
       } else {
