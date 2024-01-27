@@ -27,7 +27,7 @@ export const VERCEL= 'https://marketsdojo.vercel.app/'
     MARKETOPEN: 'v3/is-the-market-open',
     FOREXNEWS:  'v4/forex_news?page=0&apikey=',
     STOCKDATA:  'v3/quote/AAPL?apikey=',
-    BULKSTOCKLIST:'v3/quote/'
+
 };
 export const STOCKNEWSENDPOINT = {
   NEWS: 'v1?tickers=',
@@ -38,8 +38,10 @@ export const FMPAPIKEY = '6fbceaefb411ee907e9062098ef0fd66'
 export const NEWSAPIKEY = 'qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n'
 export const SETTING = {
   CURRENCY: '$',
+  INITIALSYMBOL: "AAPL"
 };
 
 export const SWA='https://virtserver.swaggerhub.com/ARMANJASUJA_1/marketsdojo/'
 export const COMANYWEBSOCKET= 'wss://websockets.financialmodelingprep.com'
-
+export const STOCKLIST="v3/quote/AAPL,AGOL.BO,NYKAA.BO,ITC.BO,META,GOOG,PMGOLD.AX,INDIGRID.NS,INDIGRID.NS";
+export const CRYPTOLIST= "v3/quote/ETH,SOL,BTCUSD,BTC";

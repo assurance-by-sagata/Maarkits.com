@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, Tab } from "react-bootstrap";
-import { BASE_URL, ENDPOINT, SETTING, FMPAPIURL, FMPAPIKEY } from "../config";
+import { BASE_URL, ENDPOINT, SETTING,  } from "../config";
 import {
   getColorClass,
   formatPLValue,
   formatValue,
   formatTickerValue,
   fetchStremDataForSymbols,
+  fetchMarketPriceForSymbol
 } from "../utility";
 import { userState, flashMsg, portfolioState } from "../state";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -26,53 +27,17 @@ export default function HistoryOrder() {
   const [tickerPrices, setTickerPrices] = useState({});
 
   useEffect(() => {
-    const fetchDataForSymbol1 = async (symbol) => {
-      const APIURL = `${FMPAPIURL}v3/quote/${symbol.symbol}?apikey=${FMPAPIKEY}`;
-      try {
-        const response = await fetch(APIURL, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
 
-        if (response.status === 200) {
-          const stockData = await response.json();
-          const currentValue = stockData[0].price * symbol.quantity;
-          const mkt_price = stockData[0].price;
-          const invested_amount = symbol.invested_amount;
-          const returnAmnt = currentValue - invested_amount;
-
-          const finalPortfolioData = {
-            product: symbol.name,
-            symbol: symbol.symbol,
-            qnty: symbol.quantity,
-            avg_cost: symbol.avg_cost,
-            mkt_price: mkt_price,
-            invested_amount: invested_amount,
-            current: currentValue,
-            current_amnt:
-              currentValue < invested_amount
-                ? "-" + currentValue
-                : currentValue,
-            return_amnt: returnAmnt,
-          };
-          return finalPortfolioData;
-        } else {
-          const resData = await response.json();
-          throw new Error(resData.message);
-        }
-      } catch (error) {
-        console.log(error.message);
-        setErrorMsg({ msg: error.message, class: "alert-danger" });
-        // Handle network errors or other exceptions
-      } finally {
-        console.log("Final call");
-      }
-    };
 
     const fetchDataForSymbol = async (symbol) => {
       try {
+
+        fetchMarketPriceForSymbol(symbol, (newPrice) => {
+          setTickerPrices((prev) => ({
+            ...prev,
+            ...newPrice,
+          }));
+        });
         const currentValue = 0 * symbol.quantity;
         const mkt_price = 0;
         const invested_amount = symbol.invested_amount;
@@ -169,6 +134,7 @@ export default function HistoryOrder() {
   }, [updateFlag]);
 
   useEffect(() => {
+    console.log("tickerPrices array",tickerPrices)
     const currentValue = portfolioData.reduce((total, ticker) => {
       total += ticker.qnty * (tickerPrices[ticker.symbol?.toLowerCase()] ?? 0);
       return total;
@@ -179,6 +145,7 @@ export default function HistoryOrder() {
 
   return (
     <>
+
       <div className="market-history-tab market-order mt15">
         <Tabs defaultActiveKey="portfolio">
           <Tab eventKey="portfolio" title="Portfolio">
