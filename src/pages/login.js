@@ -6,6 +6,7 @@ import { useSetRecoilState } from "recoil";
 import { setLoggedIn, setUserData } from "../auth";
 import { BASE_URL, ENDPOINT } from "../config";
 import { BeatLoader } from "react-spinners";
+import {getBeforeDotValue} from '../utility';
 
 const Login = () => {
   const history = useHistory();
@@ -28,12 +29,32 @@ const Login = () => {
         body: JSON.stringify({ email: username, password: password }),
       });
       if (response.status === 200) {
-        const userData = await response.json();
+        const resData = await response.json();
+        const userData = resData.data;
+        const userSymbols = [];
         if (userData) {
           // Save user data to Recoil state for future use as well in local storage
-          setUserData(userData.data, setUserState);
+          const responsePortfolio = await fetch(BASE_URL + ENDPOINT.PORTFOLIO, {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + userData.access_token,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (responsePortfolio.status === 200) {
+            const prtData = await responsePortfolio.json();
+            const portfolioData = prtData.data;
+            if (portfolioData.portfolio.length > 0) {
+              portfolioData.portfolio.forEach((element) => {
+                userSymbols.push(getBeforeDotValue (element.symbol?.toLowerCase()));
+              });
+            }
+          }
+          userData.portfolio = userSymbols;
+          setUserData(userData, setUserState);
           setLoggedIn(true, setLoggedInState);
-           history.push("/dashboard");
+          history.push("/dashboard");
         }
       } else {
         const resData = await response.json();
@@ -108,7 +129,16 @@ const Login = () => {
             </div>
             <button type="submit" className="btn btn-primary">
               {loading ? (
-                <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
+                <BeatLoader
+                  style={{
+                    display: "block",
+                    margin: "0 auto",
+                    fontSize: "16px",
+                  }}
+                  color={"#ffffff"}
+                  loading={loading}
+                  size={8}
+                />
               ) : (
                 "Sign In"
               )}

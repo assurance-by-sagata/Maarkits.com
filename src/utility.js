@@ -34,7 +34,7 @@ export const fetchStremDataForSymbols = (stream, symbols, updatePrice) => {
   const socket = new WebSocket(`wss://${stream}.financialmodelingprep.com`);
   // Connection opened
   socket.addEventListener("open", (event) => {
-    console.log("WebSocket connection opened");
+    //console.log("WebSocket connection opened");
 
     // Send login message
     const loginMessage = {
@@ -48,7 +48,7 @@ export const fetchStremDataForSymbols = (stream, symbols, updatePrice) => {
   // Listen for messages
   socket.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
-    console.log(`WebSocket message received`, message);
+    //console.log(`WebSocket message received`, message);
 
     // Check if the authentication was successful
     if (message.status === 200 && message.event === "login") {
@@ -63,7 +63,7 @@ export const fetchStremDataForSymbols = (stream, symbols, updatePrice) => {
         socket.send(JSON.stringify(subscribeMessage));
       });
     } else if (message.status === 200 && message.event === "subscribe") {
-      console.log(`Successfully subscribed to:`, message);
+      //console.log(`Successfully subscribed to:`, message);
     } else {
       updatePrice({
         [message.s]: message.lp ?? message.bp,
@@ -74,7 +74,7 @@ export const fetchStremDataForSymbols = (stream, symbols, updatePrice) => {
 
   // Connection closed
   socket.addEventListener("close", (event) => {
-    console.log(`WebSocket connection closed`, event);
+    //console.log(`WebSocket connection closed`, event);
   });
   // Handle errors
   socket.addEventListener("error", (event) => {
@@ -94,8 +94,13 @@ export const fetchMarketPriceForSymbol = async (symbol,updatePrice) => {
 
     if (response.status === 200) {
       const stockData = await response.json();
+      const asset= stockData[0];
       updatePrice({
-         [symbol.symbol?.toLowerCase()]:stockData[0].price?? 0,
+         [symbol.symbol?.toLowerCase()]:{ s: asset.symbol,
+          ap: asset.price,
+          bp: asset.price,
+          lp: asset.previousClose}
+
       });
     } else {
       const resData = await response.json();
@@ -161,4 +166,15 @@ export const fetchStremData = (stream, symbols, updatePrice) => {
   socket.addEventListener("error", (event) => {
     console.error(`WebSocket error`, event);
   });
+};
+
+export const getBeforeDotValue = (inputString) => {
+  // Check if the input string is not null and contains a dot
+  if (inputString && inputString.includes('.')) {
+    // Use split to get the part before the dot
+    return inputString.split('.')[0];
+  } else {
+    // If there is no dot or the input string is null, return the original string
+    return inputString;
+  }
 };

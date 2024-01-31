@@ -17,10 +17,11 @@ import {
   formatPLValue,
   formatValue,
   fetchStremData,
+  getBeforeDotValue,
   formatTickerValue,
 } from "../utility";
-import { useSetRecoilState } from "recoil";
-import { flashMsg, globalAsset, globalProduct } from "../state";
+import { useSetRecoilState ,useRecoilValue,useRecoilState} from "recoil";
+import { flashMsg, globalAsset, globalProduct,userState,socketData } from "../state";
 import { ClipLoader } from "react-spinners";
 import SymbolList from "../components/SymbolList";
 
@@ -34,8 +35,11 @@ const MarketPairs = () => {
   ]);
   const [initialProduct, setInitialProduct] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [tickerPrices, setTickerPrices] = useState({});
+  const tickerPrices= useRecoilValue(socketData);
+  const setTickerPrices =  useSetRecoilState(socketData);
   const globalSymbol = SETTING.INITIALSYMBOL;
+  const userData = useRecoilValue(userState);
+  const [symbolList, setSymbolList] = useState([]);
 
   useEffect(() => {
     // const fetchProductList = async () => {
@@ -75,7 +79,11 @@ const MarketPairs = () => {
 
     // Define a function to fetch data from your API
     setGlobalAsset(globalSymbol);
+    setGlobalProduct('Stock (Equity)');
     fetchData(1);
+    console.log("tickerPrices array at market pairs",tickerPrices);
+
+    console.log("user portfolio data",userData.portfolio);
   }, []);
 
   const fetchData = async (initialProduct) => {
@@ -99,8 +107,9 @@ const MarketPairs = () => {
           bp: asset.price,
           lp: asset.previousClose,
         }));
-
         setAssets(newAssets);
+        const userSymbols= userData.portfolio;
+        const mrktSymbols= []
         assetsData.forEach((asset) => {
           const nd = {
             [asset.symbol?.toLowerCase()]: {
@@ -111,12 +120,20 @@ const MarketPairs = () => {
             },
           };
 
-          setTickerPrices((prev) => ({ ...prev, ...nd }));
+          const symbolKey = getBeforeDotValue(asset.symbol?.toLowerCase());
+          //const symbolKey = asset.symbol?.toLowerCase();
+          mrktSymbols.push(symbolKey)
+           setTickerPrices((prev) => ({ ...prev, ...nd }));
         });
 
+
+        // Finilaze the symbol list including user portfolio symbol list
+        const mergedSymbols = [...new Set([...userSymbols, ...mrktSymbols])];
         // Subscribe to ticker prices
-        const symbols = assetsData.map((r) => r.symbol?.toLowerCase());
-        fetchStremData("websockets", symbols, (newData) => {
+        fetchStremData("websockets", mergedSymbols, (newData) => {
+          setTickerPrices((prev) => ({ ...prev, ...newData }));
+        });
+        fetchStremData("forex", mergedSymbols, (newData) => {
           setTickerPrices((prev) => ({ ...prev, ...newData }));
         });
       } else {
@@ -124,8 +141,8 @@ const MarketPairs = () => {
         throw new Error(resData.message);
       }
     } catch (error) {
-      console.log(error.message);
-      setFlashMsg({ msg: error.message, class: "alert-danger" });
+      console.log(error);
+       setFlashMsg({ msg: error.message, class: "alert-danger" });
       // Handle network errors or other exceptions
     } finally {
       setLoading(false);

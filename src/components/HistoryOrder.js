@@ -7,9 +7,10 @@ import {
   formatValue,
   formatTickerValue,
   fetchStremDataForSymbols,
+  fetchStremData,
   fetchMarketPriceForSymbol
 } from "../utility";
-import { userState, flashMsg, portfolioState } from "../state";
+import { userState, flashMsg, portfolioState,socketData } from "../state";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { ClipLoader } from "react-spinners";
 
@@ -24,7 +25,8 @@ export default function HistoryOrder() {
   const [returnAmnt, setReturnAmnt] = useState(0);
   const [startingAmnt, setStartingAmnt] = useState(0);
   const updateFlag = useRecoilValue(portfolioState);
-  const [tickerPrices, setTickerPrices] = useState({});
+  const tickerPrices= useRecoilValue(socketData);
+  const setTickerPrices =  useSetRecoilState(socketData);
 
   useEffect(() => {
 
@@ -103,20 +105,7 @@ export default function HistoryOrder() {
 
             setPortfolioData(results);
 
-            // Subscribe to ticker prices
-            const symbols = results.map((r) => r.symbol?.toLowerCase());
-            fetchStremDataForSymbols("forex", symbols, (newPrice) => {
-              setTickerPrices((prev) => ({
-                ...prev,
-                ...newPrice,
-              }));
-            });
-            fetchStremDataForSymbols("websockets", symbols, (newPrice) => {
-              setTickerPrices((prev) => ({
-                ...prev,
-                ...newPrice,
-              }));
-            });
+
           }
         } else {
           const resData = await response.json();
@@ -134,9 +123,11 @@ export default function HistoryOrder() {
   }, [updateFlag]);
 
   useEffect(() => {
-    console.log("tickerPrices array",tickerPrices)
+
     const currentValue = portfolioData.reduce((total, ticker) => {
-      total += ticker.qnty * (tickerPrices[ticker.symbol?.toLowerCase()] ?? 0);
+      const symbolKey = ticker.symbol?.toLowerCase();
+      const lpValue = tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
+      total += ticker.qnty * (lpValue ?? 0);
       return total;
     }, 0);
     setCurrentValue(currentValue);
@@ -207,8 +198,11 @@ export default function HistoryOrder() {
                         </tr>
                       </thead>
                       <tbody>
-                        {portfolioData.map((item, index) => (
-                          <tr data-href="exchange-light.html">
+                      {portfolioData.map((item, index) => {
+                        const symbolKey = item.symbol?.toLowerCase();
+                        const lpValue = tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
+                          return(
+                          <tr key={index} data-href="exchange-light.html">
                             <td>
                               {/* {item.symbol} ({item.symbol}) */}
                               {item.symbol}
@@ -217,23 +211,24 @@ export default function HistoryOrder() {
                             {/* <td>0</td> */}
                             <td className="">
                               {formatTickerValue(
-                                tickerPrices[item.symbol?.toLowerCase()] ?? 0.0,
+                                lpValue,
                                 SETTING.CURRENCY
                               )}
                             </td>
 
                             <td className={getColorClass(item.current_amnt)}>
-                               {formatValue(((tickerPrices[item.symbol?.toLowerCase()] ?? 0.0)*item.qnty), SETTING.CURRENCY)}
+                               {formatValue(((lpValue)*item.qnty), SETTING.CURRENCY)}
                             </td>
                             <td className={getColorClass(item.invested_amount)}>
                               {formatValue( item.invested_amount, SETTING.CURRENCY )}
                             </td>
-                            <td className={getColorClass(((tickerPrices[item.symbol?.toLowerCase()] ?? 0.0)*item.qnty)-(item.invested_amount))}>
+                            <td className={getColorClass(((lpValue)*item.qnty)-(item.invested_amount))}>
 
-                              {formatPLValue(((tickerPrices[item.symbol?.toLowerCase()] ?? 0.0)*item.qnty)- (item.invested_amount), SETTING.CURRENCY )}
+                              {formatPLValue(((lpValue)*item.qnty)- (item.invested_amount), SETTING.CURRENCY )}
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

@@ -27,3 +27,8 @@ export const portfolioState = atom({
   key: 'portfolioState',
   default: true
 });
+
+export const socketData = atom({
+  key: 'socketData',
+  default: {}
+});

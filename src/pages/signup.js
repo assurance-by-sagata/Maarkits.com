@@ -68,9 +68,12 @@ const Signup = () => {
         });
 
         if (response.status===200) {
-          const userData = await response.json();
+          const uData = await response.json();
+          const  userData= uData.data;
+          const userSymbols=[];
           // Save user data to Recoil state for future use as well in local storage
-          setUserData(userData.data, setUserState);
+          userData.portfolio = userSymbols;
+          setUserData(userData, setUserState);
           setLoggedIn(true, setLoggedInState);
           history.push("/dashboard");
         } else {
