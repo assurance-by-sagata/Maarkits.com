@@ -1,7 +1,8 @@
 export const AWSDEV='https://13.60.18.208:5000/'
+const AWSDOMAIN= 'http://devs-md.com/5000'
 export const AWSPROD='https://16.171.19.211:5000/'
 export const VERCEL= 'https://marketsdojo.vercel.app/'
- export const BASE_URL = AWSDEV;
+ export const BASE_URL = AWSDOMAIN;
  export const ENDPOINT = {
   REGISTER: 'v1/users',
   LOGIN: 'v1/users/login',
