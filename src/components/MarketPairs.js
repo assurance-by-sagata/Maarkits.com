@@ -83,7 +83,7 @@ const MarketPairs = () => {
     fetchData(1);
     console.log("tickerPrices array at market pairs",tickerPrices);
 
-    console.log("user portfolio data",userData.portfolio);
+
   }, []);
 
   const fetchData = async (initialProduct) => {
@@ -207,19 +207,19 @@ const MarketPairs = () => {
                     <td  className={getColorClass(item.changesPercentage)}> {item.changesPercentage} </td> */}
                         <td>
                           {formatTickerValue(
-                            tickerPrices[item.s?.toLowerCase()].ap ?? item.ap,
+                            tickerPrices[item.s?.toLowerCase()]?.ap ?? item.ap,
                             SETTING.CURRENCY
                           )}
                         </td>
                         <td>
                           {formatTickerValue(
-                            tickerPrices[item.s?.toLowerCase()].bp ?? item.bp,
+                            tickerPrices[item.s?.toLowerCase()]?.bp ?? item.bp,
                             SETTING.CURRENCY
                           )}
                         </td>
                         <td>
                           {formatTickerValue(
-                            tickerPrices[item.s?.toLowerCase()].lp ?? item.lp,
+                            tickerPrices[item.s?.toLowerCase()]?.lp ?? item.lp,
                             SETTING.CURRENCY
                           )}
                         </td>

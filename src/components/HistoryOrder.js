@@ -28,48 +28,47 @@ export default function HistoryOrder() {
   const tickerPrices= useRecoilValue(socketData);
   const setTickerPrices =  useSetRecoilState(socketData);
 
+  const fetchDataForSymbol = async (symbol) => {
+    try {
+
+      fetchMarketPriceForSymbol(symbol, (newPrice) => {
+        setTickerPrices((prev) => ({
+          ...prev,
+          ...newPrice,
+        }));
+      });
+      const currentValue = 0 * symbol.quantity;
+      const mkt_price = 0;
+      const invested_amount = symbol.invested_amount;
+      const returnAmnt = currentValue - invested_amount;
+
+      const finalPortfolioData = {
+        product: symbol.name,
+        symbol: symbol.symbol,
+        qnty: symbol.quantity,
+        avg_cost: symbol.avg_cost,
+        mkt_price: mkt_price,
+        invested_amount: invested_amount,
+        current: currentValue,
+        current_amnt:
+          currentValue < invested_amount ? "-" + currentValue : currentValue,
+        return_amnt: returnAmnt,
+      };
+      return finalPortfolioData;
+    } catch (error) {
+      console.log(error.message);
+      setErrorMsg({ msg: error.message, class: "alert-danger" });
+      // Handle network errors or other exceptions
+    }
+  };
   useEffect(() => {
-
-
-    const fetchDataForSymbol = async (symbol) => {
-      try {
-
-        fetchMarketPriceForSymbol(symbol, (newPrice) => {
-          setTickerPrices((prev) => ({
-            ...prev,
-            ...newPrice,
-          }));
-        });
-        const currentValue = 0 * symbol.quantity;
-        const mkt_price = 0;
-        const invested_amount = symbol.invested_amount;
-        const returnAmnt = currentValue - invested_amount;
-
-        const finalPortfolioData = {
-          product: symbol.name,
-          symbol: symbol.symbol,
-          qnty: symbol.quantity,
-          avg_cost: symbol.avg_cost,
-          mkt_price: mkt_price,
-          invested_amount: invested_amount,
-          current: currentValue,
-          current_amnt:
-            currentValue < invested_amount ? "-" + currentValue : currentValue,
-          return_amnt: returnAmnt,
-        };
-        return finalPortfolioData;
-      } catch (error) {
-        console.log(error.message);
-        setErrorMsg({ msg: error.message, class: "alert-danger" });
-        // Handle network errors or other exceptions
-      } finally {
-        console.log("Final call");
-      }
-    };
 
     const fetchPortfolioData = async () => {
       try {
-        setLoading(true);
+        console.log("response");
+        //setLoading(true);
+        console.log("response 1" );
+        console.log("userData",userData);
         const response = await fetch(BASE_URL + ENDPOINT.PORTFOLIO, {
           method: "GET",
           headers: {
@@ -77,9 +76,9 @@ export default function HistoryOrder() {
             "Content-Type": "application/json",
           },
         });
-
         if (response.status === 200) {
           const arrData = await response.json();
+
           const data = arrData.data;
           setStartingAmnt(data.starting_amt);
           if (data.portfolio.length > 0) {
@@ -87,7 +86,7 @@ export default function HistoryOrder() {
               fetchDataForSymbol(symbol)
             );
             const results = await Promise.all(promises);
-            console.log("results", results);
+
 
             const totals = results.reduce(
               (accumulator, currentValue) => {
@@ -102,11 +101,8 @@ export default function HistoryOrder() {
             setInvestedAmount(totals.invested_amount);
             setCurrentValue(totals.current);
             setReturnAmnt(totals.return_amnt);
-
             setPortfolioData(results);
-
-
-          }
+        }
         } else {
           const resData = await response.json();
           throw new Error(resData.message);
@@ -120,20 +116,21 @@ export default function HistoryOrder() {
     };
 
     fetchPortfolioData();
+
   }, [updateFlag]);
 
   useEffect(() => {
 
-    const currentValue = portfolioData.reduce((total, ticker) => {
-      const symbolKey = ticker.symbol?.toLowerCase();
-      const lpValue = tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
-      total += ticker.qnty * (lpValue ?? 0);
-      return total;
-    }, 0);
-    setCurrentValue(currentValue);
+    // const currentValue = portfolioData.reduce((total, ticker) => {
+    //   const symbolKey = ticker.symbol?.toLowerCase();
+    //   const lpValue = tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
+    //   total += ticker.qnty * (lpValue ?? 0);
+    //   return total;
+    // }, 0);
+    setCurrentValue(0);
     setReturnAmnt(investedAmount - currentValue ?? 0);
   }, [tickerPrices]);
-
+  console.log("portfolioData", portfolioData)
   return (
     <>
 
@@ -141,7 +138,7 @@ export default function HistoryOrder() {
         <Tabs defaultActiveKey="portfolio">
           <Tab eventKey="portfolio" title="Portfolio">
             {loading ? (
-              <div style={{ marginTop: "14%", marginLeft: "45%" }}>
+              <div style={{ marginTop: "14%", marginLeft: "45%" }} data-testid="loading-indicator">
                 <ClipLoader color={"#1E53E5"} loading={loading} size={80} />
               </div>
             ) : (

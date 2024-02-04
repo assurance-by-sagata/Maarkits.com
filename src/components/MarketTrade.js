@@ -41,6 +41,7 @@ const MarketTrade = () => {
 
         if (response.status === 200) {
           const marketData = await response.json();
+          console.log(" marketData =====",product === "Stock (Equity)");
           if (
             product === "Stock (Equity)" ||
             product === "Index" ||
@@ -111,7 +112,7 @@ const MarketTrade = () => {
       <div className="market-trade">
         <div className="d-flex justify-content-between">
           <div className="market-trade-buy">
-            <form action="#">
+            <form action="#" data-testid="buy-form">
 
               <div className="input-group">
                 <input
@@ -140,7 +141,7 @@ const MarketTrade = () => {
               </div>
 
 
-              <button type="button" disabled={!isMarketOpen} className="btn buy"  onClick={()=>handleBuySellStock('buy')} >
+              <button data-testid="buy-btn" type="button" disabled={!isMarketOpen} className="btn buy"  onClick={()=>handleBuySellStock('buy')} >
                 {loading==='buy' ? (
                   <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
                 ) : (
@@ -151,7 +152,7 @@ const MarketTrade = () => {
             </form>
           </div>
           <div className="market-trade-sell">
-            <form action="#">
+            <form action="#" data-testid="sell-form" >
 
                <div className="input-group">
                 <input
@@ -179,7 +180,7 @@ const MarketTrade = () => {
                 </div>
               </div>
 
-              <button type="button" disabled={!isMarketOpen} className="btn sell"  onClick={()=>handleBuySellStock('sell')} >
+              <button  data-testid="sell-btn" type="button" disabled={!isMarketOpen} className="btn sell"  onClick={()=>handleBuySellStock('sell')} >
                 {loading==='sell' ? (
                   <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
                 ) : (
