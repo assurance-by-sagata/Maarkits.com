@@ -93,6 +93,7 @@ const MarketTrade = () => {
       );
       if (response.status === 200) {
         //const data = await response.json();
+        console.log("check test case land here or not");
         setFlashMsg({ msg: `${symbol} assest sussefully ${action==='buy'?'purchased':'sell'}`, class: "alert-success" });
         setUpdateFlag((prevFlag) => !prevFlag);
       } else {
@@ -118,7 +119,7 @@ const MarketTrade = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={symbol}
+                  placeholder="Buy Symbol"
                   disabled
                   value={symbol}
                 />
@@ -130,7 +131,7 @@ const MarketTrade = () => {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="No of Shares"
+                  placeholder="Buy No of Shares"
                   required
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
@@ -158,7 +159,7 @@ const MarketTrade = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={symbol}
+                  placeholder="Sell Symbol"
                   disabled
                   value={symbol}
                 />
@@ -170,7 +171,7 @@ const MarketTrade = () => {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="No of Shares"
+                  placeholder="Sell No of Shares"
                   required
                   value={sellQuantity}
                   onChange={(e) => setSellQuantity(Number(e.target.value))}

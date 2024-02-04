@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, Tab } from "react-bootstrap";
-import { BASE_URL, ENDPOINT, SETTING,  } from "../config";
+import { BASE_URL, ENDPOINT, SETTING } from "../config";
 import {
   getColorClass,
   formatPLValue,
@@ -8,9 +8,9 @@ import {
   formatTickerValue,
   fetchStremDataForSymbols,
   fetchStremData,
-  fetchMarketPriceForSymbol
+  fetchMarketPriceForSymbol,
 } from "../utility";
-import { userState, flashMsg, portfolioState,socketData } from "../state";
+import { userState, flashMsg, portfolioState, socketData } from "../state";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { ClipLoader } from "react-spinners";
 
@@ -24,51 +24,51 @@ export default function HistoryOrder() {
   const [currentValue, setCurrentValue] = useState(0);
   const [returnAmnt, setReturnAmnt] = useState(0);
   const [startingAmnt, setStartingAmnt] = useState(0);
+  const [availableCash, setAvailableCash] = useState(0);
   const updateFlag = useRecoilValue(portfolioState);
-  const tickerPrices= useRecoilValue(socketData);
-  const setTickerPrices =  useSetRecoilState(socketData);
+  const tickerPrices = useRecoilValue(socketData);
+  const setTickerPrices = useSetRecoilState(socketData);
 
-  const fetchDataForSymbol = async (symbol) => {
-    try {
-
-      fetchMarketPriceForSymbol(symbol, (newPrice) => {
-        setTickerPrices((prev) => ({
-          ...prev,
-          ...newPrice,
-        }));
-      });
-      const currentValue = 0 * symbol.quantity;
-      const mkt_price = 0;
-      const invested_amount = symbol.invested_amount;
-      const returnAmnt = currentValue - invested_amount;
-
-      const finalPortfolioData = {
-        product: symbol.name,
-        symbol: symbol.symbol,
-        qnty: symbol.quantity,
-        avg_cost: symbol.avg_cost,
-        mkt_price: mkt_price,
-        invested_amount: invested_amount,
-        current: currentValue,
-        current_amnt:
-          currentValue < invested_amount ? "-" + currentValue : currentValue,
-        return_amnt: returnAmnt,
-      };
-      return finalPortfolioData;
-    } catch (error) {
-      console.log(error.message);
-      setErrorMsg({ msg: error.message, class: "alert-danger" });
-      // Handle network errors or other exceptions
-    }
-  };
   useEffect(() => {
+    const fetchDataForSymbol = async (symbol) => {
+      try {
+        fetchMarketPriceForSymbol(symbol, (newPrice) => {
+          setTickerPrices((prev) => ({
+            ...prev,
+            ...newPrice,
+          }));
+        });
+        const currentValue = 0 * symbol.quantity;
+        const mkt_price = 0;
+        const invested_amount = symbol.invested_amount;
+        const returnAmnt = currentValue - invested_amount;
+
+        const finalPortfolioData = {
+          product: symbol.name,
+          symbol: symbol.symbol,
+          qnty: symbol.quantity,
+          avg_cost: symbol.avg_cost,
+          mkt_price: mkt_price,
+          invested_amount: invested_amount,
+          current: currentValue,
+          current_amnt:
+            currentValue < invested_amount ? "-" + currentValue : currentValue,
+          return_amnt: returnAmnt,
+        };
+        return finalPortfolioData;
+      } catch (error) {
+        console.log(error.message);
+        setErrorMsg({ msg: error.message, class: "alert-danger" });
+        // Handle network errors or other exceptions
+      }
+    };
 
     const fetchPortfolioData = async () => {
       try {
-        console.log("response");
+        // console.log("response");
         //setLoading(true);
-        console.log("response 1" );
-        console.log("userData",userData);
+        // console.log("response 1");
+        // console.log("userData", userData);
         const response = await fetch(BASE_URL + ENDPOINT.PORTFOLIO, {
           method: "GET",
           headers: {
@@ -81,12 +81,12 @@ export default function HistoryOrder() {
 
           const data = arrData.data;
           setStartingAmnt(data.starting_amt);
+          setAvailableCash(data.available_cash);
           if (data.portfolio.length > 0) {
             const promises = data.portfolio.map((symbol) =>
               fetchDataForSymbol(symbol)
             );
             const results = await Promise.all(promises);
-
 
             const totals = results.reduce(
               (accumulator, currentValue) => {
@@ -98,11 +98,13 @@ export default function HistoryOrder() {
               { invested_amount: 0, current: 0, return_amnt: 0 }
             );
 
+            // console.log("SSAASA", results);
+
             setInvestedAmount(totals.invested_amount);
             setCurrentValue(totals.current);
             setReturnAmnt(totals.return_amnt);
             setPortfolioData(results);
-        }
+          }
         } else {
           const resData = await response.json();
           throw new Error(resData.message);
@@ -116,29 +118,30 @@ export default function HistoryOrder() {
     };
 
     fetchPortfolioData();
-
   }, [updateFlag]);
 
   useEffect(() => {
+    const currentValue = portfolioData.reduce((total, ticker) => {
+      const symbolKey = ticker.symbol?.toLowerCase();
+      const lpValue =
+        tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
+      total += ticker.qnty * (lpValue ?? 0);
+      return total;
+    }, 0);
+    setCurrentValue(currentValue);
+    setReturnAmnt(currentValue -investedAmount  ?? 0);
+  }, [tickerPrices, portfolioData]);
 
-    // const currentValue = portfolioData.reduce((total, ticker) => {
-    //   const symbolKey = ticker.symbol?.toLowerCase();
-    //   const lpValue = tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
-    //   total += ticker.qnty * (lpValue ?? 0);
-    //   return total;
-    // }, 0);
-    setCurrentValue(0);
-    setReturnAmnt(investedAmount - currentValue ?? 0);
-  }, [tickerPrices]);
-  console.log("portfolioData", portfolioData)
   return (
     <>
-
       <div className="market-history-tab market-order mt15">
         <Tabs defaultActiveKey="portfolio">
           <Tab eventKey="portfolio" title="Portfolio">
             {loading ? (
-              <div style={{ marginTop: "14%", marginLeft: "45%" }} data-testid="loading-indicator">
+              <div
+                style={{ marginTop: "14%", marginLeft: "45%" }}
+                data-testid="loading-indicator"
+              >
                 <ClipLoader color={"#1E53E5"} loading={loading} size={80} />
               </div>
             ) : (
@@ -153,12 +156,7 @@ export default function HistoryOrder() {
                       <p>Opening Balance</p>
                     </div>
                     <div className="col-sm-2">
-                      <h2>
-                        {formatValue(
-                          startingAmnt - investedAmount,
-                          SETTING.CURRENCY
-                        )}
-                      </h2>
+                      <h2>{formatValue(availableCash, SETTING.CURRENCY)}</h2>
                       <p>Avaialable Balance</p>
                     </div>
                     <div className="col-sm-3">
@@ -195,35 +193,48 @@ export default function HistoryOrder() {
                         </tr>
                       </thead>
                       <tbody>
-                      {portfolioData.map((item, index) => {
-                        const symbolKey = item.symbol?.toLowerCase();
-                        const lpValue = tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
-                          return(
-                          <tr key={index} data-href="exchange-light.html">
-                            <td>
-                              {/* {item.symbol} ({item.symbol}) */}
-                              {item.symbol}
-                            </td>
-                            <td>{item.qnty}</td>
-                            {/* <td>0</td> */}
-                            <td className="">
-                              {formatTickerValue(
-                                lpValue,
-                                SETTING.CURRENCY
-                              )}
-                            </td>
+                        {portfolioData.map((item, index) => {
+                          const symbolKey = item.symbol?.toLowerCase();
+                          const lpValue =
+                            tickerPrices[symbolKey]?.lp ??
+                            tickerPrices[symbolKey]?.bp;
+                          return (
+                            <tr key={index} data-href="exchange-light.html">
+                              <td>
+                                {/* {item.symbol} ({item.symbol}) */}
+                                {item.symbol}
+                              </td>
+                              <td>{item.qnty}</td>
+                              {/* <td>0</td> */}
+                              <td className="">
+                                {formatTickerValue(lpValue, SETTING.CURRENCY)}
+                              </td>
 
-                            <td className={getColorClass(item.current_amnt)}>
-                               {formatValue(((lpValue)*item.qnty), SETTING.CURRENCY)}
-                            </td>
-                            <td className={getColorClass(item.invested_amount)}>
-                              {formatValue( item.invested_amount, SETTING.CURRENCY )}
-                            </td>
-                            <td className={getColorClass(((lpValue)*item.qnty)-(item.invested_amount))}>
-
-                              {formatPLValue(((lpValue)*item.qnty)- (item.invested_amount), SETTING.CURRENCY )}
-                            </td>
-                          </tr>
+                              <td className={getColorClass(item.current_amnt)}>
+                                {formatValue(
+                                  lpValue * item.qnty,
+                                  SETTING.CURRENCY
+                                )}
+                              </td>
+                              <td
+                                className={getColorClass(item.invested_amount)}
+                              >
+                                {formatValue(
+                                  item.invested_amount,
+                                  SETTING.CURRENCY
+                                )}
+                              </td>
+                              <td
+                                className={getColorClass(
+                                  lpValue * item.qnty - item.invested_amount
+                                )}
+                              >
+                                {formatPLValue(
+                                  lpValue * item.qnty - item.invested_amount,
+                                  SETTING.CURRENCY
+                                )}
+                              </td>
+                            </tr>
                           );
                         })}
                       </tbody>
