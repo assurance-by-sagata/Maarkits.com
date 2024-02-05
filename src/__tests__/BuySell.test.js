@@ -9,7 +9,7 @@ import {
   fireEvent,
 } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect"; // for extra matchers
-import { RecoilRoot, atom, useRecoilValue, useSetRecoilState } from "recoil"; // Import RecoilRoot for testing Recoil state
+import { RecoilRoot} from "recoil"; // Import RecoilRoot for testing Recoil state
 import { BrowserRouter as Router } from "react-router-dom";
 import MarketTrade from "../components/MarketTrade";
 import { globalProduct, flashMsg, portfolioState ,userState} from "../state";

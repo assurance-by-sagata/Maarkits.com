@@ -6,7 +6,6 @@ import {
   act,
   waitFor,
   screen,
-  fireEvent,
 } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect"; // for extra matchers
 import { RecoilRoot } from "recoil"; // Import RecoilRoot for testing Recoil state
@@ -110,9 +109,7 @@ describe("HistoryOrder Component", () => {
     jest.clearAllMocks();
   });
   it("fetches and displays data when update flag is true", async () => {
-    // Mock the useState hook
-    // React.useState.mockReturnValue([false, jest.fn()]);
-    // Mock the useRecoilValue hook
+
     const mockFetchMarketPriceForSymbol =
       require("../utility").fetchMarketPriceForSymbol;
 
@@ -134,10 +131,6 @@ describe("HistoryOrder Component", () => {
         "tsla",
       ],
     };
-    // jest
-    //   .spyOn(require("recoil"), "useRecoilValue")
-    //   .mockReturnValue(mockUserState);
-
     // Mock the fetch function
     const mockResponse = {
       status: 200,
@@ -173,17 +166,10 @@ describe("HistoryOrder Component", () => {
       console.log("After rendering component");
     });
     // Wait for the component to finish rendering
-
-    // Check that loading is initially true
-    //expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
-
-    // Use findByText to wait for the presence of the 'Opening Balance' text
     await waitFor(
       async () => {
-        // Check that loading is now false
+
         screen.debug();
-        // Check that your data is rendered
-        //const openingBalanceText = await screen.findByText('AAPL');
         expect(screen.queryByTestId("loading-indicator")).toBeNull();
         expect(fetch).toHaveBeenCalledTimes(1);
         expect(screen.getByText("Opening Balance")).toBeInTheDocument();
