@@ -254,7 +254,7 @@ export default function HistoryOrder() {
               </>
             )}
           </Tab>
-          <Tab eventKey="order-history" title="Order history" style={{display:"none"}}>
+          {/* <Tab eventKey="order-history" title="Order history" style={{display:"none"}}>
             <ul className="d-flex justify-content-between market-order-item">
               <li>Time</li>
               <li>All pairs</li>
@@ -269,7 +269,7 @@ export default function HistoryOrder() {
               <i className="icon ion-md-document"></i>
               No data
             </span>
-          </Tab>
+          </Tab> */}
         </Tabs>
       </div>
     </>
