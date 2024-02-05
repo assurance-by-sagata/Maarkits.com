@@ -31,7 +31,7 @@ const MarketNews = () => {
           console.log("newsData",marketData);
         } else {
           const resData = await response.json();
-          throw new Error(resData.error.message);
+          throw new Error(resData.message);
         }
       } catch (error) {
         console.log(error.message);

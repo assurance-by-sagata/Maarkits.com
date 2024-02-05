@@ -1,9 +1,12 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
 
-export default function otpVerify() {
+import { Link } from "react-router-dom";
+const OtpVerify = () => {
+
+
   return (
     <>
+
       <div className="vh-100 d-flex justify-content-center">
         <div className="form-access my-auto">
           <form>
@@ -25,4 +28,5 @@ export default function otpVerify() {
       </div>
     </>
   );
-}
+};
+export default OtpVerify;

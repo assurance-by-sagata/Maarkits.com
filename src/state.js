@@ -23,3 +23,12 @@ export const globalAsset = atom({
   key: 'globalAsset',
   default: null
 });
+export const portfolioState = atom({
+  key: 'portfolioState',
+  default: true
+});
+
+export const socketData = atom({
+  key: 'socketData',
+  default: {}
+});

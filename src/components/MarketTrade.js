@@ -7,15 +7,13 @@ import {
   ENDPOINT,
 } from "../config";
 import { useSetRecoilState,useRecoilValue } from "recoil";
-import { flashMsg, userState ,globalProduct, globalAsset } from "../state";
+import { flashMsg, userState ,globalProduct, globalAsset, portfolioState } from "../state";
 import { BeatLoader } from "react-spinners";
 
 
 
 
 const MarketTrade = () => {
-
-
   const [isMarketOpen, setMarketOpen] = useState(false);
   const setFlashMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
   const symbol = useRecoilValue(globalAsset);
@@ -23,7 +21,9 @@ const MarketTrade = () => {
   const [quantity, setQuantity] = useState(0);
   const [sellQuantity,setSellQuantity] = useState(0);
   const userData = useRecoilValue(userState);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState('');
+  const setUpdateFlag = useSetRecoilState(portfolioState);
+
 
   useEffect(() => {
     // Define a function to fetch data from your API
@@ -41,6 +41,7 @@ const MarketTrade = () => {
 
         if (response.status === 200) {
           const marketData = await response.json();
+          console.log(" marketData =====",product === "Stock (Equity)");
           if (
             product === "Stock (Equity)" ||
             product === "Index" ||
@@ -58,7 +59,7 @@ const MarketTrade = () => {
 
         } else {
           const resData = await response.json();
-          throw new Error(resData.error.message);
+          throw new Error(resData.message);
         }
       } catch (error) {
         console.log(error.message);
@@ -76,70 +77,49 @@ const MarketTrade = () => {
   }, [product]); // This will re-run the effect whenever product changes
 
 
-  const handleBuyStock = async () => {
+  const handleBuySellStock = async (action) => {
+    const qty=  action==='buy'?quantity:sellQuantity;
     try {
-      const response = await fetch( BASE_URL + ENDPOINT.BUY,
+      setLoading(action);
+      const response = await fetch( BASE_URL + ENDPOINT.BUY_SELL,
         {
           method: "POST",
           headers: {
-            Authorization: userData.access_token,
+            Authorization: "Bearer " + userData.access_token,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({symbol:symbol,shares: quantity,type:product}),
+          body: JSON.stringify({symbol,quantity:qty,asset_type:product,action}),
         }
       );
       if (response.status === 200) {
-        const data = await response.json();
-         setFlashMsg({ msg: `${symbol} assest sussefully purchased!`, class: "alert-success" });
+        //const data = await response.json();
+        console.log("check test case land here or not");
+        setFlashMsg({ msg: `${symbol} assest sussefully ${action==='buy'?'purchased':'sell'}`, class: "alert-success" });
+        setUpdateFlag((prevFlag) => !prevFlag);
       } else {
         const resData = await response.json();
-        throw new Error(resData.error.message);
+        throw new Error(resData.message);
       }
     } catch (error) {
       setFlashMsg({ msg: error.message, class: "alert-danger" });
       // Handle network errors or other exceptions
     } finally {
-      setLoading(false);
+      setLoading('');
     }
   };
-  const handleSellStock = async () => {
-    try {
-      const response = await fetch( BASE_URL + ENDPOINT.SELL,
-        {
-          method: "POST",
-          headers: {
-            Authorization: userData.access_token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({symbol:symbol,shares: quantity,type:product}),
-        }
-      );
-      if (response.status === 200) {
-        const data = await response.json();
-         setFlashMsg({ msg: `${symbol} assest sussefully purchased!`, class: "alert-success" });
-      } else {
-        const resData = await response.json();
-        throw new Error(resData.error.message);
-      }
-    } catch (error) {
-      setFlashMsg({ msg: error.message, class: "alert-danger" });
-      // Handle network errors or other exceptions
-    } finally {
-      setLoading(false);
-    }
-  };
+
   return (
     <>
       <div className="market-trade">
         <div className="d-flex justify-content-between">
           <div className="market-trade-buy">
-            <form action="#">
+            <form action="#" data-testid="buy-form">
 
               <div className="input-group">
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={symbol}
+                  placeholder="Buy Symbol"
                   disabled
                   value={symbol}
                 />
@@ -151,7 +131,7 @@ const MarketTrade = () => {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="No of Shares"
+                  placeholder="Buy No of Shares"
                   required
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
@@ -161,24 +141,25 @@ const MarketTrade = () => {
                 </div>
               </div>
 
-              <button
-                disabled={!isMarketOpen}
-                type="button"
-                className="btn buy"
-                onClick={handleBuyStock}
-              >
-                {isMarketOpen ? "Buy" : "Market Closed"}
+
+              <button data-testid="buy-btn" type="button" disabled={!isMarketOpen} className="btn buy"  onClick={()=>handleBuySellStock('buy')} >
+                {loading==='buy' ? (
+                  <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
+                ) : (
+                  isMarketOpen ? "Buy" : "Market Closed"
+                )}
+
               </button>
             </form>
           </div>
           <div className="market-trade-sell">
-            <form action="#">
+            <form action="#" data-testid="sell-form" >
 
                <div className="input-group">
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={symbol}
+                  placeholder="Sell Symbol"
                   disabled
                   value={symbol}
                 />
@@ -190,18 +171,18 @@ const MarketTrade = () => {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="No of Shares"
+                  placeholder="Sell No of Shares"
                   required
                   value={sellQuantity}
-                  onChange={(e) => setSellQuantity(e.target.value)}
+                  onChange={(e) => setSellQuantity(Number(e.target.value))}
                 />
                 <div className="input-group-append">
                   <span className="input-group-text">{product}</span>
                 </div>
               </div>
 
-              <button type="button" disabled={!isMarketOpen} className="btn sell"  onClick={handleSellStock} >
-                {loading ? (
+              <button  data-testid="sell-btn" type="button" disabled={!isMarketOpen} className="btn sell"  onClick={()=>handleBuySellStock('sell')} >
+                {loading==='sell' ? (
                   <BeatLoader style={{ display: "block", margin: "0 auto",fontSize:"16px" }} color={"#ffffff"} loading={loading} size={8} />
                 ) : (
                   isMarketOpen ? "Sell" : "Market Closed"
