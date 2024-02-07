@@ -94,7 +94,7 @@ const MarketTrade = () => {
       if (response.status === 200) {
         //const data = await response.json();
         console.log("check test case land here or not");
-        setFlashMsg({ msg: `${symbol} assest sussefully ${action==='buy'?'purchased':'sell'}`, class: "alert-success" });
+        setFlashMsg({ msg: `${symbol}  succcessefully ${action==='buy'?'purchased':'sell'} unit: ${qty}`, class: "alert-success" });
         setUpdateFlag((prevFlag) => !prevFlag);
       } else {
         const resData = await response.json();

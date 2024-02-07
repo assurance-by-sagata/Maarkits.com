@@ -20,10 +20,17 @@ import {
   getBeforeDotValue,
   formatTickerValue,
 } from "../utility";
-import { useSetRecoilState ,useRecoilValue,useRecoilState} from "recoil";
-import { flashMsg, globalAsset, globalProduct,userState,socketData } from "../state";
+import { useSetRecoilState, useRecoilValue, useRecoilState } from "recoil";
+import {
+  flashMsg,
+  globalAsset,
+  globalProduct,
+  userState,
+  socketData,
+} from "../state";
 import { ClipLoader } from "react-spinners";
 import SymbolList from "../components/SymbolList";
+import Pagination from "../components/Pagination";
 
 const MarketPairs = () => {
   const setFlashMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
@@ -35,8 +42,8 @@ const MarketPairs = () => {
   ]);
   const [initialProduct, setInitialProduct] = useState(1);
   const [loading, setLoading] = useState(false);
-  const tickerPrices= useRecoilValue(socketData);
-  const setTickerPrices =  useSetRecoilState(socketData);
+  const tickerPrices = useRecoilValue(socketData);
+  const setTickerPrices = useSetRecoilState(socketData);
   const globalSymbol = SETTING.INITIALSYMBOL;
   const userData = useRecoilValue(userState);
   const [symbolList, setSymbolList] = useState([]);
@@ -79,11 +86,9 @@ const MarketPairs = () => {
 
     // Define a function to fetch data from your API
     setGlobalAsset(globalSymbol);
-    setGlobalProduct('Stock (Equity)');
+    setGlobalProduct("Stock (Equity)");
     fetchData(1);
-    console.log("tickerPrices array at market pairs",tickerPrices);
-
-
+    console.log("tickerPrices array at market pairs", tickerPrices);
   }, []);
 
   const fetchData = async (initialProduct) => {
@@ -108,8 +113,8 @@ const MarketPairs = () => {
           lp: asset.previousClose,
         }));
         setAssets(newAssets);
-        const userSymbols= userData.portfolio;
-        const mrktSymbols= []
+        const userSymbols = userData.portfolio;
+        const mrktSymbols = [];
         assetsData.forEach((asset) => {
           const nd = {
             [asset.symbol?.toLowerCase()]: {
@@ -122,10 +127,9 @@ const MarketPairs = () => {
 
           const symbolKey = getBeforeDotValue(asset.symbol?.toLowerCase());
           //const symbolKey = asset.symbol?.toLowerCase();
-          mrktSymbols.push(symbolKey)
-           setTickerPrices((prev) => ({ ...prev, ...nd }));
+          mrktSymbols.push(symbolKey);
+          setTickerPrices((prev) => ({ ...prev, ...nd }));
         });
-
 
         // Finilaze the symbol list including user portfolio symbol list
         const mergedSymbols = [...new Set([...userSymbols, ...mrktSymbols])];
@@ -142,7 +146,7 @@ const MarketPairs = () => {
       }
     } catch (error) {
       console.log(error);
-       setFlashMsg({ msg: error.message, class: "alert-danger" });
+      setFlashMsg({ msg: error.message, class: "alert-danger" });
       // Handle network errors or other exceptions
     } finally {
       setLoading(false);
@@ -158,10 +162,19 @@ const MarketPairs = () => {
   const handleRowClick = (selectedAssest) => {
     setGlobalAsset(selectedAssest);
   };
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate the range of items to display based on the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedAssets = assets.slice(startIndex, endIndex);
 
+  // Update the current page
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
   return (
     <>
-
       {/* {assets.map((symbol) => (
         <SymbolList key={symbol.symbol} symbol={symbol.symbol} onUpdate={handleUpdate} />
       ))} */}
@@ -200,8 +213,8 @@ const MarketPairs = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {assets.map((item, index) => (
-                      <tr onClick={() => handleRowClick(item.s)}>
+                    {displayedAssets.map((item, index) => (
+                      <tr onClick={() => handleRowClick(item.s)} className={index === displayedAssets.length - 1 ? "last-row" : ""}>
                         <td>{item.s}</td>
                         {/* <td  className={getColorClass(item.change)}> {item.change} </td>
                     <td  className={getColorClass(item.changesPercentage)}> {item.changesPercentage} </td> */}
@@ -227,6 +240,13 @@ const MarketPairs = () => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Use the Pagination component */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(assets.length / itemsPerPage)}
+                  onPageChange={handlePageChange}
+                />
               </Tab>
             ))}
           </Tabs>
