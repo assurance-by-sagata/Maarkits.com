@@ -37,6 +37,7 @@ const MarketPairs = () => {
   const setGlobalAsset = useSetRecoilState(globalAsset); // Recoil hook to set globalAsset
   const setGlobalProduct = useSetRecoilState(globalProduct); // Recoil hook to set globalProduct
   const [assets, setAssets] = useState([]);
+  const [filterAssets, setFilterAssets] = useState([]);
   const [products, setProducts] = useState([
     { id: 1, product_name: "Stock (Equity)" },
   ]);
@@ -162,16 +163,38 @@ const MarketPairs = () => {
   const handleRowClick = (selectedAssest) => {
     setGlobalAsset(selectedAssest);
   };
+
+  const [searchInput, setSearchInput] = useState("");
+
+
+  const handleSearchChange = (event) => {
+    const inputValue =event?.target?.value;
+    setSearchInput(inputValue);
+  };
+
+  useEffect(() => {
+    // Check if the searchInput has a value
+    if (searchInput.trim() !== "") {
+      const fltrAssest = assets.filter((asset) =>
+        asset.s.toLowerCase().includes(searchInput.toLowerCase())
+      );
+      setFilterAssets(fltrAssest);
+    } else {
+      // If searchInput is empty, reset displayedAssets
+      setFilterAssets(assets);
+    }
+  }, [searchInput, assets]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   // Calculate the range of items to display based on the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const displayedAssets = assets.slice(startIndex, endIndex);
+  const displayedAssets = filterAssets.slice(startIndex, endIndex);
 
   // Update the current page
   const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+      setCurrentPage(newPage);
   };
   return (
     <>
@@ -190,6 +213,7 @@ const MarketPairs = () => {
             className="form-control"
             placeholder="Search"
             aria-describedby="inputGroup-sizing-sm"
+            onChange={handleSearchChange}
           />
         </div>
         {loading ? (
@@ -244,7 +268,7 @@ const MarketPairs = () => {
                 {/* Use the Pagination component */}
                 <Pagination
                   currentPage={currentPage}
-                  totalPages={Math.ceil(assets.length / itemsPerPage)}
+                  totalPages={Math.ceil(filterAssets.length / itemsPerPage)}
                   onPageChange={handlePageChange}
                 />
               </Tab>
