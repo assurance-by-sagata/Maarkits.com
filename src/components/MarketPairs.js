@@ -91,7 +91,7 @@ const MarketPairs = () => {
     setGlobalAsset(globalSymbol);
     setGlobalProduct("Stock (Equity)");
     console.log("asset storage",assets);
-    if(assets.length<0){
+    if(assets.length===0){
       fetchData(1);
     }
 
