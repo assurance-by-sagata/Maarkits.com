@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 // Pagination.js
 import React from "react";
-
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const renderPageButtons = () => {
     const buttons = [];
