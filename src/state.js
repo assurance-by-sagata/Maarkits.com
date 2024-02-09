@@ -1,6 +1,11 @@
 import { atom } from 'recoil';
-import { isLoggedIn,getUserData } from './auth';
+import { isLoggedIn,getUserData,getAssetData } from './auth';
 
+
+export const assetData = atom({
+  key: 'assetData',
+  default: getAssetData(),
+});
 export const userState = atom({
   key: 'userState',
   default: getUserData(),

@@ -27,7 +27,9 @@ import {
   globalProduct,
   userState,
   socketData,
+  assetData
 } from "../state";
+import { setAssetData } from "../auth";
 import { ClipLoader } from "react-spinners";
 import SymbolList from "../components/SymbolList";
 import Pagination from "../components/Pagination";
@@ -36,7 +38,7 @@ const MarketPairs = () => {
   const setFlashMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
   const setGlobalAsset = useSetRecoilState(globalAsset); // Recoil hook to set globalAsset
   const setGlobalProduct = useSetRecoilState(globalProduct); // Recoil hook to set globalProduct
-  const [assets, setAssets] = useState([]);
+  const [assets, setAssets] = useRecoilState(assetData);
   const [filterAssets, setFilterAssets] = useState([]);
   const [products, setProducts] = useState([
     { id: 1, product_name: "Stock (Equity)" },
@@ -88,15 +90,21 @@ const MarketPairs = () => {
     // Define a function to fetch data from your API
     setGlobalAsset(globalSymbol);
     setGlobalProduct("Stock (Equity)");
-    fetchData(1);
+    console.log("asset storage",assets);
+    if(assets.length<0){
+      fetchData(1);
+    }
+
     console.log("tickerPrices array at market pairs", tickerPrices);
   }, []);
 
-  const fetchData = async (initialProduct) => {
+  const fetchData = async (initialProduct, symbol = "") => {
+    let STOCKURL = symbol ? `v3/quote/${symbol}` : STOCKLIST;
+
     try {
       setLoading(true);
       const response = await fetch(
-        `${FMPAPIURL + STOCKLIST}?apikey=${FMPAPIKEY}`,
+        `${FMPAPIURL + STOCKURL}?apikey=${FMPAPIKEY}`,
         {
           method: "GET",
           headers: {
@@ -113,7 +121,6 @@ const MarketPairs = () => {
           bp: asset.price,
           lp: asset.previousClose,
         }));
-        setAssets(newAssets);
         const userSymbols = userData.portfolio;
         const mrktSymbols = [];
         assetsData.forEach((asset) => {
@@ -141,6 +148,13 @@ const MarketPairs = () => {
         fetchStremData("forex", mergedSymbols, (newData) => {
           setTickerPrices((prev) => ({ ...prev, ...newData }));
         });
+
+        if (symbol) {
+          return newAssets;
+        } else {
+          setAssetData(newAssets, setAssets);
+          //setAssets(newAssets);
+        }
       } else {
         const resData = await response.json();
         throw new Error(resData.message);
@@ -166,23 +180,31 @@ const MarketPairs = () => {
 
   const [searchInput, setSearchInput] = useState("");
 
-
   const handleSearchChange = (event) => {
-    const inputValue =event?.target?.value;
+    const inputValue = event?.target?.value;
     setSearchInput(inputValue);
   };
 
   useEffect(() => {
     // Check if the searchInput has a value
-    if (searchInput.trim() !== "") {
-      const fltrAssest = assets.filter((asset) =>
-        asset.s.toLowerCase().includes(searchInput.toLowerCase())
-      );
-      setFilterAssets(fltrAssest);
-    } else {
-      // If searchInput is empty, reset displayedAssets
-      setFilterAssets(assets);
-    }
+    const fetchDataAndSetFilterAssets = async () => {
+      if (searchInput.trim() !== "") {
+        const fltrAssest = assets.filter((asset) =>
+          asset.s.toLowerCase().includes(searchInput.toLowerCase())
+        );
+        if (fltrAssest.length > 0) {
+          setFilterAssets(fltrAssest);
+        } else {
+          const symbolData = await fetchData(1, searchInput.trim());
+          console.log("symbolData", symbolData);
+          setFilterAssets(symbolData);
+        }
+      } else {
+        // If searchInput is empty, reset displayedAssets
+        setFilterAssets(assets);
+      }
+    };
+    fetchDataAndSetFilterAssets();
   }, [searchInput, assets]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -190,11 +212,14 @@ const MarketPairs = () => {
   // Calculate the range of items to display based on the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const displayedAssets = filterAssets.slice(startIndex, endIndex);
+  let displayedAssets = filterAssets;
+  if (filterAssets.length > 10) {
+    displayedAssets = filterAssets.slice(startIndex, endIndex);
+  }
 
   // Update the current page
   const handlePageChange = (newPage) => {
-      setCurrentPage(newPage);
+    setCurrentPage(newPage);
   };
   return (
     <>
@@ -238,7 +263,12 @@ const MarketPairs = () => {
                   </thead>
                   <tbody>
                     {displayedAssets.map((item, index) => (
-                      <tr onClick={() => handleRowClick(item.s)} className={index === displayedAssets.length - 1 ? "last-row" : ""}>
+                      <tr
+                        onClick={() => handleRowClick(item.s)}
+                        className={
+                          index === displayedAssets.length - 1 ? "last-row" : ""
+                        }
+                      >
                         <td>{item.s}</td>
                         {/* <td  className={getColorClass(item.change)}> {item.change} </td>
                     <td  className={getColorClass(item.changesPercentage)}> {item.changesPercentage} </td> */}
