@@ -25,6 +25,7 @@ import {
   flashMsg,
   globalAsset,
   globalProduct,
+  globalExchange,
   userState,
   socketData,
   assetData
@@ -38,6 +39,7 @@ const MarketPairs = () => {
   const setFlashMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
   const setGlobalAsset = useSetRecoilState(globalAsset); // Recoil hook to set globalAsset
   const setGlobalProduct = useSetRecoilState(globalProduct); // Recoil hook to set globalProduct
+  const setGlobalExchange = useSetRecoilState(globalExchange); // Recoil hook to set globalProduct
   const [assets, setAssets] = useRecoilState(assetData);
   const [filterAssets, setFilterAssets] = useState([]);
   const [products, setProducts] = useState([
@@ -89,6 +91,7 @@ const MarketPairs = () => {
 
     // Define a function to fetch data from your API
     setGlobalAsset(globalSymbol);
+    setGlobalExchange("NASDAQ");
     setGlobalProduct("Stock (Equity)");
     console.log("asset storage",assets);
     if(assets.length===0){
@@ -120,6 +123,7 @@ const MarketPairs = () => {
           ap: asset.price,
           bp: asset.price,
           lp: asset.previousClose,
+          exchange:asset.exchange
         }));
         const userSymbols = userData.portfolio;
         const mrktSymbols = [];
@@ -150,7 +154,11 @@ const MarketPairs = () => {
         });
 
         if (symbol) {
-          return newAssets;
+          const filteredAssets = newAssets.filter((asset) =>
+              ['NASDAQ', 'NYSE'].includes(asset.exchange)
+          );
+          console.log("newAssets",newAssets);
+          return filteredAssets;
         } else {
           setAssetData(newAssets, setAssets);
           //setAssets(newAssets);
@@ -174,8 +182,9 @@ const MarketPairs = () => {
     const selected = products.find((product) => product.id == arrKey[1]);
     setGlobalProduct(selected.product_name);
   };
-  const handleRowClick = (selectedAssest) => {
+  const handleRowClick = (selectedAssest,selectedExchange) => {
     setGlobalAsset(selectedAssest);
+    setGlobalExchange(selectedExchange);
   };
 
   const [searchInput, setSearchInput] = useState("");
@@ -213,7 +222,7 @@ const MarketPairs = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   let displayedAssets = filterAssets;
-  if (filterAssets.length > 10) {
+  if (filterAssets?.length > 10) {
     displayedAssets = filterAssets.slice(startIndex, endIndex);
   }
 
@@ -264,7 +273,7 @@ const MarketPairs = () => {
                   <tbody>
                     {displayedAssets.map((item, index) => (
                       <tr
-                        onClick={() => handleRowClick(item.s)}
+                        onClick={() => handleRowClick(item.s,item?.exchange)}
                         className={
                           index === displayedAssets.length - 1 ? "last-row" : ""
                         }
