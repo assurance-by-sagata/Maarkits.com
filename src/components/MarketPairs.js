@@ -230,6 +230,32 @@ const MarketPairs = () => {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
+  const [refreshed, setRefreshed] = useState(false);
+  useEffect(() => {
+    const checkMarketClosingTime = () => {
+      const now = new Date();
+      const marketClosingTimeUTC = new Date(now);
+      marketClosingTimeUTC.setUTCHours(12, 35, 0, 0); // Set the market closing time to 8:00 PM UTC
+
+      // Convert current time to UTC for comparison
+      const nowUTC = new Date(now.toUTCString());
+
+      // Check if the current time is after the market closing time
+      if (nowUTC >= marketClosingTimeUTC && !refreshed) {
+         setRefreshed(true); // Set refreshed to true to avoid multiple refreshes
+        // Reload the page if the market is closed
+        fetchData(1);
+
+      }
+    };
+
+    // Check market closing time every minute
+    const intervalId = setInterval(checkMarketClosingTime, 6000);
+
+    // Clean up the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, [refreshed]);
+
   return (
     <>
       {/* {assets.map((symbol) => (
