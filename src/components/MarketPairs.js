@@ -235,7 +235,7 @@ const MarketPairs = () => {
     const checkMarketClosingTime = () => {
       const now = new Date();
       const marketClosingTimeUTC = new Date(now);
-      marketClosingTimeUTC.setUTCHours(12, 35, 0, 0); // Set the market closing time to 8:00 PM UTC
+      marketClosingTimeUTC.setUTCHours(21, 0, 0, 0); // Set the market closing time to 09:00 PM UTC
 
       // Convert current time to UTC for comparison
       const nowUTC = new Date(now.toUTCString());
