@@ -16,4 +16,7 @@ RUN NODE_MAJOR=20; echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https:
 RUN apt-get update
 RUN apt-get install nodejs -y
 
+# Install npm 'serve' package
+RUN npm install -g serve
+
 CMD ["bash"]
