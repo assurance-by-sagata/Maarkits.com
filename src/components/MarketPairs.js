@@ -94,9 +94,11 @@ const MarketPairs = () => {
     setGlobalExchange("NASDAQ");
     setGlobalProduct("Stock (Equity)");
     console.log("asset storage",assets);
-    if(assets.length===0){
-      fetchData(1);
-    }
+    // it code will call when assets data not in local storege
+    // if(assets.length===0){
+       //fetchData(1);
+    // }
+    fetchData(1);
 
     console.log("tickerPrices array at market pairs", tickerPrices);
   }, []);
