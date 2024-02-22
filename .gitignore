@@ -1,0 +1,6 @@
+.vscode
+venv_local
+api
+node_modules
+src/pages/signup copy.js
+.env
