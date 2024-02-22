@@ -24,3 +24,13 @@
     const userData = localStorage.getItem('userData');
     return userData ? JSON.parse(userData) : null;
   };
+
+  export const getAssetData = () => {
+    const assetData = localStorage.getItem('assetData');
+    return assetData ? JSON.parse(assetData) : [];
+  };
+
+  export const setAssetData = (assetData, setAssetDataState) => {
+    localStorage.setItem('assetData', JSON.stringify(assetData));
+    setAssetDataState(assetData);
+  };

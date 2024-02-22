@@ -34,7 +34,7 @@ export const fetchStremDataForSymbols = (stream, symbols, updatePrice) => {
   const socket = new WebSocket(`wss://${stream}.financialmodelingprep.com`);
   // Connection opened
   socket.addEventListener("open", (event) => {
-    //console.log("WebSocket connection opened");
+    console.log("WebSocket connection opened");
 
     // Send login message
     const loginMessage = {
@@ -48,7 +48,7 @@ export const fetchStremDataForSymbols = (stream, symbols, updatePrice) => {
   // Listen for messages
   socket.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
-    //console.log(`WebSocket message received`, message);
+    console.log(`WebSocket message received`, message);
 
     // Check if the authentication was successful
     if (message.status === 200 && message.event === "login") {

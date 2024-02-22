@@ -44,5 +44,5 @@ export const SETTING = {
 
 export const SWA='https://virtserver.swaggerhub.com/ARMANJASUJA_1/marketsdojo/'
 export const COMANYWEBSOCKET= 'wss://websockets.financialmodelingprep.com'
-export const STOCKLIST="v3/quote/AAPL,AGOL.BO,NYKAA.BO,ITC.BO,META,GOOG,PMGOLD.AX,INDIGRID.NS,INDIGRID.NS";
+export const STOCKLIST="v3/quote/AAPL,META,GOOG,AMZN,TSLA,MSFT,NVDA, HSBC, LLY,TSM,AVGO, JPM, UNH, WMT, MA, XOM, JNJ, ASML,PG, HD";
 export const CRYPTOLIST= "v3/quote/ETH,SOL,BTCUSD,BTC";

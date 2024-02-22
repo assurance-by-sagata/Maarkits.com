@@ -175,9 +175,9 @@ const Header = () => {
                         <img src={'img/avatar.svg'} alt="" />
                       </div>
                       <div className="info text-center">
-                        <p className="name font-weight-bold mb-0">{userData.username}</p>
+                        <p className="name font-weight-bold mb-0">{userData?.username}</p>
                         <p className="email text-muted mb-3">
-                          {userData.email}
+                          {userData?.email}
                         </p>
                       </div>
                     </div>

@@ -1,0 +1,910 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .flex-container {
+        display:flex;
+        height: 100vh;
+    }
+
+    article *:not(h1):not(iframe) {
+        text-align: left;
+    }
+    
+    iframe {
+        text-align: center;
+    }
+    
+    .sidebar {
+        width: 250px;
+        background-color: #f3f3f3;
+        padding: 20px;
+        height: 100%;
+        overflow: auto;
+    }
+    
+    .module {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .lesson {
+        cursor: pointer;
+        padding: 10px;
+        background-color: #ddd;
+        margin-bottom: 5px;
+    }
+    
+    .sub-lessons {
+        overflow: auto;
+        display: none;
+        padding-left: 20px;
+    }
+    
+    .sub-lesson {
+        padding: 5px;
+        cursor: pointer;
+    }
+    
+    .main-content {
+        flex-grow: 1;
+        padding:0px;
+        height: 100%;
+        overflow-y: auto;
+    }
+    
+    article {
+        max-width: 1650px;
+        width: 100%; 
+        overflow-y: auto; 
+        overflow-x: hidden;
+        background-color: #f3f3f3;
+        padding: 20px;
+        border: 1px solid #f3f3f3;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .module-button-container {
+        background-color: #f3f3f3;
+        width: 100%;
+        text-align: center;
+        padding: 20px 0;
+        display: flex; /* Use flexbox */
+        flex-direction: column; /* Stack children vertically */
+        align-items: center; /* Center align children horizontally */
+    }
+    
+    #visitModuleBtn {
+        padding: 10px 20px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .progress-bar {
+        width: 0%;
+        height: 20px;
+        background-color: green;
+        text-align: center;
+        line-height: 20px;
+        color: white;
+        transition: width 2s ease;
+    }
+    
+    
+    
+</style>
+<div><div id="totalProgress" class="progress-bar"></div></div>
+<div id="mod_1" class="module-button-container">
+    <h1>Module 1- Introduction to trading</h1>
+    <button id="visitModuleBtn">Visit Module 1</button>
+    <br><br>
+    <div id="container" style="width: 100px; height: 100px;"></div>     
+</div>
+<br id="rm_1" style="display:none">
+<div id="mod_2" class="module-button-container">
+    <h1>Module 2- Introduction to Asset Classes</h1>
+    <button id="visitModuleBtn_2">Visit Module 2</button>
+    <br><br>
+    <div id="container_2" style="width: 100px; height: 100px;"></div>  
+</div>
+<br id="rm_2" style="display:none">
+<div id="mod_3" class="module-button-container">
+    <h1>Module 3- Fundamental Analysis</h1>
+    <button id="visitModuleBtn_3">Visit Module 3</button>
+    <br><br>
+    <div id="container_3" style="width: 100px; height: 100px;"></div>    
+</div>
+<br id="rm_3" style="display:none">
+<div id="mod_4" class="module-button-container">
+    <h1>Module 4- Technical Analysis Intro</h1>
+    <button id="visitModuleBtn_4">Visit Module 4</button>
+    <br><br>
+    <div id="container_4" style="width: 100px; height: 100px;"></div>   
+</div>
+<br id="rm_4" style="display:none">
+<div id="mod_5" class="module-button-container">
+    <h1>Module 5- Risk and Return</h1>
+    <button id="visitModuleBtn_5">Visit Module 5</button>
+    <br><br>
+    <div id="container_5" style="width: 100px; height: 100px;"></div>    
+</div>
+<br id="rm_5" style="display:none">
+<div id="mod_6" class="module-button-container">
+    <h1>Module 6- Derivatives</h1>
+    <button id="visitModuleBtn_6">Visit Module 6</button>
+    <br><br>
+    <div id="container_6" style="width: 100px; height: 100px;"></div>    
+</div>
+<div id="module_1" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 1- Introduction to Trading</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 1- Motivation to Invest
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-1-1">Sub Lesson 1.1</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 2- Understanding Financial Markets
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-2-1">Sub Lesson 2.1</div>
+                    <div class="sub-lesson" data-article-id="article-2-2">Sub Lesson 2.2</div>
+                    <div class="sub-lesson" data-article-id="article-2-3">Sub Lesson 2.3</div>
+                    <div>
+                        <form action="/update" method="post">
+                            <input type="hidden" name="complete" value="1">
+                            <button type=submit>Complete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 3- Interest
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-3-1">Sub Lesson 3.1</div>
+                    <div class="sub-lesson" data-article-id="article-3-2">Sub Lesson 3.2</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 4- Basics Of the Stock Market
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-4-1">Sub Lesson 4.1</div>
+                    <div class="sub-lesson" data-article-id="article-4-2">Sub Lesson 4.2</div>
+                    <div class="sub-lesson" data-article-id="article-4-3">Sub Lesson 4.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 1! This is Lesson 1 Part 1</h1>
+            <p>When you earn a livelihood, you have income and expenses. Some part of income goes towards your
+                needs, your wants and some part of it remains. What should you do with the money that remains?
+                The motivation to invest is to make your remaining income grow. Investing looks at long term
+                benefits where as trading looks to make short term benefits. However, both play a crucial role in
+                building your wealth. If you don’t take any action to grow your money, it will either be spent in
+                expenses, eroded by inflation and you would miss out on opportunities where your money can fetch
+                more money therefore Investing is a basic tenet of financial IQ.</p>
+        </article>
+    </div>
+</div>
+<div id="module_2" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 2- Introduction to Asset Classes</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 5
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article2-5-1">Sub Lesson 5.1</div>
+                    <div class="sub-lesson" data-article-id="article2-5-2">Sub Lesson 5.2</div>
+                    <div class="sub-lesson" data-article-id="article2-5-3">Sub Lesson 5.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="2">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 6
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article2-6-1">Sub Lesson 6.1</div>
+                    <div class="sub-lesson" data-article-id="article2-6-2">Sub Lesson 6.2</div>
+                    <div class="sub-lesson" data-article-id="article2-6-3">Sub Lesson 6.3</div>
+                    <div class="sub-lesson" data-article-id="article2-6-4">Sub Lesson 6.4</div>
+                    <div class="sub-lesson" data-article-id="article2-6-5">Sub Lesson 6.5</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="2">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 7
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article2-7-1">Sub Lesson 7.1</div>
+                    <div class="sub-lesson" data-article-id="article2-7-2">Sub Lesson 7.2</div>
+                    <div class="sub-lesson" data-article-id="article2-7-3">Sub Lesson 7.3</div>
+                    <div class="sub-lesson" data-article-id="article2-7-4">Sub Lesson 7.4</div>
+                    <div class="sub-lesson" data-article-id="article2-7-5">Sub Lesson 7.5</div>
+                    <div class="sub-lesson" data-article-id="article2-7-6">Sub Lesson 7.6</div>
+                    <div class="sub-lesson" data-article-id="article2-7-7">Sub Lesson 7.7</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="2">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_2">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 2! This is Lesson 5 Part 1</h1><p>Content for Sub-Lesson 5.1
+            </p>
+        </article>
+    </div>
+</div>
+<div id="module_3" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 3- Fundamental Analysis</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 8
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article3-8-1">Sub Lesson 8.1</div>
+                    <div class="sub-lesson" data-article-id="article3-8-2">Sub Lesson 8.2</div>
+                    <div class="sub-lesson" data-article-id="article3-8-3">Sub Lesson 8.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="3">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 9
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article3-9-1">Sub Lesson 9.1</div>
+                    <div class="sub-lesson" data-article-id="article3-9-2">Sub Lesson 9.2</div>
+                    <div class="sub-lesson" data-article-id="article3-9-3">Sub Lesson 9.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="3">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_3">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 3! This is Lesson 8 Part 1- A Beginner's Guide To Fundamental Analysis</h1><p>In the world of investing, understanding the market changes might seem complex, but fear not, bold investor, for a powerful tool lies at your disposal: fundamental analysis. This analytical approach delves deep into the inner workings of a company, scrutinizing its finances, operations, and competitive landscape to determine its true worth. By mastering this skill, you'll gain the confidence to make informed investment decisions, potentially leading to long-term success. So, buckle up and get ready to embark on a learning journey.<br>Core Concepts:<br>At its heart, fundamental analysis boils down to one key objective: assessing a company's intrinsic value. This &quot;true value&quot; goes beyond the fluctuations of the market price, offering a glimpse into the company's long-term potential. Think of it like appraising a house. You wouldn't simply base your offer on the paint color or the curtains, would you? Instead, you'd delve into the property's structural integrity, location, and potential for appreciation. Similarly, fundamental analysis digs beneath the surface of a company's stock price to uncover its true worth.<br>To effectively assess a company's intrinsic value, fundamental analysts employ a diverse range of tools:<br>• Financial Statements: These are the holy grail of fundamental analysis, offering a detailed snapshot of a company's financial health. The Income Statement, Balance Sheet, and Cash Flow Statement provide insights into a company's earnings, assets, liabilities, and cash flow. In upcoming lessons, we will discuss the big three trio.<br>• Ratio Analysis: By calculating ratios such as the Price-to-Earnings (P/E) ratio or the Debt-to-Equity (D/E) ratio, analysts gain valuable insights into a company's valuation, profitability, and solvency.<br>• Industry Research: Understanding the competitive landscape within a company's industry is crucial. Factors such as market size, growth potential, and key competitors all play a role in shaping a company's future prospects.<br>• News and Events: Staying updated on company-specific news, industry trends, and macroeconomic factors is essential for making informed investment decisions.<br>The Fundamental Analysis Framework:<br>Now that you're familiar with the key tools, let's explore the step-by-step framework for conducting fundamental analysis:<br>1. Define Your Investment Goals: Are you seeking long-term growth or income? Knowing your investment goals will guide your analysis and help you identify suitable companies.<br>2. Choose Your Target Company: Research potential companies within your chosen sector or industry. Market share, competitive advantages, and management expertise should be considered.<br>3. Analyze the Financial Statements: Scrutinize the company's financial statements, paying close attention to revenue growth, profitability margins, and debt levels. Use ratio analysis to gain further insights.<br>4. Assess the Competitive Landscape: Research the company's main competitors, their market share, and their respective strengths and weaknesses.<br>5. Macroeconomic Factors: Evaluate the impact of broader economic trends, regulatory changes, and industry-specific developments on the company's prospects.<br>6. Formulate Your Investment Thesis: Based on your analysis, form a well-reasoned opinion on the company's intrinsic value and its potential for future growth. This will guide your investment decision to buy, hold, or sell.<br>Embracing the Challenge: Mastering fundamental analysis takes time, dedication, and a thirst for knowledge. But the rewards can be substantial, empowering you to make informed investment decisions to navigate the market with confidence. By diligently applying the principles of fundamental analysis, you can transform from a passive observer of the market into an active participant and shape your own investment future. Fundamental analysis is an ongoing process, not a one-time event. It's important to regularly reassess your investment thesis with changing market conditions. So, embrace the challenge, hone your analytical skills, and unlock the secrets of the financial world!</p>
+        </article>
+    </div>
+</div>
+<div id="module_4" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 4- Technical Analysis Intro</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 10
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article4-10-1">Sub Lesson 10.1</div>
+                    <div class="sub-lesson" data-article-id="article4-10-2">Sub Lesson 10.2</div>
+                    <div class="sub-lesson" data-article-id="article4-10-3">Sub Lesson 10.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="4">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 11
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article4-11-1">Sub Lesson 11.1</div>
+                    <div class="sub-lesson" data-article-id="article4-11-2">Sub Lesson 11.2</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="4">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_4">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 4! This is Lesson 10 Part 1</h1><p>10.1: Introduction to Technical Analysis<br>Have you ever stared at a stock chart and wondered what it all means? Were you intrigued by the price movements? This lesson will guide you to conquer the language of the markets known as Technical Analysis. Charts can be intimidating, but its secrets are waiting to be unlocked. Unlike fundamental analysis, which delves into a company's financials and economic data, technical analysis takes a purely price action driven approach. It assumes that all the information needed to determine future price movements is already reflected in the chart. By studying historical price and volume data, technical analysts aim to identify recurring patterns, trends, and indicators that hints at the most probable outcome by the market. So, how does this magic work? Technical analysis relies on a multitude of tools, each offering a unique perspective on the market's pulse.<br><strong>Trendlines:</strong> These lines connect significant price points, showing the overall direction of movement. Identifying upward or downward trends early can tip you off to profitable entry and exit points.<br><strong>Chart Patterns:</strong> These geometric shapes formed by price movements can supposedly predict implications for future price action. While not foolproof, they can suggest possible turning points.<br><strong>Indicators:</strong> These mathematical formulas applied to price and volume data generate signals such as moving averages, oscillators, and Bollinger Bands. They help gauge momentum, trend strength, and potential overbought or oversold conditions.<br>But remember, technical analysis can’t predict the future. Nothing is guaranteed in the financial markets. Using indicators, chart patterns, and trendlines increases the likelihood of a successful trade. It's a toolbox, and like any tool, it requires both skill and practice to wield effectively. Here are some key points to keep in mind:<br><strong>No crystal ball:</strong> Past performance is not always a guarantee of future results. Markets are dynamic, and unexpected events can throw even the best analyses off-course. Use technical analysis as a guide, not a gospel.<br><strong>Confirmation bias:</strong> Don't cherry-pick indicators that confirm your pre-existing biases. Seek diverse perspectives and challenge your assumptions to avoid blind spots.<br><strong>Over-reliance: </strong> Technical analysis is just one piece of the puzzle. Consider fundamental factors, market sentiment, and risk management for a holistic approach.<br>Learning technical analysis is similar to learning a new language. It takes time, dedication, and practice. But with perseverance, you can gradually crack the code of the markets, transform data into insights, and navigate trades with greater confidence. So, dive into the charts, explore the tools, and practice. The market is a living beast, and its language keeps evolving. Stay updated on new techniques, refine your existing skills, and adapt your approach as needed. And above all, never forget: trading involves risk. Always approach the market with a healthy dose of caution and sound risk management principles.
+</p>
+        </article>
+    </div>
+</div>
+<div id="module_5" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 5- Risk and Return</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 12
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article5-12-1">Sub Lesson 12.1</div>
+                    <div class="sub-lesson" data-article-id="article5-12-2">Sub Lesson 12.2</div>
+                    <div class="sub-lesson" data-article-id="article5-12-3">Sub Lesson 12.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="5">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 13
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article5-13-1">Sub Lesson 13.1</div>
+                    <div class="sub-lesson" data-article-id="article5-13-2">Sub Lesson 13.2</div>
+                    <div class="sub-lesson" data-article-id="article5-13-3">Sub Lesson 13.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="5">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_5">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 5! This is Lesson 12 Part 1</h1><p>12.1 Risk bounds<br>To navigate the markets successfully, you need a clear plan and control. Think of it as exploring a jungle – sure there's excitement in the possibilities, but there are risks, too. That's where setting up your risk bounds come in. They're an invisible fence that helps you stay safe financially while exploring trading opportunities.<br>A strategy with a positive expectancy will result in long-term profitability. However, let's start with a vital fact: losses are inevitable in trading. No strategy can fully protect you from them. So, it's crucial to accept this reality and actively manage potential losses. Risk bounds are your way of doing this. They're limits you set in advance, deciding the maximum amount of money you're willing to lose on any investment. Think of them as your own rules that stop you from taking unnecessary risks. They keep you from making hasty decisions that could lead to big losses. Here are some important steps to consider:<br>1. Establishing risk bounds isn't the same for everyone. Know Yourself, Know Your Goals! It's a deeply personal decision dictated by several factors:<br>• How comfortable are you with handling losses, both emotionally and financially? Do you like excitement and can handle ups and downs, or do you prefer to play it safe with your money?<br>• What are your goals in trading? Are you looking for quick profits or aiming for long-term growth? This affects how much risk you're okay with taking in each trade and overall, in your investments.<br>• How much experience do you have in trading? If you're new to this, it's wise to be cautious at first and gradually take more risks as you gain knowledge and confidence.<br>2. Several tools can help you determine your risk bounds:<br>• The Kelly Criterion: It's a math formula, a bit tricky, but it helps figure out the best size for your trades based on how likely you are to win and how much you could gain.<br>• The Percentage of Account Rule: You decide on a certain percentage, say 2-3%, of all the money you have for trading. That's the most you'll risk on each trade to avoid big losses.<br>• Volatility Analysis: Look at how prices have changed for the asset you're interested in. This helps you understand how much the value might drop and helps set your limits to stay safe.<br>3. Risk bounds extend beyond mere calculations. Mastering your emotions is also crucial:<br>• Fear: Don't let the fear of missing out push you into taking risks beyond your comfort zone. It's better to aim for steady, controlled gains instead of occasional big wins.<br>• Greed: Avoid the temptation to invest more after losses, thinking you'll make it all back quickly. Stick to your planned limits to prevent chasing profits that might be hard to reach.<br>• Discipline: Treat your risk limits as strict rules, not suggestions. Consistently sticking to them is crucial for long-term success.<br>A.R<br>4. Risk limits shouldn't stay the same. Change them based on how the market is behaving and what you've learned:<br>• Market Volatility: When things get wild in the market, tighten your risk limits to avoid big losses. In calmer times, you might have room to take slightly more calculated risks.<br>• Learning and Adjustment: As you get better at trading, you might change how much risk you're willing to take. But do it gradually and carefully.<br>In conclusion, think of losses as the cost of running your trading business. Sticking to your risk limits is crucial for responsible and lasting trading. To understand your comfort with risk, use the tools available, and keep a strong mindset. This way, you can navigate the market confidently, reducing losses, and finding opportunities for growth.
+
+            </p>
+        </article>
+    </div>
+</div>
+<div id="module_6" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 6- Derivatives</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 14
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-14-1">Sub Lesson 14.1</div>
+                    <div class="sub-lesson" data-article-id="article6-14-2">Sub Lesson 14.2</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 15
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-15-1">Sub Lesson 15.1</div>
+                    <div class="sub-lesson" data-article-id="article6-15-2">Sub Lesson 15.2</div>
+                    <div class="sub-lesson" data-article-id="article6-15-3">Sub Lesson 15.3</div>
+                    <div class="sub-lesson" data-article-id="article6-15-4">Sub Lesson 15.4</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 16
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-16-1">Sub Lesson 16.1</div>
+                    <div class="sub-lesson" data-article-id="article6-16-2">Sub Lesson 16.2</div>
+                    <div class="sub-lesson" data-article-id="article6-16-3">Sub Lesson 16.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 17
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-17-1">Sub Lesson 17.1</div>
+                    <div class="sub-lesson" data-article-id="article6-17-2">Sub Lesson 17.2</div>
+                    <div class="sub-lesson" data-article-id="article6-17-3">Sub Lesson 17.3</div>
+                    <div class="sub-lesson" data-article-id="article6-17-4">Sub Lesson 17.4</div>
+                    <div class="sub-lesson" data-article-id="article6-17-5">Sub Lesson 17.5</div>
+                    <div class="sub-lesson" data-article-id="article6-17-6">Sub Lesson 17.6</div>
+                    <div class="sub-lesson" data-article-id="article6-17-7">Sub Lesson 17.7</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_6">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 6! This is Lesson 14 Part 1</h1><p>Content for Sub-Lesson 14.1
+            </p>
+        </article>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/1.1.0/progressbar.min.js"></script>
+<script>
+    // Functions for progress tracking animation
+    // Progress tracking for total progress front-end
+    function animateProgress(element, targetProgress) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < targetProgress) {
+                progress++;
+                element.style.width = progress + '%';
+                element.textContent = progress + '%';
+            } else {
+                clearInterval(interval);
+            }
+        }, 10);
+    }
+    
+    function animateCircularChart(chartId, targetProgress) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < targetProgress) {
+                progress++;
+                updateCircularChart(chartId, progress);
+            } else {
+                clearInterval(interval);
+            }
+        }, 10);
+    }
+    
+    
+    //console.log(prog)
+    // Progress tracking per module 
+    let totprog = {{progress.total_prog}}
+    
+    animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    var bar = new ProgressBar.Circle('#container', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_2 = new ProgressBar.Circle('#container_2', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_3 = new ProgressBar.Circle('#container_3', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_4 = new ProgressBar.Circle('#container_4', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_5 = new ProgressBar.Circle('#container_5', {
+        strokeWidth: 6,
+        color: "green", // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_6 = new ProgressBar.Circle('#container_6', {
+        strokeWidth: 6,
+        color: "green", // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+    
+    // Update the progress bar
+    let mod1p = {{progress.mod_1}};
+    let mod2p = {{progress.mod_2}};
+    let mod3p = {{progress.mod_3}};
+    let mod4p = {{progress.mod_4}};
+    let mod5p = {{progress.mod_5}};
+    let mod6p = {{progress.mod_6}};
+    bar.animate(mod1p);
+    bar_2.animate(mod2p);
+    bar_3.animate(mod3p);
+    bar_4.animate(mod4p);
+    bar_5.animate(mod5p);
+    bar_6.animate(mod6p);
+    
+    
+    document.getElementById('visitModuleBtn').addEventListener('click', function() {
+        document.querySelector('#module_1').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod1p * 100);
+    });
+
+    document.getElementById('goBack').addEventListener('click', function() {
+        document.querySelector('#module_1').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = '';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none'; 
+        document.getElementById("rm_5").style.display ='none'; 
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_2').addEventListener('click', function() {
+        document.querySelector('#module_2').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod2p * 100);
+    });
+
+    document.getElementById('goBack_2').addEventListener('click', function() {
+        document.querySelector('#module_2').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = ''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_3').addEventListener('click', function() {
+        document.querySelector('#module_3').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod3p * 100);
+    });
+
+    document.getElementById('goBack_3').addEventListener('click', function() {
+        document.querySelector('#module_3').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = '';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_4').addEventListener('click', function() {
+        document.querySelector('#module_4').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod4p * 100);
+    });
+
+    document.getElementById('goBack_4').addEventListener('click', function() {
+        document.querySelector('#module_4').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = '';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_5').addEventListener('click', function() {
+        document.querySelector('#module_5').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod5p * 100);
+    });
+
+    document.getElementById('goBack_5').addEventListener('click', function() {
+        document.querySelector('#module_5').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = ''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_6').addEventListener('click', function() {
+        document.querySelector('#module_6').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod6p * 100);
+    });
+
+    document.getElementById('goBack_6').addEventListener('click', function() {
+        document.querySelector('#module_6').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = ''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+    const articleContents = {
+        "article-1-1": "<h1>Welcome to Module 1! This is Lesson 1 Part 1</h1><p>When you earn a livelihood, you have income and expenses. Some part of income goes towards your needs, your wants and some part of it remains. What should you do with the money that remains? The motivation to invest is to make your remaining income grow. Investing looks at long term benefits where as trading looks to make short term benefits. However, both play a crucial role in building your wealth. If you don’t take any action to grow your money, it will either be spent in expenses, eroded by inflation and you would miss out on opportunities where your money can fetch more money therefore Investing is a basic tenet of financial IQ.</p>",
+        "article-2-1": "<h1>Welcome to Module 1! This is Lesson 2 Part 1</h1><p>A market is a physical or virtual venue where buyers and sellers convene to buy and sell goods/services at prices determined by them. A financial market is a system where participants engage in buying and selling financial instruments. Financial instruments include stocks, bonds, currencies, commodities, and derivatives. Below we will see the various types of financial markets, who are the key market players and what are their roles.</p>",
+        "article-2-2": "<h1>Welcome to Module 1! This is Lesson 2 Part 2</h1><p>In a financial market there is one segment who provide services and infrastructure and on the other side there are users of such services. The market is controlled by the regulatory authorities who laydown the framework, architecture and various policies and procedures.<p>Among the regulatory bodies, one of the most important players is the central bank which sets out the monetary policy and controls the supply of money in the market. Thereafter, there are exchange authorities such as the SCA and DFSA in UAE, who supervise the securities and commodities markets, ensure their integrity and protect investors. Stock Exchanges are centralized marketplaces or platforms where buyers and sellers come together to trade various financial instruments. They provide rules, trading infrastructure and regulations for trading. They do not directly trade with customers. A broker is an entity that executes transactions between buyers and sellers and earn a fee for their services. Brokerage firms employ sub brokers to increase their coverage among retail clients.</p><p>Individual investors are private individuals who buy and sell financial instruments for personal gain. They contribute to market liquidity. Institutional investors include entities like pension funds, mutual funds, hedge funds, and insurance companies who manage large pools of capital on behalf of their clients and can have a significant impact on the market due to the scale of their investments Investment Banks and Commercial Banks play a crucial role in providing liquidity, financing and other financial services.</p>",
+        "article-2-3": "<h1>Welcome to Module 1! This is Lesson 2 Part 3</h1><p>There are many types of financial markets pertaining to different asset classes. Two main categories are capital markets and money markets. Capital markets include stock markets, bond markets, derivative markets. In a stock market share of publicly traded companies are bought and sold. A bond is a financial instrument which represents debt. A bond market or debt market is where investors buy debts by lending money to the issuer in exchange for periodic interest payments and the return of principal at maturity. In derivative markets financial contracts whose value are derived from an underlying asset or index, are traded.</p><p>Money markets deal with short term debt instruments and cash equivalents like 1 week Certificate of Deposit (CD), overnight CD or CDs that mature over in a few months. Debt can also belong to governments and corporations. Treasury Bills (T-Bills) represent government debt a.k.a government security. Similarly a corporation can raise debt by issuing a Commercial paper. These are all short term debts.</p><p>The Foreign Exchange market focuses on the trading of national currencies. Participants engage in buying and selling different currencies based on exchange rate. The exchange rate is determined by the supply and demand of various currencies in the foreign exchange market.</p><p>In the commodities markets, traders buy and sell physical goods such as gold, oil and agricultural product such as coffee, tea, wheat.</p><p>Each one of the above has a current market and a future market.</p>",
+        "article-3-1": "<h1>Welcome to Module 1! This is Lesson 3 Part 1</h1><p>Content for Sub Lesson 3.1</p>",
+        "article-3-2": "<h1>Welcome to Module 1! This is Lesson 3 Part 2</h1><p>One of the most significant mistakes that early investors can make is not starting now. The reason for that is the principle of compound interest wherein interest compounds on itself and over the course of years becomes a significant amount even if you don’t do add anything more than the initial principal amount.</p><img src = '/static/img/table.png'><p>There are three main takeaways from the table above. First the initial deposit is growing on its own. Second, the longer it grows the bigger it becomes. Finally, the last column makes the point that the bigger the investment becomes the quicker it grows. We’re all here only for a finite amount of time and if you chose to delay investing by even 10 years the amount you could have had if you didn’t delay, reduces by 50%.</p>",
+        "article-4-1": "<h1>Welcome to Module 1! This is Lesson 4 Part 1</h1><p>Content for Sub Lesson 4.1</p>",
+        "article-4-2": "<h1>Welcome to Module 1! This is Lesson 4 Part 2</h1><p>Content for Sub Lesson 4.2</p>",
+        "article-4-3": "<h1>Welcome to Module 1! This is Lesson 4 Part 3</h1><p>Content for Sub Lesson 4.3</p>",
+        "article2-5-1": "<h1>Welcome to Module 2! This is Lesson 5 Part 1</h1><p>Content for Sub Lesson 5.1</p>",
+        "article2-5-2": "<h1>Welcome to Module 2! This is Lesson 5 Part 2</h1><p>Content for Sub Lesson 5.2</p>",
+        "article2-5-3": "<h1>Welcome to Module 2! This is Lesson 5 Part 3</h1><p>Content for Sub Lesson 5.3</p>",
+        "article2-6-1": "<h1>Welcome to Module 2! This is Lesson 6 Part 1</h1><p>Content for Sub Lesson 6.1</p>",
+        "article2-6-2": "<h1>Welcome to Module 2! This is Lesson 6 Part 2</h1><p>Content for Sub Lesson 6.2</p>",
+        "article2-6-3": "<h1>Welcome to Module 2! This is Lesson 6 Part 3</h1><p>Content for Sub Lesson 6.3</p>",
+        "article2-6-4": "<h1>Welcome to Module 2! This is Lesson 6 Part 4</h1><p>Content for Sub Lesson 6.4</p>",
+        "article2-6-5": "<h1>Welcome to Module 2! This is Lesson 6 Part 5</h1><p>Content for Sub Lesson 6.</p>",
+        "article2-7-1": "<h1>Welcome to Module 2! This is Lesson 7 Part 1</h1><p>Content for Sub Lesson 7.1</p>",
+        "article2-7-2": "<h1>Welcome to Module 2! This is Lesson 7 Part 2</h1><p>Content for Sub Lesson 7.2</p>",
+        "article2-7-3": "<h1>Welcome to Module 2! This is Lesson 7 Part 3</h1><p>Content for Sub Lesson 7.3</p>",
+        "article2-7-4": "<h1>Welcome to Module 2! This is Lesson 7 Part 4</h1><p>Content for Sub Lesson 7.4</p>",
+        "article2-7-5": "<h1>Welcome to Module 2! This is Lesson 7 Part 5</h1><p>Content for Sub Lesson 7.5</p>",
+        "article2-7-6": "<h1>Welcome to Module 2! This is Lesson 7 Part 6</h1><p>Content for Sub Lesson 7.6</p>",
+        "article2-7-7": "<h1>Welcome to Module 2! This is Lesson 7 Part 7</h1><p>Content for Sub Lesson 7.7</p>",
+        "article3-8-1": "<h1>Welcome to Module 3! This is Lesson 8 Part 1- A Beginner's Guide To Fundamental Analysis</h1><p>In the world of investing, understanding the market changes might seem complex, but fear not, bold investor, for a powerful tool lies at your disposal: fundamental analysis. This analytical approach delves deep into the inner workings of a company, scrutinizing its finances, operations, and competitive landscape to determine its true worth. By mastering this skill, you'll gain the confidence to make informed investment decisions, potentially leading to long-term success. So, buckle up and get ready to embark on a learning journey.<br>Core Concepts:<br>At its heart, fundamental analysis boils down to one key objective: assessing a company's intrinsic value. This &quot;true value&quot; goes beyond the fluctuations of the market price, offering a glimpse into the company's long-term potential. Think of it like appraising a house. You wouldn't simply base your offer on the paint color or the curtains, would you? Instead, you'd delve into the property's structural integrity, location, and potential for appreciation. Similarly, fundamental analysis digs beneath the surface of a company's stock price to uncover its true worth.<br>To effectively assess a company's intrinsic value, fundamental analysts employ a diverse range of tools:<br>• Financial Statements: These are the holy grail of fundamental analysis, offering a detailed snapshot of a company's financial health. The Income Statement, Balance Sheet, and Cash Flow Statement provide insights into a company's earnings, assets, liabilities, and cash flow. In upcoming lessons, we will discuss the big three trio.<br>• Ratio Analysis: By calculating ratios such as the Price-to-Earnings (P/E) ratio or the Debt-to-Equity (D/E) ratio, analysts gain valuable insights into a company's valuation, profitability, and solvency.<br>• Industry Research: Understanding the competitive landscape within a company's industry is crucial. Factors such as market size, growth potential, and key competitors all play a role in shaping a company's future prospects.<br>• News and Events: Staying updated on company-specific news, industry trends, and macroeconomic factors is essential for making informed investment decisions.<br>The Fundamental Analysis Framework:<br>Now that you're familiar with the key tools, let's explore the step-by-step framework for conducting fundamental analysis:<br>1. Define Your Investment Goals: Are you seeking long-term growth or income? Knowing your investment goals will guide your analysis and help you identify suitable companies.<br>2. Choose Your Target Company: Research potential companies within your chosen sector or industry. Market share, competitive advantages, and management expertise should be considered.<br>3. Analyze the Financial Statements: Scrutinize the company's financial statements, paying close attention to revenue growth, profitability margins, and debt levels. Use ratio analysis to gain further insights.<br>4. Assess the Competitive Landscape: Research the company's main competitors, their market share, and their respective strengths and weaknesses.<br>5. Macroeconomic Factors: Evaluate the impact of broader economic trends, regulatory changes, and industry-specific developments on the company's prospects.<br>6. Formulate Your Investment Thesis: Based on your analysis, form a well-reasoned opinion on the company's intrinsic value and its potential for future growth. This will guide your investment decision to buy, hold, or sell.<br>Embracing the Challenge: Mastering fundamental analysis takes time, dedication, and a thirst for knowledge. But the rewards can be substantial, empowering you to make informed investment decisions to navigate the market with confidence. By diligently applying the principles of fundamental analysis, you can transform from a passive observer of the market into an active participant and shape your own investment future. Fundamental analysis is an ongoing process, not a one-time event. It's important to regularly reassess your investment thesis with changing market conditions. So, embrace the challenge, hone your analytical skills, and unlock the secrets of the financial world!</p>",
+        "article3-8-2": "<h1>Welcome to Module 3! This is Lesson 8 Part 2</h1><p>Financial statements hold a wealth of information about a company's health and performance. For investors, creditors, and even curious employees, understanding these statements can paint a clear picture of the company's financial standing and future prospects. This guide equips you with the tools to form a basic understanding of financial statements and gain valuable insights into any company you choose.<br>Financial statements come in three primary forms, each offering a unique perspective on a company's financial well-being:<br>• Balance Sheet: This snapshot of a company at a specific time point tells you what it owns (assets), what it owes (liabilities), and the value remaining for shareholders (equity). Think of it as a financial photograph of the company's net worth.<br>• Income Statement: This chronological report documents a company's sales and expenses over a period. It tracks every dollar earned and spent, calculating the all-important &quot;net income&quot; figure.<br>• Cash Flow Statement: This statement bridges the gap between the balance sheet and income statement by showcasing how cash moves in and out of the company during a period. It details cash inflows from operations, investing, and financing activities, alongside cash outflows for similar categories.<br>Navigating the Balance Sheet:<br>• Assets: The valuables a company owns, from cash and inventory to equipment and intellectual property. Look for increasing trends in current assets as a sign of liquidity, while rising long-term assets such as equipment, factory, property may indicate future growth plans.<br>• Liabilities: The debts a company owes, including short-term obligations like accounts payable and long-term debts like bank loans. Lower debt-to-equity ratios generally indicate a company's financial stability.<br>• Equity: The owners' stake in the company, calculated as assets minus liabilities. A rising equity level might suggest reinvested profits and potential future dividends for shareholders.<br>• Equation: All must balance using the simple accounting formula, Assets = Liabilities + Shareholders Equity<br>Analyzing the Income Statement:<br>• Revenue: The total amount of money generated from selling goods or services. Track its growth or decline over time to gauge the company's sales performance.<br>• Expenses: The costs incurred to generate revenue, categorized as cost of goods sold, operating expenses, and financial expenses. Analyze expense trends and compare them to revenue to understand profitability.<br>• Net Income: The bottom line, arrived at after deducting all expenses from revenue. This key figure measures the company's profit for the period and is often used to calculate various financial ratios.<br>Decoding the Cash Flow Statement:<br>• Operating Activities: Cash generated or used in the core business operations, including sales, collections, and payments to suppliers. Positive operating cash flow indicates the company can sustain itself without external funding.<br>• Investing Activities: Cash used to buy or sell assets such as property, equipment, or investments. Increased investment activity may signal expansion plans, while consistent sales of assets could raise concerns about asset depletion.<br>• Financing Activities: Cash raised or repaid through borrowing, issuing equity, or paying dividends. Understanding these activities helps assess the company's reliance on external funding and its capital structure.<br>Example: Take a look at Apple’s Financial Statements by navigating the link below. Can you identify the numbers and terms we covered? In our advanced lessons we will dive deeper into the numbers.<br><a style='color:blue' href='https://www.apple.com/newsroom/pdfs/fy2023-q4/FY23_Q4_Consolidated_Financial_Statements.pdf'>https://www.apple.com/newsroom/pdfs/fy2023-q4/FY23_Q4_Consolidated_Financial_Statements.pdf</a><br>Context and Ratios: While understanding the individual line items in each statement is crucial, the real magic happens when you use them to calculate financial ratios. These ratios, such as the debt-to-equity ratio or the price-to-earnings ratio, compare different parts of the financial statements to paint a bigger picture. By comparing these ratios against industry benchmarks or the company's historical performance, you gain valuable insights into its financial health, operational efficiency, and potential for future growth. Financial statements are not infallible. Accounting policies and estimates can introduce complexities. Always consider industry context and external factors when analyzing these statements. Consulting with financial professionals or taking our advance courses can further enhance your understanding and interpretation.<br>Remember: Reading financial statements doesn't have to be a chore. By familiarizing yourself with the key documents, understanding the individual line items, and utilizing financial ratios, you can unlock true value. With practice and patience, you'll be able to confidently navigate the intricacies of financial statements. In our advanced lessons, we'll extensively explore how to interpret financial statements.</p>",
+        "article3-8-3": "<h1>Welcome to Module 3! This is Lesson 8 Part 3- Indicators of Fundamental Analysis</h1><p>Stock prices dances to a complex rhythm and its movements are dictated by number of factors. While technical analysis indicators focus on price action and volume, fundamental analysis indicators focus on company's financial health, industry trends, and economic pulse. Fundamental indicators amplify specific signals and helps investors understand the underlying business. While fundamental analysis doesn't rely solely on indicators, these data-driven tools can validate your assessment of a company's future potential. Here are some key categories:<br>➢ Profitability Measures:<br>o Earnings Per Share (EPS): Indicates how much profit a company earns for each outstanding share.<br>o Return on Equity (ROE): Measures how efficiently a company generates profit from its shareholders' investments.<br>o Gross Margin: Represents the percentage of sales revenue remaining after deducting the cost of goods sold.<br>➢ Efficiency Ratios:<br>o Price-to-Earnings Ratio (P/E): Compares a company's stock price to its annual earnings per share.<br>o Debt-to-Equity Ratio: Measures the financial leverage a company uses, indicating its risk profile.<br>o Current Ratio: Indicates a company's ability to meet its short-term obligations with its current assets.<br>➢ Growth Indicators:<br>o Earnings Growth Rate: Measures the percentage increase in a company's earnings over time.<br>o Price-to-Book Ratio (P/B): Compares a company's stock price to its net asset value.<br>o Revenue Growth Rate: Shows the percentage increase in a company's sales revenue over time.<br>Beyond the Numbers:<br>Just as a single note played out of context offers little to no information, individual indicators cannot tell the whole story. Here's how to make the most of them:<br>• Benchmarking: Compare a company's indicators to its industry peers and historical data to identify trends and relative performance.<br>• Ratio Analysis: Utilize multiple indicators together to paint a richer picture. For example, consider the P/E ratio in conjunction with a company's growth rate to assess its valuation.<br>• Qualitative Factors: Don't neglect qualitative factors such as management quality, competitive advantage, and brand reputation.<br>Now let's see how indicators can be used in different scenarios:<br>➢ Investing in a Growth Stock: You're considering a tech company with a high P/E ratio but also impressive earnings and revenue growth. Analyzing its historical P/E and comparing it to similar companies can offer insights into its potential for continued growth.<br>➢ Evaluating a Value Stock: You're interested in a stock with a low P/E but stagnant earnings. Checking its debt-to-equity ratio and current ratio will help assess its financial stability and liquidity.<br>Remember:<br>Indicators are not crystal balls. They provide valuable information, but market risks and unforeseen events can still impact outcomes. No need to overcomplicate! Choose a few relevant indicators that align with your investment goals and risk tolerance. Track industry trends, economic data, and company-specific news to interpret indicators effectively. Always stay informed!<br>Conclusion:<br>By integrating indicators into your fundamental analysis, you gain a deeper understanding of a company's strengths, weaknesses, and future prospects. Use them wisely, alongside qualitative factors and continuous learning. Remember, in the complex world of the stock market, becoming a skilled investor takes patience and practice.<br>Resources:<br>• The Motley Fool: <a style='color:blue' href='https://www.fool.com/'>https://www.fool.com/</a><br>• Morningstar: <a style='color:blue' href='https://www.morningstar.com/'>https://www.morningstar.com/</a><br>• Financial Times: <a style='color:blue' href='https://www.ft.com/'>https://www.ft.com/</a><br>• Investopedia: <a  style='color:blue' href='https://www.investopedia.com/terms/f/fundamentalanalysis.asp'>https://www.investopedia.com/terms/f/fundamentalanalysis.asp</a></p>",
+        "article3-9-1": "<h1>Welcome to Module 3! This is Lesson 9 Part 1- Valuation Techniques</h1>Understanding how to value equities is a critical skill for investors. Calculating what a company is worth is similar to assessing the value of a car. When you're considering buying a car, you assess various factors such as its make, model, mileage, and condition to determine its worth. Similarly, when investors want to gauge a company's worth, they employ different methods known as equity valuation techniques.<br>One popular approach is the &ldquo;Discounted Cash Flow (DCF) Analysis.&rdquo; Imagine you're buying a used car. You wouldn't just pay whatever the seller asks, right? You'd consider how much the car is worth to you based on its future usefulness. Discounted Cash Flow (DCF) analysis operates similarly, estimating a company's current value by considering its future cash flow generation, the time value of money and risk. This model can help investors calculate a company's intrinsic value by estimating future cash earnings and then converts that future value into today's dollars.<br>Another approach to determine a company's value is through the &ldquo;Multiples Valuation.&rdquo; This model allows investors to evaluate similar businesses in the same industry to see how they're valued by the stock market. If a similar company is valued higher, it might imply that the company you're interested in could also have a higher worth. You can think of it as comparing the price of the car you want to buy with similar cars that have been sold recently.<br>Then there's the &ldquo;Asset-Based Valuation&rdquo; method. Imagine evaluating a used car by tallying up its current market value for all its parts&mdash;the engine, tires, seats, and so on. For companies, this entails assessing all the assets they own, such as buildings, machinery, and cash, and summing them up. This method doesn&rsquo;t solely focus on a company's potential earnings but also considers its tangible assets.<br>The Price-Earnings Ratio (P/E ratio)&quot; serves as a simple measure to understand a company's value. Using the car example, it involves comparing how much you're paying for the car with how much money you can make in a year. Similarly, the P/E ratio compares a company's stock price with its earnings. A high ratio might signify that investors believe the company has strong growth potential.<br>The &ldquo;Book Value&rdquo; is similar to understanding how much the car is worth based on its initial purchase price minus depreciation. For companies, this method involves reviewing the balance sheet and deducting liabilities from assets. It provides an idea of the company's worth if it were to liquidate all its assets.<br>Lastly, the &ldquo;Dividend Discount Model (DDM)&rdquo; is comparable to estimating the future value of your car by considering potential earnings from selling it later. In the business context, this model predicts a company's value by estimating the future dividends it will pay to shareholders and then discounting those values back to the present.<br>These equity valuation techniques serve as tools in an investor's toolbox, allowing them to assess a company's value. Similar to different tools serving distinct purposes for fixing various parts of a car, these methods aid in understanding different aspects of a company's worth. Employing a combination of these methods can offer a more comprehensive and accurate evaluation of a company's potential value.",
+        "article3-9-2": "<h1>Welcome to Module 3! This is Lesson 9 Part 2- Analyzing Company Health</h1><p>Investing can be similar to a rollercoaster ride, but knowing how to pick fundamentally strong companies can make the ride much smoother. It's about understanding the company's &quot;health&quot; meaning its ability to grow, generate profits, and weather market storms. Here's a roadmap to help you analyze and choose investment-worthy businesses:<br>1. Financial Fitness Check:<br>Financial Statements: Dive into the company's balance sheet, income statement, and cash flow statement. These paint a picture of its assets, liabilities, revenue, expenses, and cash flow. Look for key trends: are revenues growing steadily? Is the company managing debt responsibly? Is the company profitable?<br>Ratios: Calculate key ratios such as current ratio, debt-to-equity ratio, and P/E ratio. These tell you about the company's liquidity, solvency, and valuation compared to its peers.<br>Profitability: Look at metrics such as gross margin, operating margin, and net income margin. These reveal how efficiently the company turns revenue into profit.<br>2. Beyond the Numbers:<br>Industry and Market: Understand the industry's growth potential, competitive landscape, and regulatory environment. Is the company a leader in a growing industry?<br>Management and Leadership: Evaluate the leadership team's track record, experience, and vision. Are they skilled and passionate about the company's future?<br>Competitive Advantage: What makes the company unique and defensible against competitors? Does the company have an economic moat? Does it have strong brand recognition, intellectual property, or a cost-effective production process?<br>Corporate Governance: Assess the company's commitment to ethical practices, transparency, and shareholder value. Does it have a strong board of directors and responsible management practices?<br>3. Putting it all together:<br>Compare and Contrast: Benchmark the company's performance against its peers and industry averages. This provides a clearer picture of its relative strength.<br>Look for consistency: Consistency in financial performance, market share growth, and management execution is key to long-term success.<br>Consider your investment goals: Align your investment choices with your risk tolerance and time horizon. A young, high-growth company might be riskier but offer higher potential returns, while a mature, dividend-paying company might be more stable but offer lower growth.<br><br>Always Remember:<br>Analyzing company health is an ongoing process, not a one-time event. Stay updated with industry news, company announcements, and financial reports.<br>Diversification is key. Don't put all your eggs in one basket. Spread your investments across different companies and sectors to mitigate risk.<br>Seek professional guidance if needed. Financial advisors can provide personalized advice based on your specific financial situation and goals.<br>By following these steps and conducting thorough research, you can make informed investment decisions and pick fundamentally strong companies that will help you reach your financial goals. Happy hunting!</p>",
+        "article3-9-3": "<h1>Welcome to Module 3! This is Lesson 9 Part 3- Sector Analysis</h1><p>Investing in the stock market can be thrilling, yet daunting. With countless companies vying for your attention, it's easy to feel overwhelmed. This is where sector analysis comes in, a powerful tool that helps you navigate the market with clarity and purpose. By understanding the economic and financial landscape of specific industries, you gain valuable insights to inform your investment decisions.<br>Step 1: Choose Your Battlefield<br>Before diving headfirst, define your target. Select a sector that sparks your interest, whether it's the evolving world of technology or the essential realm of healthcare. Research the sector's composition, identifying the major players and their market share. Understanding the competitive landscape is crucial for gauging the sector's overall health and potential for growth.<br>Step 2: Zoom Out<br>Don't get lost in the woods; take a step back and consider the broader economic forces at play. Is the sector sensitive to interest rates, inflation, or global events? Government regulations and tax policies can significantly impact specific sectors. Every sector is susceptible to fluctuations within the broader business cycle. Analyzing these macroeconomic factors helps you anticipate potential tailwinds or headwinds that might impact the sector's performance.<br>Step 3: Numbers Matter<br>Now, it's time to get down to the nitty-gritty: financial metrics. Delve into key ratios like price-to-earnings (P/E), price-to-book (P/B), and debt-to-equity ratios to assess the sector's valuation and financial health. Compare these ratios with historical data and benchmark them against other sectors to identify any red flags or hidden gems.<br>Step 4: Growth Story<br>Growth potential is the lifeblood of any investment. Analyze the sector's projected revenue growth, market penetration, and technological advancements. Identify any disruptive trends or innovations that could reshape the industry landscape and create new opportunities. Remember, a sector with strong growth prospects can be a goldmine for investors.<br>Step 5: Competition<br>No sector exists in isolation. Analyze the competitive dynamics within the sector. Are there dominant players with significant market share? How intense is the competition for resources and customers? Understanding these competitive forces helps you identify the sector's leading companies and their potential for sustainable growth.<br>Step 6: Sentiment Matters<br>Don't underestimate the power of sentiment. Gauge investor and analyst sentiment towards the sector by following news articles, industry reports, social media trends, and analyst recommendations. This can provide valuable insights into the perceived future trajectory of the sector and potential market psychology shifts. Remember, fear and greed can significantly impact stock prices, so check the fear and greed index to identify overall market sentiment.<br>Bonus Tip: Stay Agile! Be ready to change your mind if the facts change.<br>The financial world is a dynamic beast. Regularly monitor economic data releases, industry conferences, and company news to stay updated on emerging trends and adjust your analysis accordingly. Remember, the market is constantly evolving, so adaptability is key to future gains. By following these steps and continuously honing your analysis skills, you can transform from a naive beginner to a confident investor, navigating the stock market with precision and purpose. Remember, sector analysis is not a crystal ball. It's an informed assessment based on available data and analysis. Use it as a tool to guide your investment decisions, but always consider your risk tolerance and overall investment strategy before making any final calls. In the short term, the stock market can behave irrationally, but over the long term, it tends to align more accurately with the true value of assets.<br>Happy investing!</p>",
+        "article4-10-1": "<h1>Welcome to Module 4! This is Lesson 10 Part 1</h1><p>10.1: Introduction to Technical Analysis<br>Have you ever stared at a stock chart and wondered what it all means? Were you intrigued by the price movements? This lesson will guide you to conquer the language of the markets known as Technical Analysis. Charts can be intimidating, but its secrets are waiting to be unlocked. Unlike fundamental analysis, which delves into a company's financials and economic data, technical analysis takes a purely price action driven approach. It assumes that all the information needed to determine future price movements is already reflected in the chart. By studying historical price and volume data, technical analysts aim to identify recurring patterns, trends, and indicators that hints at the most probable outcome by the market. So, how does this magic work? Technical analysis relies on a multitude of tools, each offering a unique perspective on the market's pulse.<br><strong>Trendlines:</strong> These lines connect significant price points, showing the overall direction of movement. Identifying upward or downward trends early can tip you off to profitable entry and exit points.<br><strong>Chart Patterns:</strong> These geometric shapes formed by price movements can supposedly predict implications for future price action. While not foolproof, they can suggest possible turning points.<br><strong>Indicators:</strong> These mathematical formulas applied to price and volume data generate signals such as moving averages, oscillators, and Bollinger Bands. They help gauge momentum, trend strength, and potential overbought or oversold conditions.<br>But remember, technical analysis can’t predict the future. Nothing is guaranteed in the financial markets. Using indicators, chart patterns, and trendlines increases the likelihood of a successful trade. It's a toolbox, and like any tool, it requires both skill and practice to wield effectively. Here are some key points to keep in mind:<br><strong>No crystal ball:</strong> Past performance is not always a guarantee of future results. Markets are dynamic, and unexpected events can throw even the best analyses off-course. Use technical analysis as a guide, not a gospel.<br><strong>Confirmation bias:</strong> Don't cherry-pick indicators that confirm your pre-existing biases. Seek diverse perspectives and challenge your assumptions to avoid blind spots.<br><strong>Over-reliance: </strong> Technical analysis is just one piece of the puzzle. Consider fundamental factors, market sentiment, and risk management for a holistic approach.<br>Learning technical analysis is similar to learning a new language. It takes time, dedication, and practice. But with perseverance, you can gradually crack the code of the markets, transform data into insights, and navigate trades with greater confidence. So, dive into the charts, explore the tools, and practice. The market is a living beast, and its language keeps evolving. Stay updated on new techniques, refine your existing skills, and adapt your approach as needed. And above all, never forget: trading involves risk. Always approach the market with a healthy dose of caution and sound risk management principles.</p>",
+        "article4-10-2": "<h1>Welcome to Module 4! This is Lesson 10 Part 2</h1>10.2: Chart Types and Patterns<br>While financial news and economic data offer valuable insights technical analysis through charts and patterns provides a visual narrative of a stock's price movements potentially revealing its future trajectory. Developing charts is an art for some and a science for others. This lesson delves into the two main components of technical analysis: stock chart types and chart patterns.<br>Charting the Course: Stock Chart Types<br>Stock charts are essentially roadmaps visually depicting a stock's price history over time. The three most common chart types are:<br>Line Chart: The simplest and most basic the line chart connects closing prices over a specific period offering a clear overview of long-term trends. Below is a line chart of Microsoft.<img src = '/static/img/line_chart.png'><br>Bar Chart: Each bar represents a single trading period showcasing the opening highest lowest and closing prices. This format provides more detailed information about price fluctuations within that period. Below is a bar chart of Walmart. <br><img src = '/static/img/bar_chart.png'><br>Candlestick Chart: The most popular among technical analysts candlestick charts use colored candlesticks to represent price movements. The body of the candlestick shows the difference between the opening and closing prices while the wicks (thin lines above and below the body) illustrate the highest and lowest traded prices. Take a look at the candlestick chart for Apple below. <img src = '/static/img/candlestick_chart.png'><br>Choosing the right chart type depends on your analytical needs. Line charts are suitable for long-term trends while bar and candlestick charts offer a more granular view of price action within a specific timeframe.<br>Pattern Power:<br>Chart patterns are recurring formations identified on price charts believed to signal potential future price movements. They are broadly categorized into three groups:<br>Continuation Patterns: These patterns suggest the continuation of the prevailing trend such as: Ascending Triangle: Formed by converging upward trendlines it indicates a potential upward breakout. Descending Triangle: Defined by converging downward trendlines it hints at a possible downward breakout. <br> <img src = '/static/img/ascending.png'> <img src = '/static/img/descending.png'><br>Reversal Patterns: These patterns suggest a potential reversal of the current trend such as: Head and Shoulders: Resembling a human head with two shoulders it signifies a bearish reversal after an uptrend. Double Bottom: Two consecutive lows followed by an upward move suggest a potential trend reversal from bearish to bullish. <img src = '/static/img/head.png'> <img src = '/static/img/double.png'><br>Bilateral Patterns: These patterns can signal either continuation or reversal depending on the breakout direction such as: Pennant: A triangular pattern formed after a sharp price movement; it indicates a potential continuation in the breakout direction. Flag: Similar to a pennant but with parallel trendlines it suggests a continuation after a period of consolidation.<img src = '/static/img/flag.png'><br>Remember: Chart patterns are not foolproof indicators. They should be used in conjunction with other forms of analysis to make informed investment decisions. Additionally macro-economic conditions and company specific fundamental can influence the reliability of these patterns.<br>Conclusion: We have barely scratched the surface on chart patterns but by understanding the basics chart types and patterns you can start to identify them on charts. Charting is a roadmap that can help you make informed decisions and potentially improve your investment outcomes. So the next time you gaze at a stock chart remember it's not just a jumble of lines and bars; it's a story waiting to be deciphered. In our advanced lessons we will delve deeper into more complex chart patterns.",
+        "article4-10-3": "<h1>Welcome to Module 4! This is Lesson 10 Part 3</h1><p>Technical indicators are mathematical tools that transform raw data into actionable insights. But with a vast array of indicators at your fingertips navigating them can feel intimidating. Fear not novice trader this guide will help you to use these powerful tools effectively.<br>Understanding the Basic Math:<br>At their core technical indicators are formulas that crunch price volume and other market data into lines bands or oscillators displayed on your chart. They fall into five main categories each offering a unique perspective on the market:<br>Trend Indicators: These tools identify the prevailing direction be it an upward climb or a downward breakdown. Moving averages Bollinger Bands and the Average Directional Index (ADX) are typically used by most traders.<br>Momentum Indicators: Ever felt the market is full of excitement or exhaustion? Momentum indicators quantify that feeling revealing the pace and strength of price movements. The Relative Strength Index (RSI) Stochastic Oscillator and MACD are your pulse readers in this context.<br>Volatility Indicators: Imagine the market as a rollercoaster – volatility indicators measure the intensity of those ups and downs. Bollinger Bands and Average True Range (ATR) help you gauge the level of turbulence ahead.<br>Volume Indicators: Volume the lifeblood of the market speaks volumes (pun intended) about buying and selling pressure. On-Balance Volume (OBV) and the Chaikin Money Flow (CMF) translate this buying and selling into actionable signals.<br>Sentiment Indicators: Many fear and greed indexes are used as sentiment indicators. The VIX for example measures investor fear while the Put/Call ratio analyzes options trading activity to gauge market sentiment.<br>Example: Take a look at the Relative Strength Index (RSI) below. <img src = '/static/img/rsi.png'> This momentum indicator calculates whether the stock is overbought (above 70) or oversold (under 30).<br>Choosing Your Weapon:<br>With such a diverse arsenal at your disposal selecting the right indicators can be overwhelming. Remember there's no holy grail– the best indicators are those that suit your trading style and the asset you're analyzing. Here are some tips for building your technical skills:<br>Match your timeframe: Day traders prioritize short-term indicators like the RSI while swing traders might focus on trend indicators like moving averages.<br>Keep it simple: Never rely on a single indicator however don't overwhelm your chart with too many indicators. Start with 2-3 that complement each other and provide unique insights.<br>Back test: Testing your indicator combinations on historical data helps you assess their effectiveness and refine your strategy.<br>Practice: Develop your skills with a demo account before venturing into real-world trading.<br>Mastering charts:<br>Technical indicators are simply tools that provide insights but the final trading decision rests with you. True mastery lies in understanding their limitations and interpreting them within the broader market context. With practice patience and a healthy dose of skepticism you can utilize these mathematical tools to increase your probability of a successful trade. Always remember the point is not to predict the future but to make informed decisions based on the information at hand. Trading is a game of probabilities and indicators are there to give you a winning edge.</p>",
+        "article4-11-1": "<h1>Welcome to Module 4! This is Lesson 11 Part 1</h1><p>11.1: Developing a Trading Plan<br>The allure of the financial markets is undeniable. The potential for significant returns, the thrill of the chase, the satisfaction of outsmarting the market. But without a well-defined plan, navigating this complex landscape can quickly turn into a painful journey. Developing a robust trading plan is the key to steering your course toward consistent profits. Think of a trading plan as your blueprint for success. It outlines your goals, risk tolerance, trading strategies, and money management techniques. Without a plan, you're essentially gambling! Relying on gut feelings and impulsive decisions can quickly lead to disaster. A well-crafted plan, however, provides structure and discipline.<br>Building Your Trading Plan<br>Developing a winning trading plan isn't rocket science, but it does require careful consideration and introspection. Here are the basic seven pillars to guide you:<br>• Self-Assessment: Before diving into specifics, begin with a candid self-evaluation. Consider your financial goals, risk tolerance, time commitment, and emotional resilience. Are you aiming for long-term wealth accumulation or short-term profits? How comfortable are you with potential losses? Understanding your own psychology is crucial for setting realistic expectations and choosing suitable strategies.<br>• Define Your Goals: What do you hope to achieve through trading? Is it generating passive income, building a retirement nest egg, or simply learning the ropes? Clearly defined goals will shape your investment choices and risk management strategies.<br>• Risk Tolerance: Not everyone handles losses the same way. Some thrive on the adrenaline rush, while others panic on the slightest dip. Assess your comfort level with risk and set stop-loss orders accordingly.<br>• Trading Style: Day trading, swing trading, value investing, growth investing. Which ones fit your style? Research and experiment to find a style that aligns with your personality, goals, and available time. Pick a style that you can commit to for the long haul.<br>• Develop Your Trading Strategy: Define your entry and exit criteria based on technical analysis, fundamental analysis, or a combination of both. Will you rely on moving averages, chart patterns, or company financials to make decisions? Having a well-defined strategy keeps you grounded and prevents impulsive trades based on emotions.<br>• Money Management: Every trade should have a predetermined position size, limiting the amount you risk on any single investment. A common rule of thumb is to never risk more than 2% of your capital on any trade.<br>• Track and Analyze: Maintain a trading journal to track your performance, analyze successes and failures, and identify areas for improvement. Regularly evaluate your plan and adapt it as needed based on market conditions and your own evolving goals.<br>A.R.<br>Building Your Strategy<br>Let's construct your trading strategy:<br>1. Entry Signals: Define precise conditions based on technical indicators or chart patterns that trigger a buy or sell. For example, entering a long position when the price breaks above a key resistance level confirmed by an RSI above 50.<br>2. Exit Points: Don't forget your escape hatch if you are wrong! Set clear stop-loss orders to limit potential losses, while profit targets lock in gains and book returns.<br>3. Position Sizing: Allocate a maximum percentage of your capital per trade, ensuring diversification and minimizing the impact of losses.<br>4. Timeframe: Choose a trading timeframe that aligns with your goals and lifestyle. Day trading suits active schedules, while longer timeframes cater to passive approaches.<br>Back testing and Optimization<br>Before risking real capital, test your strategy. Back testing involves applying your rules to historical data to assess its performance under different market conditions. This reveals strengths and weaknesses, allowing you to refine your entry signals, exit points, and risk management parameters. Before venturing into real money trading, consider paper trading simulations to test your strategies and gain practical experience without risking your real capital.<br>Trading with Confidence<br>With a well-crafted trading plan, you can approach the market with confidence and discipline. Remember, success in trading isn't about getting rich quick; it's about building a sustainable, long-term strategy that aligns with your financial goals and risk tolerance. So, take your time, do your research, and develop a plan that works for you. The market may be unpredictable, but your approach doesn't have to be. With dedication, discipline, and a well-developed trading plan, you can conquer the markets!</p>",
+        "article4-11-2": "<h1>Welcome to Module 4! This is Lesson 11 Part 2</h1><p>11.2: Trading Psychology<br>Beyond technical analysis and market trends lies a crucial factor often overlooked: the human mind. Trading psychology explores the emotional and mental aspects that influence our decisions. The world of financial markets can appear thrilling, but to master the science of trading you must understand your psychology.<br>Fear vs. Greed<br>Imagine two powerful forces locked in a constant struggle: fear and greed. Fear whispers caution, urging us to hold onto losing investments or avoid taking necessary risks. Greed, on the other hand, seduces us with visions of quick profits, tempting us to chase hot stocks or overexpose ourselves to the market. These primal emotions can cloud our judgment, leading to impulsive decisions and costly mistakes.<br>Common Psychological Pitfalls:<br>• Overconfidence: Success breeds confidence, but unchecked overconfidence can morph into arrogance. We start ignoring risk signals, overleveraging our positions, and believing ourselves immune to market downturns.<br>• Confirmation Bias: We tend to seek information that confirms our existing beliefs while disregarding evidence that contradicts them. This can lead us to miss valuable insights and make biased decisions based on incomplete data.<br>• FOMO (Fear of Missing Out): Seeing others reap profits can trigger the dreaded FOMO, pushing us to jump into overheated markets without proper analysis, only to end up with losses.<br>• Loss Aversion: The pain of losing feels more intense than the joy of winning. This can lead us to hold onto losing stocks for too long, hoping for a turnaround that never comes, while quickly selling winners out of fear of a reversal.<br>• Anchoring Bias: We often fixate on an initial price or value as a reference point, hindering our ability to make objective decisions. This can lead to holding onto declining stocks because of their initial purchase price, despite clear signs of trouble.<br>Cultivating a Winning Mindset<br>So, how can we harness the power of our minds for success in the market? Here are some key strategies:<br>• Develop self-awareness: Recognize your emotions and how they influence your trading decisions. Journaling your thoughts and actions can be a valuable tool for introspection.<br>• Embrace discipline: Stick to your trading plan and risk management strategies, regardless of market fluctuations or emotional urges.<br>• Practice patience: Remember, the market is a marathon, not a sprint. Chasing quick profits often leads to losses. Focus on long-term strategies and disciplined execution.<br>• Manage risk effectively: Set clear stop-loss orders and position sizing limits to protect your capital from significant losses.<br>A.R.<br>• Seek continuous learning: Always strive to learn and improve your knowledge of the market and trading techniques. Read books, take courses, and seek guidance from experienced traders.<br>• Maintain a healthy perspective: Don't let your self-worth be defined by your trading results. Focus on the process, not just the outcome. Take breaks when needed to avoid burnout and maintain a balanced perspective.<br>Mastering your mind: Mastering stock trading psychology is not about suppressing emotions. It's about understanding their role, acknowledging their influence, and developing strategies to manage them effectively. Remember, the true winners in the game of trading are not solely those with the most technical knowledge, but those who can conquer the inner market first.</p>",
+        "article5-12-1": "<h1>Welcome to Module 5! This is Lesson 12 Part 1</h1><p>12.1 Risk bounds<br>To navigate the markets successfully, you need a clear plan and control. Think of it as exploring a jungle – sure there's excitement in the possibilities, but there are risks, too. That's where setting up your risk bounds come in. They're an invisible fence that helps you stay safe financially while exploring trading opportunities.<br>A strategy with a positive expectancy will result in long-term profitability. However, let's start with a vital fact: losses are inevitable in trading. No strategy can fully protect you from them. So, it's crucial to accept this reality and actively manage potential losses. Risk bounds are your way of doing this. They're limits you set in advance, deciding the maximum amount of money you're willing to lose on any investment. Think of them as your own rules that stop you from taking unnecessary risks. They keep you from making hasty decisions that could lead to big losses. Here are some important steps to consider:<br>1. Establishing risk bounds isn't the same for everyone. Know Yourself, Know Your Goals! It's a deeply personal decision dictated by several factors:<br>• How comfortable are you with handling losses, both emotionally and financially? Do you like excitement and can handle ups and downs, or do you prefer to play it safe with your money?<br>• What are your goals in trading? Are you looking for quick profits or aiming for long-term growth? This affects how much risk you're okay with taking in each trade and overall, in your investments.<br>• How much experience do you have in trading? If you're new to this, it's wise to be cautious at first and gradually take more risks as you gain knowledge and confidence.<br>2. Several tools can help you determine your risk bounds:<br>• The Kelly Criterion: It's a math formula, a bit tricky, but it helps figure out the best size for your trades based on how likely you are to win and how much you could gain.<br>• The Percentage of Account Rule: You decide on a certain percentage, say 2-3%, of all the money you have for trading. That's the most you'll risk on each trade to avoid big losses.<br>• Volatility Analysis: Look at how prices have changed for the asset you're interested in. This helps you understand how much the value might drop and helps set your limits to stay safe.<br>3. Risk bounds extend beyond mere calculations. Mastering your emotions is also crucial:<br>• Fear: Don't let the fear of missing out push you into taking risks beyond your comfort zone. It's better to aim for steady, controlled gains instead of occasional big wins.<br>• Greed: Avoid the temptation to invest more after losses, thinking you'll make it all back quickly. Stick to your planned limits to prevent chasing profits that might be hard to reach.<br>• Discipline: Treat your risk limits as strict rules, not suggestions. Consistently sticking to them is crucial for long-term success.<br>A.R<br>4. Risk limits shouldn't stay the same. Change them based on how the market is behaving and what you've learned:<br>• Market Volatility: When things get wild in the market, tighten your risk limits to avoid big losses. In calmer times, you might have room to take slightly more calculated risks.<br>• Learning and Adjustment: As you get better at trading, you might change how much risk you're willing to take. But do it gradually and carefully.<br>In conclusion, think of losses as the cost of running your trading business. Sticking to your risk limits is crucial for responsible and lasting trading. To understand your comfort with risk, use the tools available, and keep a strong mindset. This way, you can navigate the market confidently, reducing losses, and finding opportunities for growth.</p>",
+        "article5-12-2": "<h1>Welcome to Module 5! This is Lesson 12 Part 2</h1><p>12.2 Stop-loss strategies<br>Managing risk is extremely important to become a profitable trader. While big profits attract investors, dealing with the ups and downs of the market means having strong protections in place. That's where the stop-loss order comes in – it's a powerful tool that helps you avoid big losses and keeps your money safe. This lesson explains stop-loss strategies in detail, helping you create plans to exit trades that suit your style of trading.<br>Stop-Loss Orders<br>At its core, a stop-loss order automatically sells your shares when the price hits a certain level you've chosen, called the &quot;stop price.&quot; This helps you exit a trade if the market moves against your expectation. Stop-loss orders work as an insurance policy, reducing the stress of seeing losses pile up and encouraging you to trade in a disciplined way.<br>Effective Stop-Loss Techniques<br>Knowing where to set your stop-loss involves balancing how much risk you're willing to take with how much profit you want to make. Here are some strategies to consider:<br>• Percentage-based: This method sets your stop price at a certain percentage below the price you bought the stock. For example, if you bought a $200 stock and set a 5% stop-loss, it would trigger at $190. It's good for managing short-term trades and limiting how much you could lose at the start.<br>• Technical Analysis: Use indicators such as support levels or moving averages to find points where prices might change direction. Placing your stop-loss just below these levels can help you exit a trade if the market moves against you.<br>• Volatility-adjusted: Consider how much a stock's price usually changes. More volatile stocks might need wider stop-loss percentages so you don't exit too early when prices are just moving normally.<br>• Trailing Stop-Loss: This type of stop-loss changes as the stock price changes. It locks in profits but still protects you if the price suddenly drops. It's great for stocks with parabolic price action.<br>Things to consider when using stop-loss orders:<br>• Market Orders: Stop-loss orders become market orders when they're triggered, which might mean you don't get the best price. Try using stop-limit orders to set a minimum price for your exit.<br>A.R<br>• Stick to Your Plan: Once you've set your stop-loss, avoid changing it. Stick to your plan for consistent risk management.<br>• Adapt: Look back at how your stop-loss orders have worked in the past. See if they match how much risk you're comfortable with and your trading goals. Change your strategy if required.<br>Stop-loss orders aren't perfect, but they're really important tools for traders. Remember, knowing when to exit a trade is just as important as knowing when to enter. So, learn all you can, be disciplined, and watch your trading improve with better protection and potential.</p>",
+        "article5-12-3": "<h1>Welcome to Module 5! This is Lesson 12 Part 3</h1><p>12.3 Order Limits<br>In the volatile world of stock trading, having precise control over your orders can make a big difference. Order limits are tools that let traders have more control and independence in the market. This lesson looks into order limits in detail, types, benefits, and downsides to help in your trading strategies.<br>Order Limits: What They Do<br>Order limits are instructions you give to a broker about the highest or lowest price you're willing to buy or sell a stock for. They're different from market orders, which happen immediately at the best available price. Order limits focus more on controlling the price than getting the trade done quickly. They have some advantages:<br>• Precise Buying or Selling: Let's say a stock is usually at $30, but you think it's really worth $28. Setting a buy limit at $28 means you'll only buy it if it drops to that price or lower.<br>• Less Emotional Trading: Setting limits helps you avoid making quick decisions based on emotions when the market changes. It can help you make smarter choices.<br>• Better Prices: Sometimes, setting a buy limit a bit lower than the market price can get you a better deal than what's currently available.<br>There is more than just basic buy or sell limits. Here are a couple of other types:<br>• Stop-Limit Orders: These combine features of stop and limit orders. They trigger a limit order when the price hits a certain &quot;stop price.&quot; For example, if you set a sell stop-limit at $25 with a limit of $24, your shares will only sell if the price drops to $25, but the buyer has to pay at least $24 per share.<br>• Trailing Stop-Limit Orders: These change their stop price based on price action. If you set a 10% trailing stop-limit and the stock rises to $50, the stop price adjusts to $45, locking in potential gains.<br>Disadvantages<br>1. Not Guaranteed: They might not always get filled. If the price never hits your limit, your order might not happen, and you might miss out.<br>2. Can Affect Prices: Putting big limits, especially in smaller markets, might change the stock price for a short time, which might not be good for what you want.<br>3. Can Be Complicated: Some types, like trailing stops, might be hard to set up and need a good understanding of trading mechanism.<br>To use order limits properly, think about a few things:<br>• Volatility: For very volatile stocks, tight limits might not work well because prices change too quickly. Wider limits might be better, even if they're not as precise.<br>• Volume: If a stock isn't traded a lot, narrow limits might mean your order won't happen. You might need broader limits or different order types.<br>• Trading Goals: Decide what you want to achieve. Are you trying to get in or out quickly, looking to grow your money over time, or managing how much risk you're taking? Your goals will help you pick the right price limits and order types.<br>A.R<br>Remember, practice and adjusting your limits based on what's happening in the market are important. So, go into trading with confidence, knowing you have the tools to make your own way to success.</p>",
+        "article5-13-1": "<h1>Welcome to Module 5! This is Lesson 13 Part 1</h1><p>13.1: Risk v. Reward<br>Stock trading is a mix of taking risks and aiming for rewards. The opportunity to make money excites many investors, but the possibility of losing it all keeps them on edge. Being good at this balancing act, where every move weighs the hope of making money against the fear of losing it, is what makes a trader skilled.<br>Knowing Both Sides:<br>• Risk: The stock market is tough beast, and risk is everywhere. It shows up in market drops, unexpected events, and even simple mistakes. Every trade could mean losing money, so managing risk is crucial.<br>• Reward: Successful stock trading can bring tremendous rewards. Making money, collecting dividends, and feeling smart for beating the market are all part of the dream. But going after rewards without understanding the risks can turn your dream into a nightmare.<br>Calculating the Cost: A key way to manage risk and rewards is using something called the risk-reward ratio. This is the potential profit divided by the potential loss in a trade. For example, a ratio of 1:2 means for every dollar you risk, you could make two dollars. Higher ratios might seem better, but they usually come with higher risks. For example, a ratio of 2:6 would be too risky for a novice trader and is not recommended.<br>Using ratios is helpful, but managing risk and rewards is about more than just numbers. Here are some important things to consider:<br>• Know Your Risk Limits: Calculate how much risk you're okay with and plan your trades based on that. Don't go after high-risk stocks if you get nervous easily.<br>• Use Stop-Loss Orders: These are preset points where you'll sell to limit how much you could lose. Don't let pride or stubbornness stop you from using them.<br>• Diversify: Don't put all your money in one trade! This action could potentially blow up your account.<br>• Stay Updated: Keep up on news about companies, industries, and the economy to make smart decisions.<br>Risk and reward aren't enemies – they're both part of the same thing. Going after rewards without thinking can lead to big losses, but being too scared can stop you from making money. Finding a balance, having a strategy that fits your risk comfort, and using good risk management is important. Remember that trading is about balancing risks and rewards. Use risk-reward ratios to understand your trades better. Always stick to what risks you're okay with. Spread your money around to lower risks. By following these guides, you can handle the ups and downs of risk and rewards confidently.</p>",
+        "article5-13-2": "<h1>Welcome to Module 5! This is Lesson 13 Part 2</h1><p>13.2 Choosing Risky Assets<br>Investors are drawn to the possibility of big returns, especially when considering riskier assets. While safer options offer stability, the chance to hit it big with riskier investments can be exciting. But before diving into these unpredictable assets, it's important to grasp their dangers and plan carefully.<br>What are Risky Assets?<br>Risky assets are those with a higher potential for price fluctuations. This volatility can be caused by various factors, including:<br>• Macroeconomic uncertainty: Changes in interest rates, inflation, regulation, and economic growth can significantly impact the value of risky assets.<br>• Company-specific factors: A company's financial performance, management decisions, and industry trends can all influence the price of its stocks.<br>• Geopolitical events: Wars, political instability, and natural disasters can create market-wide panic, leading to a collapse in asset prices.<br>Examples of Risky Assets:<br>1. Stocks: Individual company stocks, particularly those of smaller, emerging companies with negative net income, tend to be more volatile than well-established blue-chip stocks.<br>2. Commodities: Prices of oil, gold, and other commodities are often influenced by global supply and demand, making them susceptible to sudden swings.<br>3. High-yield bonds: These bonds offer very higher interest rates, but they also carry a higher risk of default by the issuer.<br>4. Derivatives: Options, futures, and other derivatives can magnify gains and losses, making them suitable only for experienced investors with a high tolerance for risk. We’ll dive deeper in later lessons on this topic.<br>5. Cryptocurrency: An emerging new asset class that continues to evolve. While Cryptocurrencies can offer even higher potential returns, they also come with their own unique set of risks as an unproven asset class.<br>Despite the inherent dangers, risky assets can be a valuable part of a well-diversified portfolio. Here are some potential benefits:<br>• Higher potential returns: Over the long term, risky assets have historically outperformed other investments.<br>• Hedging against inflation: Risky assets such as real estate and commodities can help protect your portfolio against loss of purchasing power.<br>Before venturing into the world of risky assets, remember these essential tips:<br>• Know your risk tolerance: Honestly assess your ability to handle potential losses. If the thought of a significant downturn keeps you up at night, stick to safer investments.<br>A.R<br>• Do your research: Thoroughly research any risky asset you consider investing in. Understand the company, industry, and underlying factors that drive its price.<br>• Diversify your portfolio: Spread your investments across different asset classes and sectors to mitigate risk.<br>• Invest for the long term: Don't expect to get rich quick with risky assets. Be prepared to ride out market fluctuations and focus on long-term growth.<br>Investing in risky assets is not for everyone. It requires a strong understanding of financial markets, a high tolerance for risk, and a long-term investment horizon. If you're willing to take on the challenge, however, the potential rewards can be significant. Just approach it with caution, do your research, and never invest more than you can afford to lose. If you can’t stomach the inevitable volatility then stick to safer asset classes. In the next lesson we’ll discuss your options.</p>",
+        "article5-13-3": "<h1>Welcome to Module 5! This is Lesson 13 Part 3</h1><p>13.3 Choosing Safer Assets<br>In the unpredictable world of financial markets, finding stability can be comforting. Picking investments that focus on keeping your money safe instead of trying to make a lot quickly has an important part to play in your portfolio.<br>But what is a &quot;safe&quot; asset, and how does one pick them wisely amidst the vast ocean of investment options? Sorry to burst your bubble, but no asset is truly risk-free. Every investment carries some degree of uncertainty. However, certain assets have characteristics that make them more resilient during market downturns and periods of economic stress. These &quot;safe havens&quot; tend to hold their value or even appreciate when other asset classes plummet.<br>Several key attributes define a safe haven:<br>• Low Volatility: These assets experience smaller price swings compared to the broader market. This stability provides investors with peace of mind and protects their portfolio from significant losses.<br>• Liquidity: Safe assets are highly liquid meaning they are easily converted to cash without facing substantial losses.<br>• Negative Correlation: Ideally, a safe haven's price movements should be inversely correlated to the overall market. This means that when stocks and bonds tumble, your safe haven asset should rise or stay flat in value.<br>• Perceptual Safety: Investor confidence plays a significant role in shaping a safe haven's value. Assets perceived as reliable and trustworthy by a large global audience tend to attract capital during crises.<br>Now, let's explore some of the most common safe haven options:<br>1. Government Bonds: Government debt issued by highly stable economies, such as the U.S. Treasuries often top the list. Backed by the issuing government's taxing power and perceived as low-risk. For example, US treasuries are viewed by the global community as a safe haven asset during market contractions. These bonds offer relatively secure returns but with moderate yields.<br>2. Defensive Stocks: Companies in essential sectors such as consumer staples, utilities, and healthcare often maintain stable earnings and dividend payouts even during recessions. Their products remain in demand regardless of economic conditions, making them resilient investments.<br>3. Cash and Cash Equivalents: While offering minimal returns, holding emergency funds in highly liquid accounts such as money market funds or high-yield savings accounts provides immediate access to cash and absolute capital preservation.<br>4. TIPS (Treasury Inflation-Protected Securities): These bonds shield against inflation by adjusting their principal and interest payments based on the CPI (Consumer Price Index).<br>A.R<br>5. ETFs: While they can be volatile, Index-tracking ETFs such as the S&amp;P 500 can offer safety through diversification as they replicate the performance of a specific index. With lower fees, transparency, and easy trading, they're considered safe assets due to their broad market exposure and cost-effectiveness.<br>Remember, even safe havens aren't immune to risk. Spreading your investments across different asset classes and geographies mitigates risk and creates a more robust portfolio. Navigating toward safer investments needs careful planning and understanding your comfort with risk and what you want to achieve with your investments.</p>",
+        "article6-14-1": "<h1>Welcome to Module 6! This is Lesson 14 Part 1</h1><p>Content for Sub Lesson 14.1<</p>",
+        "article6-14-2": "<h1>Welcome to Module 6! This is Lesson 14 Part 2</h1><p>Content for Sub Lesson 14.2<</p>",
+        "article6-15-1": "<h1>Welcome to Module 6! This is Lesson 15 Part 1</h1><p>Content for Sub Lesson 15.1<</p>",
+        "article6-15-2": "<h1>Welcome to Module 6! This is Lesson 15 Part 2</h1><p>Content for Sub Lesson 15.2<</p>",
+        "article6-15-3": "<h1>Welcome to Module 6! This is Lesson 15 Part 3</h1><p>Content for Sub Lesson 15.3<</p>",
+        "article6-15-4": "<h1>Welcome to Module 6! This is Lesson 15 Part 4</h1><p>Content for Sub Lesson 15.4<</p>",
+        "article6-16-1": "<h1>Welcome to Module 6! This is Lesson 16 Part 1</h1><p>Content for Sub Lesson 16.1<</p>",
+        "article6-16-2": "<h1>Welcome to Module 6! This is Lesson 16 Part 2</h1><p>Content for Sub Lesson 16.2<</p>",
+        "article6-16-3": "<h1>Welcome to Module 6! This is Lesson 16 Part 3</h1><p>Content for Sub Lesson 16.3<</p>",
+        "article5-17-1": "<h1>Welcome to Module 6! This is Lesson 17 Part 1</h1><p>Content for Sub Lesson 17.1<</p>",
+        "article6-17-2": "<h1>Welcome to Module 6! This is Lesson 17 Part 2</h1><p>Content for Sub Lesson 17.2<</p>",
+        "article6-17-3": "<h1>Welcome to Module 6! This is Lesson 17 Part 3</h1><p>Content for Sub Lesson 17.3<</p>",
+        "article6-17-4": "<h1>Welcome to Module 6! This is Lesson 17 Part 4</h1><p>Content for Sub Lesson 17.4<</p>",
+        "article6-17-5": "<h1>Welcome to Module 6! This is Lesson 17 Part 5</h1><p>Content for Sub Lesson 17.5<</p>",
+        "article6-17-6": "<h1>Welcome to Module 6! This is Lesson 17 Part 6</h1><p>Content for Sub Lesson 17.6<</p>",
+        "article6-17-7": "<h1>Welcome to Module 6! This is Lesson 17 Part 7</h1><p>Content for Sub Lesson 17.7<</p>",
+        
+    };
+    function toggleSubLessons(lessonElement) {
+        var subLessons = lessonElement.querySelector('.sub-lessons');
+        if (subLessons.style.display === 'block') {
+            subLessons.style.display = 'none';
+        } else {
+            subLessons.style.display = 'block';
+        }
+    }
+
+    document.querySelectorAll('.sub-lesson').forEach(function(subLesson) {
+        subLesson.addEventListener('click', function() {
+            loadArticleContent(this.getAttribute('data-article-id'));
+        });
+    });
+
+    function loadArticleContent(articleId) {
+        // Determine which module the article belongs to
+        var moduleId = articleId.split('-')[0]; // Extracts 'article' or 'article2', etc.
+        console.log(moduleId);
+
+        // Select the correct article element based on the module
+        var articleElement;
+        if (moduleId === "article") {
+            articleElement = document.querySelector('#module_1 .main-content article');
+        } else if (moduleId === "article2") {
+            articleElement = document.querySelector('#module_2 .main-content article');
+        } else if (moduleId === "article3") {
+            articleElement = document.querySelector('#module_3 .main-content article');
+        } else if (moduleId === "article4") {
+            articleElement = document.querySelector('#module_4 .main-content article');
+        } else if (moduleId === "article5") {
+            articleElement = document.querySelector('#module_5 .main-content article');
+        } else if (moduleId === "article6") {
+            articleElement = document.querySelector('#module_6 .main-content article');
+        } else {
+            console.error("Invalid module ID");
+            return;
+        }
+
+        // Update the article content
+        articleElement.innerHTML = articleContents[articleId] || "<p>Content not found.</p>";
+    }
+    
+</script>
+{% endblock %}
