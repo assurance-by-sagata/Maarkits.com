@@ -68,3 +68,32 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+
+# Development Environment
+
+    Build the docker image
+
+        $ docker build --progress=plain -t sagata__maarkits__dev .
+
+
+    Stop and remove existing container
+
+        $ docker container stop    sagata__maarkits__dev  1>/dev/null 2> /dev/null
+        $ docker container remove  sagata__maarkits__dev  1>/dev/null 2> /dev/null
+
+
+
+    Start the docker container
+
+        $ docker run \
+            --init -it \
+            --mount type=bind,src=./,target=/code/ \
+            --workdir /code/ \
+            --name sagata__maarkits__dev \
+            -h sagata__maarkits__dev \
+            -p 127.0.0.1:3000:3000 \
+            sagata__maarkits__dev
+
