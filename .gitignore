@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+.vscode
+venv_local
+api
+node_modules
+src/pages/signup copy.js
+.env
+=======
 
 # Node gitignore
 #   from: https://github.com/github/gitignore/blob/main/Node.gitignore
@@ -137,3 +145,4 @@ dist
 
 # Additional gitignore rules
 /build/
+>>>>>>> 944b2c4dde047cc3c32ff20ddbaf586ee5d68016

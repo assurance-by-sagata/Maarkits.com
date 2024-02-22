@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-wait-for-multiple-assertions */
 /* eslint-disable testing-library/no-unnecessary-act */
 /* eslint-disable testing-library/no-wait-for-side-effects */
 import React from "react";
@@ -121,8 +122,8 @@ describe("MarketTrade", () => {
     };
     // Mocking the handleBuySellStock method
      // Spy on the fetch method
-      const fetchSpy = jest.spyOn(global, 'fetch');
-      fetchSpy.mockImplementationOnce(() => Promise.resolve({
+    const fetchSpy = jest.spyOn(global, 'fetch');
+    fetchSpy.mockImplementationOnce(() => Promise.resolve({
       json: () => Promise.resolve(expectedApiResponse),
       status: 200,
     }));

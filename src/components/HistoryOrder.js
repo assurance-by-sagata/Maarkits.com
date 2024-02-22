@@ -124,11 +124,14 @@ export default function HistoryOrder() {
     const currentValue = portfolioData.reduce((total, ticker) => {
       const symbolKey = ticker.symbol?.toLowerCase();
       const lpValue =
-        tickerPrices[symbolKey]?.lp ?? tickerPrices[symbolKey]?.bp;
+        tickerPrices[symbolKey]?.ap ?? tickerPrices[symbolKey]?.bp ?? tickerPrices[symbolKey]?.lp ?? 0;
       total += ticker.qnty * (lpValue ?? 0);
       return total;
     }, 0);
     setCurrentValue(currentValue);
+    console.log("availableCash",availableCash,"  currentValue:" ,currentValue," startingAmnt:",startingAmnt)
+    console.log("portfolioData",portfolioData)
+
     setReturnAmnt((availableCash + currentValue) - startingAmnt);
   }, [tickerPrices, portfolioData]);
 
@@ -156,6 +159,7 @@ export default function HistoryOrder() {
                       <p>Opening Balance</p>
                     </div>
                     <div className="col-sm-2">
+                      {console.log('availableCash inside return',availableCash)}
                       <h2>{formatValue(availableCash, SETTING.CURRENCY)}</h2>
                       <p>Avaialable Balance</p>
                     </div>
@@ -172,7 +176,8 @@ export default function HistoryOrder() {
 
                     <div className="col-sm-2">
                       <h2 className={getColorClass(returnAmnt)}>
-                        {formatPLValue(returnAmnt, SETTING.CURRENCY)}
+                        {formatPLValue(((availableCash + currentValue) - startingAmnt), SETTING.CURRENCY)}
+                        {/*  change the code for run time calculation {formatPLValue(returnAmnt, SETTING.CURRENCY)} */}
                       </h2>
                       <p>Profit/Loss</p>
                     </div>
@@ -195,9 +200,9 @@ export default function HistoryOrder() {
                       <tbody>
                         {portfolioData.map((item, index) => {
                           const symbolKey = item.symbol?.toLowerCase();
-                          const lpValue =
-                            tickerPrices[symbolKey]?.lp ??
-                            tickerPrices[symbolKey]?.bp;
+                          console.log("tickerPrices[symbolKey]", tickerPrices[symbolKey]);
+                          let lpValue = 0;
+                          lpValue = tickerPrices[symbolKey]?.ap ?? tickerPrices[symbolKey]?.bp ?? tickerPrices[symbolKey]?.lp ?? 0 ;
                           return (
                             <tr key={index} data-href="exchange-light.html">
                               <td>

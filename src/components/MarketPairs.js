@@ -94,17 +94,18 @@ const MarketPairs = () => {
     setGlobalExchange("NASDAQ");
     setGlobalProduct("Stock (Equity)");
     console.log("asset storage",assets);
-    if(assets.length===0){
-      fetchData(1);
-    }
+    // it code will call when assets data not in local storege
+    // if(assets.length===0){
+       //fetchData(1);
+    // }
+    fetchData(1);
 
     console.log("tickerPrices array at market pairs", tickerPrices);
   }, []);
 
   const fetchData = async (initialProduct, symbol = "") => {
     let STOCKURL = symbol ? `v3/quote/${symbol}` : STOCKLIST;
-
-    try {
+   try {
       setLoading(true);
       const response = await fetch(
         `${FMPAPIURL + STOCKURL}?apikey=${FMPAPIKEY}`,
@@ -193,26 +194,26 @@ const MarketPairs = () => {
     const inputValue = event?.target?.value;
     setSearchInput(inputValue);
   };
+  const fetchDataAndSetFilterAssets = async () => {
+    if (searchInput.trim() !== "") {
+      const fltrAssest = assets.filter((asset) =>
+        asset.s.toLowerCase().includes(searchInput.toLowerCase())
+      );
+      if (fltrAssest.length > 0) {
+        setFilterAssets(fltrAssest);
+      } else {
+        const symbolData = await fetchData(1, searchInput.trim());
+        console.log("symbolData", symbolData);
+        setFilterAssets(symbolData);
+      }
+    } else {
+      // If searchInput is empty, reset displayedAssets
+      setFilterAssets(assets);
+    }
+  };
 
   useEffect(() => {
     // Check if the searchInput has a value
-    const fetchDataAndSetFilterAssets = async () => {
-      if (searchInput.trim() !== "") {
-        const fltrAssest = assets.filter((asset) =>
-          asset.s.toLowerCase().includes(searchInput.toLowerCase())
-        );
-        if (fltrAssest.length > 0) {
-          setFilterAssets(fltrAssest);
-        } else {
-          const symbolData = await fetchData(1, searchInput.trim());
-          console.log("symbolData", symbolData);
-          setFilterAssets(symbolData);
-        }
-      } else {
-        // If searchInput is empty, reset displayedAssets
-        setFilterAssets(assets);
-      }
-    };
     fetchDataAndSetFilterAssets();
   }, [searchInput, assets]);
 
@@ -242,6 +243,7 @@ const MarketPairs = () => {
 
       // Check if the current time is after the market closing time
       if (nowUTC >= marketClosingTimeUTC && !refreshed) {
+        console.log('nowUTC Time',nowUTC,"<br/>","marketClosingTimeUTC:", marketClosingTimeUTC)
          setRefreshed(true); // Set refreshed to true to avoid multiple refreshes
         // Reload the page if the market is closed
         fetchData(1);
@@ -250,7 +252,7 @@ const MarketPairs = () => {
     };
 
     // Check market closing time every minute
-    const intervalId = setInterval(checkMarketClosingTime, 6000);
+    const intervalId = setInterval(checkMarketClosingTime, 60000);
 
     // Clean up the interval when the component is unmounted
     return () => clearInterval(intervalId);
@@ -277,7 +279,7 @@ const MarketPairs = () => {
           />
         </div>
         {loading ? (
-          <div style={{ marginTop: "14%", marginLeft: "45%" }}>
+          <div style={{ marginTop: "14%", marginLeft: "45%" }} >
             <ClipLoader color={"#1E53E5"} loading={loading} size={80} />
           </div>
         ) : (
