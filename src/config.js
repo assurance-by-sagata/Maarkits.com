@@ -1,7 +1,8 @@
 export const AWSDEV='https://13.60.18.208:5000/'
+const AWSDOMAIN= 'http://devs-md.com/5000'
 export const AWSPROD='https://16.171.19.211:5000/'
 export const VERCEL= 'https://marketsdojo.vercel.app/'
- export const BASE_URL = AWSDEV;
+ export const BASE_URL = 'https://mddevelopmentserver.com:5000/';
  export const ENDPOINT = {
   REGISTER: 'v1/users',
   LOGIN: 'v1/users/login',
@@ -43,5 +44,5 @@ export const SETTING = {
 
 export const SWA='https://virtserver.swaggerhub.com/ARMANJASUJA_1/marketsdojo/'
 export const COMANYWEBSOCKET= 'wss://websockets.financialmodelingprep.com'
-export const STOCKLIST="v3/quote/AAPL,AGOL.BO,NYKAA.BO,ITC.BO,META,GOOG,PMGOLD.AX,INDIGRID.NS,INDIGRID.NS";
+export const STOCKLIST="v3/quote/AAPL,META,GOOG,AMZN,TSLA,MSFT,NVDA, HSBC, LLY,TSM,AVGO, JPM, UNH, WMT, MA, XOM, JNJ, ASML,PG, HD";
 export const CRYPTOLIST= "v3/quote/ETH,SOL,BTCUSD,BTC";

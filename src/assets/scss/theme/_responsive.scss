@@ -1,9 +1,9 @@
 @media only screen and (max-width: 1434px) {
   .market-pairs tbody {
-    height: 760px;
+    height: auto;
   }
   .no-fluid .market-pairs tbody {
-    height: 815px;
+    height: auto;
   }
   .settings-profile .custom-file {
     width: 25%;
@@ -11,10 +11,10 @@
 }
 @media only screen and (max-width: 1300px) {
   .market-pairs tbody {
-    height: 740px;
+    height: auto;
   }
   .no-fluid .market-pairs tbody {
-    height: 685px;
+    height: auto;
   }
 }
 @media only screen and (max-width: 1200px) {
@@ -40,7 +40,7 @@
 }
 @media only screen and (max-width: 792px) {
   .market-pairs tbody {
-    height: 699px;
+    height: auto;
   }
 }
 @media only screen and (max-width: 768px) {

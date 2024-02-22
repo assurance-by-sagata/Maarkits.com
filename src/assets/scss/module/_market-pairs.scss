@@ -61,7 +61,9 @@
   width: 100%; /* Set the desired width for the table */
   overflow-x: auto; /* Enable horizontal scrolling */
   overflow-y: auto; /* Enable vertical scrolling */
-  max-height: 632px;
+  height: 633px;
 
 }
-
+.last-row td {
+  border-bottom: 1px solid #e0e3eb; /* Adjust the color and style as needed */
+}

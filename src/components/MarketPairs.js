@@ -20,23 +20,35 @@ import {
   getBeforeDotValue,
   formatTickerValue,
 } from "../utility";
-import { useSetRecoilState ,useRecoilValue,useRecoilState} from "recoil";
-import { flashMsg, globalAsset, globalProduct,userState,socketData } from "../state";
+import { useSetRecoilState, useRecoilValue, useRecoilState } from "recoil";
+import {
+  flashMsg,
+  globalAsset,
+  globalProduct,
+  globalExchange,
+  userState,
+  socketData,
+  assetData
+} from "../state";
+import { setAssetData } from "../auth";
 import { ClipLoader } from "react-spinners";
 import SymbolList from "../components/SymbolList";
+import Pagination from "../components/Pagination";
 
 const MarketPairs = () => {
   const setFlashMsg = useSetRecoilState(flashMsg); // Recoil hook to set flashMsg
   const setGlobalAsset = useSetRecoilState(globalAsset); // Recoil hook to set globalAsset
   const setGlobalProduct = useSetRecoilState(globalProduct); // Recoil hook to set globalProduct
-  const [assets, setAssets] = useState([]);
+  const setGlobalExchange = useSetRecoilState(globalExchange); // Recoil hook to set globalProduct
+  const [assets, setAssets] = useRecoilState(assetData);
+  const [filterAssets, setFilterAssets] = useState([]);
   const [products, setProducts] = useState([
     { id: 1, product_name: "Stock (Equity)" },
   ]);
   const [initialProduct, setInitialProduct] = useState(1);
   const [loading, setLoading] = useState(false);
-  const tickerPrices= useRecoilValue(socketData);
-  const setTickerPrices =  useSetRecoilState(socketData);
+  const tickerPrices = useRecoilValue(socketData);
+  const setTickerPrices = useSetRecoilState(socketData);
   const globalSymbol = SETTING.INITIALSYMBOL;
   const userData = useRecoilValue(userState);
   const [symbolList, setSymbolList] = useState([]);
@@ -79,18 +91,23 @@ const MarketPairs = () => {
 
     // Define a function to fetch data from your API
     setGlobalAsset(globalSymbol);
-    setGlobalProduct('Stock (Equity)');
-    fetchData(1);
-    console.log("tickerPrices array at market pairs",tickerPrices);
+    setGlobalExchange("NASDAQ");
+    setGlobalProduct("Stock (Equity)");
+    console.log("asset storage",assets);
+    if(assets.length===0){
+      fetchData(1);
+    }
 
-    console.log("user portfolio data",userData.portfolio);
+    console.log("tickerPrices array at market pairs", tickerPrices);
   }, []);
 
-  const fetchData = async (initialProduct) => {
+  const fetchData = async (initialProduct, symbol = "") => {
+    let STOCKURL = symbol ? `v3/quote/${symbol}` : STOCKLIST;
+
     try {
       setLoading(true);
       const response = await fetch(
-        `${FMPAPIURL + STOCKLIST}?apikey=${FMPAPIKEY}`,
+        `${FMPAPIURL + STOCKURL}?apikey=${FMPAPIKEY}`,
         {
           method: "GET",
           headers: {
@@ -106,10 +123,10 @@ const MarketPairs = () => {
           ap: asset.price,
           bp: asset.price,
           lp: asset.previousClose,
+          exchange:asset.exchange
         }));
-        setAssets(newAssets);
-        const userSymbols= userData.portfolio;
-        const mrktSymbols= []
+        const userSymbols = userData.portfolio;
+        const mrktSymbols = [];
         assetsData.forEach((asset) => {
           const nd = {
             [asset.symbol?.toLowerCase()]: {
@@ -122,10 +139,9 @@ const MarketPairs = () => {
 
           const symbolKey = getBeforeDotValue(asset.symbol?.toLowerCase());
           //const symbolKey = asset.symbol?.toLowerCase();
-          mrktSymbols.push(symbolKey)
-           setTickerPrices((prev) => ({ ...prev, ...nd }));
+          mrktSymbols.push(symbolKey);
+          setTickerPrices((prev) => ({ ...prev, ...nd }));
         });
-
 
         // Finilaze the symbol list including user portfolio symbol list
         const mergedSymbols = [...new Set([...userSymbols, ...mrktSymbols])];
@@ -136,13 +152,24 @@ const MarketPairs = () => {
         fetchStremData("forex", mergedSymbols, (newData) => {
           setTickerPrices((prev) => ({ ...prev, ...newData }));
         });
+
+        if (symbol) {
+          const filteredAssets = newAssets.filter((asset) =>
+              ['NASDAQ', 'NYSE'].includes(asset.exchange)
+          );
+          console.log("newAssets",newAssets);
+          return filteredAssets;
+        } else {
+          setAssetData(newAssets, setAssets);
+          //setAssets(newAssets);
+        }
       } else {
         const resData = await response.json();
         throw new Error(resData.message);
       }
     } catch (error) {
       console.log(error);
-       setFlashMsg({ msg: error.message, class: "alert-danger" });
+      setFlashMsg({ msg: error.message, class: "alert-danger" });
       // Handle network errors or other exceptions
     } finally {
       setLoading(false);
@@ -155,13 +182,82 @@ const MarketPairs = () => {
     const selected = products.find((product) => product.id == arrKey[1]);
     setGlobalProduct(selected.product_name);
   };
-  const handleRowClick = (selectedAssest) => {
+  const handleRowClick = (selectedAssest,selectedExchange) => {
     setGlobalAsset(selectedAssest);
+    setGlobalExchange(selectedExchange);
   };
+
+  const [searchInput, setSearchInput] = useState("");
+
+  const handleSearchChange = (event) => {
+    const inputValue = event?.target?.value;
+    setSearchInput(inputValue);
+  };
+
+  useEffect(() => {
+    // Check if the searchInput has a value
+    const fetchDataAndSetFilterAssets = async () => {
+      if (searchInput.trim() !== "") {
+        const fltrAssest = assets.filter((asset) =>
+          asset.s.toLowerCase().includes(searchInput.toLowerCase())
+        );
+        if (fltrAssest.length > 0) {
+          setFilterAssets(fltrAssest);
+        } else {
+          const symbolData = await fetchData(1, searchInput.trim());
+          console.log("symbolData", symbolData);
+          setFilterAssets(symbolData);
+        }
+      } else {
+        // If searchInput is empty, reset displayedAssets
+        setFilterAssets(assets);
+      }
+    };
+    fetchDataAndSetFilterAssets();
+  }, [searchInput, assets]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate the range of items to display based on the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  let displayedAssets = filterAssets;
+  if (filterAssets?.length > 10) {
+    displayedAssets = filterAssets.slice(startIndex, endIndex);
+  }
+
+  // Update the current page
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+  const [refreshed, setRefreshed] = useState(false);
+  useEffect(() => {
+    const checkMarketClosingTime = () => {
+      const now = new Date();
+      const marketClosingTimeUTC = new Date(now);
+      marketClosingTimeUTC.setUTCHours(21, 0, 0, 0); // Set the market closing time to 09:00 PM UTC
+
+      // Convert current time to UTC for comparison
+      const nowUTC = new Date(now.toUTCString());
+
+      // Check if the current time is after the market closing time
+      if (nowUTC >= marketClosingTimeUTC && !refreshed) {
+         setRefreshed(true); // Set refreshed to true to avoid multiple refreshes
+        // Reload the page if the market is closed
+        fetchData(1);
+
+      }
+    };
+
+    // Check market closing time every minute
+    const intervalId = setInterval(checkMarketClosingTime, 6000);
+
+    // Clean up the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, [refreshed]);
 
   return (
     <>
-
       {/* {assets.map((symbol) => (
         <SymbolList key={symbol.symbol} symbol={symbol.symbol} onUpdate={handleUpdate} />
       ))} */}
@@ -177,6 +273,7 @@ const MarketPairs = () => {
             className="form-control"
             placeholder="Search"
             aria-describedby="inputGroup-sizing-sm"
+            onChange={handleSearchChange}
           />
         </div>
         {loading ? (
@@ -200,26 +297,31 @@ const MarketPairs = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {assets.map((item, index) => (
-                      <tr onClick={() => handleRowClick(item.s)}>
+                    {displayedAssets.map((item, index) => (
+                      <tr
+                        onClick={() => handleRowClick(item.s,item?.exchange)}
+                        className={
+                          index === displayedAssets.length - 1 ? "last-row" : ""
+                        }
+                      >
                         <td>{item.s}</td>
                         {/* <td  className={getColorClass(item.change)}> {item.change} </td>
                     <td  className={getColorClass(item.changesPercentage)}> {item.changesPercentage} </td> */}
                         <td>
                           {formatTickerValue(
-                            tickerPrices[item.s?.toLowerCase()].ap ?? item.ap,
+                            tickerPrices[item.s?.toLowerCase()]?.ap ?? item.ap,
                             SETTING.CURRENCY
                           )}
                         </td>
                         <td>
                           {formatTickerValue(
-                            tickerPrices[item.s?.toLowerCase()].bp ?? item.bp,
+                            tickerPrices[item.s?.toLowerCase()]?.bp ?? item.bp,
                             SETTING.CURRENCY
                           )}
                         </td>
                         <td>
                           {formatTickerValue(
-                            tickerPrices[item.s?.toLowerCase()].lp ?? item.lp,
+                            tickerPrices[item.s?.toLowerCase()]?.lp ?? item.lp,
                             SETTING.CURRENCY
                           )}
                         </td>
@@ -227,6 +329,13 @@ const MarketPairs = () => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Use the Pagination component */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(filterAssets.length / itemsPerPage)}
+                  onPageChange={handlePageChange}
+                />
               </Tab>
             ))}
           </Tabs>
