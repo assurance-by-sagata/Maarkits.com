@@ -129,7 +129,7 @@ export default function HistoryOrder() {
       return total;
     }, 0);
     setCurrentValue(currentValue);
-    setReturnAmnt(currentValue -investedAmount  ?? 0);
+    setReturnAmnt((availableCash + currentValue) - startingAmnt);
   }, [tickerPrices, portfolioData]);
 
   return (
