@@ -7,7 +7,7 @@ export default function TermsAndConditions() {
         <div className="row">
           <div className="col-md-12">
             <h2>Terms and Conditions</h2>
-            <p>Welcome to Crypo </p>
+            <p>Welcome to MarketsDojo </p>
 
             <p>
               These terms and conditions outline the rules and regulations for
