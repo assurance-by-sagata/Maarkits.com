@@ -206,8 +206,7 @@ export default function HistoryOrder() {
                           return (
                             <tr key={index} data-href="exchange-light.html">
                               <td>
-                                {/* {item.symbol} ({item.symbol}) */}
-                                {item.symbol}
+                              {item.symbol}
                               </td>
                               <td>{item.qnty}</td>
                               {/* <td>0</td> */}
