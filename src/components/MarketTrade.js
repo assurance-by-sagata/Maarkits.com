@@ -121,7 +121,7 @@ const MarketTrade = () => {
                   className="form-control"
                   placeholder="Buy Symbol"
                   disabled
-                  value={symbol}
+                  value={symbol || ''}
                 />
                 <div className="input-group-append">
                   <span className="input-group-text">{product}</span>
@@ -161,7 +161,7 @@ const MarketTrade = () => {
                   className="form-control"
                   placeholder="Sell Symbol"
                   disabled
-                  value={symbol}
+                  value={symbol || ''}
                 />
                 <div className="input-group-append">
                   <span className="input-group-text">{product}</span>
