@@ -97,3 +97,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
             -p 127.0.0.1:3000:3000 \
             sagata__maarkits__dev
 
+
+    Attach a new terminal to the running docker container
+
+        $ docker exec -it \
+            --workdir /code/ \
+            sagata__maarkits__dev \
+            bash
+
