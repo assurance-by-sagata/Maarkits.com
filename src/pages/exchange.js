@@ -1,9 +1,7 @@
 import HistoryOrder from "../components/HistoryOrder";
-import MarketHistory from "../components/MarketHistory";
 import MarketNews from "../components/MarketNews";
 import MarketPairs from "../components/MarketPairs";
 import MarketTrade from "../components/MarketTrade";
-import OrderBook from "../components/OrderBook";
 import TradingChart from "../components/TradingChart";
 import TradingChartDark from "../components/TradingChartDark";
 import { ThemeConsumer } from "../context/ThemeContext";
@@ -43,10 +41,7 @@ const Exchange = () => {
           </div>
 
 
-          {/* <div className="col-md-3">
-              <OrderBook />
-              <MarketHistory />
-            </div> */}
+
           <div className="col-md-9">
             <HistoryOrder />
           </div>

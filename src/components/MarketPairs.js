@@ -32,7 +32,6 @@ import {
 } from "../state";
 import { setAssetData } from "../auth";
 import { ClipLoader } from "react-spinners";
-import SymbolList from "../components/SymbolList";
 import Pagination from "../components/Pagination";
 
 const MarketPairs = () => {

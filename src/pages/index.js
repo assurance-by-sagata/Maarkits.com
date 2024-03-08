@@ -2,7 +2,6 @@ import React from 'react';
 import Layout from '../components/Layout';
 import { Switch, Route } from 'react-router-dom';
 import Exchange from '../pages/exchange';
-import Markets from '../pages/markets';
 import Profile from './profile';
 import Wallet from './wallet';
 import Settings from './settings';
@@ -26,7 +25,6 @@ export default function index() {
           <PrivateRoute path="/">
             <Layout>
               <PrivateRoute exact path="/dashboard" component={Exchange}></PrivateRoute>
-              <PrivateRoute exact path="/markets" component={Markets}></PrivateRoute>
               <PrivateRoute exact path="/profile" component={Profile}></PrivateRoute>
               <PrivateRoute exact path="/wallet" component={Wallet}></PrivateRoute>
               <PrivateRoute exact path="/settings" component={Settings}></PrivateRoute>
