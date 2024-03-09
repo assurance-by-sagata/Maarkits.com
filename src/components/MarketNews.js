@@ -62,7 +62,10 @@ const MarketNews = () => {
         <h2 className="heading">Market News</h2>
         <ul>
         {marketNewsData.map((item, index) => (
-          <li>
+          <li
+            // Since news the returned news items do not have an inherent 'id', we will use the news item's url as the key prop value.
+            key={item.url}
+          >
             <a href={item.url} target="_blank" rel="noopener noreferrer">
               <strong>{item.title}</strong>
               {item.image && (
