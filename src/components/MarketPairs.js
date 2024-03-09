@@ -287,7 +287,7 @@ const MarketPairs = () => {
             onSelect={handleTabChange}
           >
             {products.map((item, index) => (
-              <Tab eventKey={`tab-${item.id}`} title={item.product_name}>
+              <Tab key={item.id} eventKey={`tab-${item.id}`} title={item.product_name}>
                 <table className="table star-active">
                   <thead>
                     <tr>
@@ -300,6 +300,7 @@ const MarketPairs = () => {
                   <tbody>
                     {displayedAssets.map((item, index) => (
                       <tr
+                        key={item.s}
                         onClick={() => handleRowClick(item.s,item?.exchange)}
                         className={
                           index === displayedAssets.length - 1 ? "last-row" : ""

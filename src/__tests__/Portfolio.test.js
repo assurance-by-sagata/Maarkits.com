@@ -215,7 +215,7 @@ describe("HistoryOrder Component", () => {
         expect(
           screen.getByText(
             formatPLValue(
-              currentVal-mockPortfolioData.data.total_invested_amount ,
+              (mockPortfolioData.data.available_cash + currentVal) - mockPortfolioData.data.starting_amt ,
               SETTING.CURRENCY
             )
           )
